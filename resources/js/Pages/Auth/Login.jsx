@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSignIn, useClerk, useUser } from '@clerk/clerk-react';
 import { Head, Link, router } from '@inertiajs/react';
 import Navbar from '@/Components/Navbar';
+import CadenceLogo from '@/Components/CadenceLogo';
 
 export default function Login() {
     const { isLoaded: isSignInLoaded, signIn, setActive } = useSignIn();
@@ -164,32 +165,22 @@ export default function Login() {
     };
 
     return (
-        <div
-            className="flex min-h-screen flex-col"
-            style={{
-                backgroundColor: '#ffffff',
-                backgroundImage:
-                    'radial-gradient(rgba(0, 0, 0, 0.15) 1.5px, transparent 1.5px)',
-                backgroundSize: '16px 16px',
-            }}
-        >
-            <Head title="Log In" />
+        <div className="flex min-h-screen flex-col bg-[#F0F0E9] font-sans text-[#30302D]">
+            <Head title="Cadence - Log In" />
             <Navbar />
 
             <div className="flex flex-1 flex-col justify-center p-4 sm:p-6 lg:p-8">
                 <div className="mx-auto w-full max-w-md">
-                    <div className="mb-6 flex flex-col items-center justify-center gap-2 text-center">
-                        <div className="inline-block rounded-lg border-4 border-black bg-white px-4 py-1 text-2xl font-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            TOS
-                        </div>
-                        <h1 className="text-3xl font-black uppercase tracking-tight text-black">
-                            TutorOS
-                        </h1>
+                    <div className="mb-8 flex flex-col items-center justify-center text-center">
+                        <CadenceLogo className="h-9 w-auto" textClassName="text-2xl font-bold" />
+                        <p className="mt-2 text-xs text-[#73736C]">
+                            Welcome back. Enter your details to continue learning.
+                        </p>
                     </div>
 
-                    <div className="rounded-2xl border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:p-8">
+                    <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-7 shadow-lg shadow-stone-200/50 sm:p-9">
                         {error && (
-                            <div className="mb-6 rounded-xl border-2 border-black bg-red-100 p-3 text-xs font-black text-red-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                            <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
                                 {error}
                             </div>
                         )}
@@ -199,80 +190,58 @@ export default function Login() {
                                 <button
                                     type="button"
                                     onClick={handleGoogleLogin}
-                                    className="border-3 flex w-full items-center justify-center gap-3 rounded-xl border-black bg-white p-3.5 text-sm font-black uppercase text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-0.5 hover:bg-gray-100 active:translate-x-1 active:translate-y-1 active:shadow-none"
+                                    className="flex w-full items-center justify-center gap-3 rounded-full border border-[#D8DDD5] bg-[#FFFFFF] p-3 text-xs font-semibold text-[#30302D] shadow-sm transition-all hover:bg-[#F7F7F2] active:scale-95"
                                 >
-                                    <svg
-                                        className="h-5 w-5"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            fill="#4285F4"
-                                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                                        />
-                                        <path
-                                            fill="#34A853"
-                                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                                        />
-                                        <path
-                                            fill="#FBBC05"
-                                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                                        />
-                                        <path
-                                            fill="#EA4335"
-                                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                                        />
+                                    <svg className="h-4 w-4" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                                     </svg>
                                     Continue with Google
                                 </button>
 
-                                <div className="my-6 flex items-center gap-3">
-                                    <div className="h-[2px] flex-1 bg-black"></div>
-                                    <span className="text-xs font-black uppercase text-black">
-                                        OR
+                                <div className="my-5 flex items-center gap-3">
+                                    <div className="h-[1px] flex-1 bg-[#D8DDD5]"></div>
+                                    <span className="text-[10px] font-bold uppercase text-[#73736C]">
+                                        or
                                     </span>
-                                    <div className="h-[2px] flex-1 bg-black"></div>
+                                    <div className="h-[1px] flex-1 bg-[#D8DDD5]"></div>
                                 </div>
 
-                                <form
-                                    onSubmit={handleSubmit}
-                                    className="space-y-4"
-                                >
+                                <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
-                                        <label className="mb-1 block text-xs font-black uppercase text-black">
+                                        <label className="mb-1 block text-xs font-semibold uppercase text-[#30302D]">
                                             Email
                                         </label>
                                         <input
                                             type="email"
                                             value={email}
-                                            onChange={(e) =>
-                                                setEmail(e.target.value)
-                                            }
+                                            onChange={(e) => setEmail(e.target.value)}
                                             required
-                                            className="border-3 w-full rounded-xl border-black p-3 text-sm font-bold text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] outline-none focus:bg-red-50"
+                                            className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none placeholder:text-[#8E9088] focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                             placeholder="you@example.com"
                                         />
                                     </div>
 
                                     <div>
                                         <div className="mb-1 flex items-center justify-between">
-                                            <label className="text-xs font-black uppercase text-black">
+                                            <label className="text-xs font-semibold uppercase text-[#30302D]">
                                                 Password
                                             </label>
                                             <Link
                                                 href="/forgot-password"
-                                                className="text-xs font-bold text-black underline hover:text-red-600"
+                                                className="text-xs font-medium text-[#AD5266] hover:underline"
                                             >
-                                                Forgot Password?
+                                                Forgot?
                                             </Link>
                                         </div>
                                         <input
                                             type="password"
                                             value={password}
-                                            onChange={(e) =>
-                                                setPassword(e.target.value)
-                                            }
+                                            onChange={(e) => setPassword(e.target.value)}
                                             required
-                                            className="border-3 w-full rounded-xl border-black p-3 text-sm font-bold text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] outline-none focus:bg-red-50"
+                                            className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                             placeholder="••••••••"
                                         />
                                     </div>
@@ -280,27 +249,21 @@ export default function Login() {
                                     <button
                                         type="submit"
                                         disabled={loading || !isSignInLoaded}
-                                        className="border-3 w-full rounded-xl border-black bg-red-600 p-3.5 text-sm font-black uppercase text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-0.5 hover:bg-red-700 active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50"
+                                        className="w-full rounded-full bg-[#AD5266] p-3 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95 disabled:opacity-50"
                                     >
-                                        {loading ? 'Logging In...' : 'Log In'}
+                                        {loading ? 'Logging in...' : 'Log in'}
                                     </button>
                                 </form>
                             </>
                         ) : (
-                            <form
-                                onSubmit={handleVerifyCode}
-                                className="space-y-4"
-                            >
+                            <form onSubmit={handleVerifyCode} className="space-y-4">
                                 <div className="text-center">
-                                    <h2 className="text-base font-black uppercase text-black">
+                                    <h2 className="text-base font-bold text-[#30302D]" style={{ fontFamily: '"Manrope", sans-serif' }}>
                                         Verification Code Required
                                     </h2>
-                                    <p className="mt-1 text-xs font-bold text-gray-700">
-                                        Enter the verification code sent to{' '}
-                                        <br />
-                                        <span className="font-black text-black">
-                                            {email}
-                                        </span>
+                                    <p className="mt-1 text-xs text-[#73736C]">
+                                        Enter the verification code sent to <br />
+                                        <strong className="text-[#30302D]">{email}</strong>
                                     </p>
                                 </div>
 
@@ -308,12 +271,10 @@ export default function Login() {
                                     <input
                                         type="text"
                                         value={code}
-                                        onChange={(e) =>
-                                            setCode(e.target.value)
-                                        }
+                                        onChange={(e) => setCode(e.target.value)}
                                         required
                                         maxLength={6}
-                                        className="border-3 w-full rounded-xl border-black p-3 text-center text-2xl font-black tracking-widest text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] outline-none focus:bg-red-50"
+                                        className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-center text-2xl font-bold tracking-widest text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF]"
                                         placeholder="123456"
                                     />
                                 </div>
@@ -321,31 +282,24 @@ export default function Login() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="border-3 w-full rounded-xl border-black bg-red-600 p-3.5 text-sm font-black uppercase text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-0.5 hover:bg-red-700 active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50"
+                                    className="w-full rounded-full bg-[#AD5266] p-3 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] disabled:opacity-50"
                                 >
-                                    {loading
-                                        ? 'Verifying...'
-                                        : 'Verify & Log In'}
+                                    {loading ? 'Verifying...' : 'Verify & Log in'}
                                 </button>
 
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        setPendingSecondFactor(false)
-                                    }
-                                    className="w-full text-center text-xs font-black uppercase text-black underline hover:text-red-600"
+                                    onClick={() => setPendingSecondFactor(false)}
+                                    className="w-full text-center text-xs font-medium text-[#73736C] hover:text-[#30302D]"
                                 >
-                                    ← Back to Login
+                                    ← Back to Log in
                                 </button>
                             </form>
                         )}
 
-                        <div className="mt-6 text-center text-xs font-bold text-black">
+                        <div className="mt-6 text-center text-xs text-[#73736C]">
                             Don't have an account?{' '}
-                            <Link
-                                href="/register"
-                                className="font-black underline hover:text-red-600"
-                            >
+                            <Link href="/register" className="font-semibold text-[#AD5266] hover:underline">
                                 Register here
                             </Link>
                         </div>

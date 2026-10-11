@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import Resource from '@/Components/Resource';
+import CadenceLogo from '@/Components/CadenceLogo';
 import { useClerk } from '@clerk/clerk-react';
 
 export default function AuthenticatedLayout({ children, resources }) {
@@ -17,26 +18,26 @@ export default function AuthenticatedLayout({ children, resources }) {
     );
     const publicResources = userResources.filter(
         (item) =>
-            item.resource_type === 'public' ||
-            item.clerk_id !== user?.clerk_id,
+            item.resource_type === 'public' || item.clerk_id !== user?.clerk_id,
     );
 
     const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
     const [resourceModalType, setResourceModalType] = useState('private');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isPrivateOpen, setIsPrivateOpen] = useState(true);
+    const [isPublicOpen, setIsPublicOpen] = useState(true);
 
     const { signOut } = useClerk();
 
     const handleLogout = async () => {
         try {
-            // 1. Sign out of Clerk frontend session
             await signOut();
         } catch (err) {
             console.warn('Clerk sign out error:', err);
         } finally {
-            // 2. Terminate Laravel session backend & redirect to /login
             router.post(
-                route('logout'),
+                typeof route === 'function' ? route('logout') : '/logout',
                 {},
                 {
                     onFinish: () => {
@@ -48,14 +49,14 @@ export default function AuthenticatedLayout({ children, resources }) {
     };
 
     return (
-        <>
+        <div className="flex min-h-screen bg-[#F0F0E9] font-sans text-[#30302D] antialiased">
             {/* MOBILE TOP NAVBAR */}
-            <header className="fixed left-0 right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-[#2f2f2f] bg-[#191919] px-4 text-white md:hidden">
+            <header className="fixed left-0 right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-[#D8DDD5] bg-[#FFFFFF]/95 px-4 backdrop-blur-md md:hidden">
                 <div className="flex items-center gap-3">
                     <button
                         type="button"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#3a3a3a] bg-[#222222] text-gray-300 transition-colors hover:bg-[#2c2c2c] hover:text-white"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D8DDD5] bg-[#F7F7F2] text-[#30302D] transition-colors hover:bg-[#EAEAE4]"
                         aria-label="Toggle Navigation Menu"
                     >
                         {isMobileMenuOpen ? (
@@ -91,101 +92,102 @@ export default function AuthenticatedLayout({ children, resources }) {
 
                     <Link
                         href={
-                            route().has('dashboard') ? route('dashboard') : '#'
+                            typeof route === 'function'
+                                ? route('dashboard')
+                                : '/dashboard'
                         }
-                        className="inline-flex items-center gap-2"
+                        className="flex items-center gap-2"
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-black bg-red-600 text-[10px] font-black text-white shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]">
-                            TOS
-                        </div>
-                        <span className="text-base font-black tracking-tight text-red-500">
-                            TutorOS
-                        </span>
+                        <CadenceLogo
+                            className="h-6 w-auto"
+                            textClassName="text-lg font-bold"
+                        />
                     </Link>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Link
-                        href={
-                            route().has('profile.edit')
-                                ? route('profile.edit')
-                                : '#'
-                        }
-                        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-neutral-700 bg-purple-600 text-xs font-bold text-white shadow-sm"
-                        title={user?.name || 'Profile'}
-                    >
-                        {user?.profile_image_url ? (
-                            <img
-                                src={user.profile_image_url}
-                                alt={user.name}
-                                className="h-full w-full object-cover"
-                            />
-                        ) : user?.name ? (
-                            user.name.charAt(0).toUpperCase()
-                        ) : (
-                            'U'
-                        )}
-                    </Link>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#AD5266] text-xs font-bold text-white shadow-sm">
+                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
                 </div>
             </header>
 
             {/* MOBILE BACKDROP OVERLAY */}
             {isMobileMenuOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity md:hidden"
+                    className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity md:hidden"
                     onClick={() => setIsMobileMenuOpen(false)}
                     aria-hidden="true"
                 />
             )}
 
+            {/* SIDEBAR NAVIGATION (MATCHES FIGMA FRAME 8:200, 14:709, 14:1103) */}
             <aside
-                className={`fixed left-0 top-0 z-50 flex h-screen w-64 max-w-[80vw] select-none flex-col justify-between border-r border-[#2f2f2f] bg-[#191919] p-3 text-sm font-medium text-[#9b9b9b] transition-transform duration-300 ease-in-out md:translate-x-0 ${
+                className={`fixed left-0 top-0 z-50 flex h-screen select-none flex-col justify-between border-r border-[#D8DDD5] bg-[#FFFFFF] transition-all duration-300 ease-in-out md:translate-x-0 ${
                     isMobileMenuOpen
                         ? 'translate-x-0 shadow-2xl'
                         : '-translate-x-full'
-                }`}
+                } ${isSidebarCollapsed ? 'w-20' : 'w-64 max-w-[80vw]'}`}
             >
-                {/* TOP NAVIGATION & CONTENT AREA */}
-                <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto pr-1">
-                    {/* SIDEBAR HEADER / BRANDING */}
-                    <div className="flex items-center justify-between border-b border-[#2f2f2f] px-3 py-4">
-                        <div className="inline-flex items-center gap-3 whitespace-nowrap">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-black bg-red-600 text-xs font-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                                TOS
-                            </div>
-                            <span className="text-lg font-black leading-none tracking-tight text-red-500">
-                                TutorOS
-                            </span>
-                        </div>
+                {/* TOP BRANDING & NAVIGATION LINKS */}
+                <div className="custom-scrollbar flex-1 overflow-y-auto px-4 py-5">
+                    {/* BRANDING HEADER */}
+                    <div className="flex items-center justify-between border-b border-[#F0F0E9] pb-6">
+                        <Link
+                            href={
+                                typeof route === 'function'
+                                    ? route('dashboard')
+                                    : '/dashboard'
+                            }
+                            className="flex items-center gap-2.5 overflow-hidden"
+                            title="Cadence Home"
+                        >
+                            <CadenceLogo
+                                className="h-7 w-auto shrink-0"
+                                showText={!isSidebarCollapsed}
+                                textClassName="text-xl font-bold tracking-tight text-[#762F50]"
+                            />
+                        </Link>
 
                         <button
                             type="button"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#3a3a3a] bg-[#252525] text-xs font-bold text-gray-400 hover:text-white md:hidden"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D8DDD5] bg-[#F7F7F2] text-xs text-[#73736C] hover:text-[#30302D] md:hidden"
                             aria-label="Close menu"
                         >
                             ✕
                         </button>
                     </div>
 
-                    {/* 1. HOME LINK */}
-                    <div className="space-y-1">
+                    {/* SECTION LABEL: WORKSPACE */}
+                    <div className="mb-2 mt-6 px-2">
+                        {!isSidebarCollapsed && (
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-[#73736C]">
+                                Workspace
+                            </span>
+                        )}
+                    </div>
+
+                    {/* MAIN NAVIGATION LIST */}
+                    <nav className="space-y-1 text-sm font-medium">
+                        {/* 1. HOME */}
                         <Link
                             onClick={() => setIsMobileMenuOpen(false)}
                             href={
-                                route().has('dashboard')
+                                typeof route === 'function'
                                     ? route('dashboard')
-                                    : '#'
+                                    : '/dashboard'
                             }
-                            className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 transition-colors ${
+                            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
                                 url === '/dashboard' || url === '/'
-                                    ? 'bg-[#2c2c2c] font-semibold text-white'
-                                    : 'hover:bg-[#252525] hover:text-gray-200'
+                                    ? 'bg-[#F0F0E9] font-bold text-[#762F50]'
+                                    : 'text-[#30302D] hover:bg-[#F7F7F2]'
                             }`}
+                            title="Home"
                         >
                             <svg
-                                className="h-4 w-4"
+                                className="h-5 w-5 shrink-0"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -193,325 +195,302 @@ export default function AuthenticatedLayout({ children, resources }) {
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    strokeWidth="2"
+                                    strokeWidth="1.8"
                                     d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                                 />
                             </svg>
-                            <span>Home</span>
+                            {!isSidebarCollapsed && <span>Home</span>}
                         </Link>
-                    </div>
 
-                    {/* 2. PRIVATE RESOURCES SECTION */}
-                    <div className="space-y-1">
-                        <span className="px-2.5 text-[11px] font-semibold uppercase tracking-wider text-[#5f5f5f]">
-                            Personal Space
-                        </span>
-
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setResourceModalType('private');
-                                setIsResourceModalOpen(true);
-                            }}
-                            className="flex items-center gap-2 rounded-md px-2.5 py-1 text-xs transition-colors hover:bg-[#252525] hover:text-gray-200"
-                        >
-                            <span className="text-sm font-bold">+</span>
-                            <span>Create</span>
-                        </button>
-
-                        {privateResources.length > 0 && (
-                            <div className="ml-3 mt-1 space-y-0.5 border-l border-[#2d2d2d] pl-2">
-                                {privateResources.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className={`flex items-center rounded-md text-xs transition-colors ${
-                                            url ===
-                                                `/resources/private/${item.id}` ||
-                                            url === `/resources/${item.id}`
-                                                ? 'bg-[#2c2c2c] font-semibold text-white'
-                                                : 'hover:bg-[#252525] hover:text-gray-200'
-                                        }`}
+                        {/* 2. PRIVATE SPACE */}
+                        <div className="pt-2">
+                            <div className="flex items-center justify-between px-3 py-1.5 text-xs text-[#73736C]">
+                                {!isSidebarCollapsed && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsPrivateOpen(!isPrivateOpen)
+                                        }
+                                        className="flex items-center gap-2 font-semibold text-[#73736C] hover:text-[#30302D]"
                                     >
-                                        <Link
-                                            onClick={() =>
-                                                setIsMobileMenuOpen(false)
-                                            }
-                                            href={
-                                                route().has('resources.private')
-                                                    ? route(
-                                                          'resources.private',
-                                                          item.id,
-                                                      )
-                                                    : route().has(
-                                                            'resources.show',
-                                                        )
-                                                      ? route(
-                                                            'resources.show',
-                                                            item.id,
-                                                        )
-                                                      : '#'
-                                            }
-                                            className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1"
+                                        <svg
+                                            className="h-4 w-4 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
-                                            <span className="text-[10px]">
-                                                🔒
-                                            </span>
-                                            <span className="truncate">
-                                                {item.course_name ||
-                                                    item.name ||
-                                                    item.title}
-                                            </span>
-                                        </Link>
-                                        <Link
-                                            method="delete"
-                                            href={route(
-                                                'resources.destroy',
-                                                item.id,
-                                            )}
-                                            as="button"
-                                            onClick={(event) => {
-                                                if (
-                                                    !window.confirm(
-                                                        'Delete this private resource?',
-                                                    )
-                                                ) {
-                                                    event.preventDefault();
-                                                }
-                                            }}
-                                            className="mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#777] transition-colors hover:bg-red-500/15 hover:text-red-400"
-                                            title="Delete private resource"
-                                            aria-label={`Delete ${item.course_name || item.name || item.title}`}
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="1.8"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                            />
+                                        </svg>
+                                        <span>Private space</span>
+                                        <svg
+                                            className={`h-3 w-3 transition-transform ${isPrivateOpen ? 'rotate-180' : ''}`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
-                                            <svg
-                                                className="h-3.5 w-3.5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </Link>
-                                    </div>
-                                ))}
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setResourceModalType('private');
+                                        setIsResourceModalOpen(true);
+                                    }}
+                                    className="flex h-5 w-5 items-center justify-center rounded-md border border-[#D8DDD5] bg-[#FFFFFF] text-xs font-bold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
+                                    title="Create private space"
+                                >
+                                    +
+                                </button>
                             </div>
-                        )}
-                    </div>
 
-                    {/* 3. PUBLIC RESOURCES SECTION */}
-                    <div className="space-y-1">
-                        <span className="px-2.5 text-[11px] font-semibold uppercase tracking-wider text-[#5f5f5f]">
-                            Collaborative Space
-                        </span>
-
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setResourceModalType('public');
-                                setIsResourceModalOpen(true);
-                            }}
-                            className="flex items-center gap-2 rounded-md px-2.5 py-1 text-xs transition-colors hover:bg-[#252525] hover:text-gray-200"
-                        >
-                            <span className="text-sm font-bold">+</span>
-                            <span>Create</span>
-                        </button>
-
-                        {publicResources.length > 0 && (
-                            <div className="ml-3 mt-1 space-y-0.5 border-l border-[#2d2d2d] pl-2">
-                                {publicResources.map((item) => {
-                                    const isOwner =
-                                        item.clerk_id === user?.clerk_id;
-
-                                    return (
-                                        <div
-                                            key={item.id}
-                                            className={`flex items-center rounded-md text-xs transition-colors ${
-                                                url ===
-                                                    `/resources/public/${item.id}` ||
-                                                url === `/resources/${item.id}`
-                                                    ? 'bg-[#2c2c2c] font-semibold text-white'
-                                                    : 'hover:bg-[#252525] hover:text-gray-200'
-                                            }`}
-                                        >
-                                            <Link
-                                                onClick={() =>
-                                                    setIsMobileMenuOpen(false)
-                                                }
-                                                href={
-                                                    route().has(
-                                                        'resources.public',
-                                                    )
-                                                        ? route(
-                                                              'resources.public',
-                                                              item.id,
-                                                          )
-                                                        : route().has(
-                                                                'resources.show',
-                                                            )
-                                                          ? route(
-                                                                'resources.show',
-                                                                item.id,
-                                                            )
-                                                          : '#'
-                                                }
-                                                className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1"
-                                            >
-                                                <span className="text-[10px]">
-                                                    🌐
-                                                </span>
-                                                <span className="truncate">
-                                                    {item.course_name ||
-                                                        item.name ||
-                                                        item.title}
-                                                </span>
-                                            </Link>
-
-                                            {isOwner && (
-                                                <Link
-                                                    method="delete"
-                                                    href={route(
-                                                        'resources.destroy',
-                                                        item.id,
-                                                    )}
-                                                    as="button"
-                                                    onClick={(event) => {
-                                                        if (
-                                                            !window.confirm(
-                                                                'Delete this public resource?',
-                                                            )
-                                                        ) {
-                                                            event.preventDefault();
-                                                        }
-                                                    }}
-                                                    className="mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#777] transition-colors hover:bg-red-500/15 hover:text-red-400"
-                                                    title="Delete public resource"
+                            {!isSidebarCollapsed &&
+                                isPrivateOpen &&
+                                privateResources.length > 0 && (
+                                    <div className="mt-1 space-y-0.5 pl-5 pr-1">
+                                        {privateResources.map((item) => {
+                                            const isActive =
+                                                url.includes(
+                                                    `/resources/private/${item.id}`,
+                                                ) ||
+                                                url.includes(
+                                                    `/resources/${item.id}`,
+                                                );
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className={`group flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
+                                                        isActive
+                                                            ? 'bg-[#F0F0E9] font-bold text-[#762F50]'
+                                                            : 'text-[#73736C] hover:bg-[#F7F7F2] hover:text-[#30302D]'
+                                                    }`}
                                                 >
-                                                    <svg
-                                                        className="h-3.5 w-3.5"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
+                                                    <Link
+                                                        onClick={() =>
+                                                            setIsMobileMenuOpen(
+                                                                false,
+                                                            )
+                                                        }
+                                                        href={
+                                                            typeof route ===
+                                                            'function'
+                                                                ? route(
+                                                                      'resources.private',
+                                                                      item.id,
+                                                                  )
+                                                                : `/resources/private/${item.id}`
+                                                        }
+                                                        className="min-w-0 flex-1 truncate"
                                                     >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                        />
-                                                    </svg>
-                                                </Link>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                                                        {item.course_name ||
+                                                            item.name ||
+                                                            item.title}
+                                                    </Link>
+                                                    <Link
+                                                        method="delete"
+                                                        href={
+                                                            typeof route ===
+                                                            'function'
+                                                                ? route(
+                                                                      'resources.destroy',
+                                                                      item.id,
+                                                                  )
+                                                                : `/resources/${item.id}`
+                                                        }
+                                                        as="button"
+                                                        onClick={(e) => {
+                                                            if (
+                                                                !window.confirm(
+                                                                    'Delete this space?',
+                                                                )
+                                                            )
+                                                                e.preventDefault();
+                                                        }}
+                                                        className="p-0.5 text-gray-400 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100"
+                                                        title="Delete space"
+                                                    >
+                                                        ✕
+                                                    </Link>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                        </div>
 
-                    {/* 4. SESSION SECTION */}
-                    <div className="space-y-1">
-                        <Link
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            href={
-                                route().has('sessions.index')
-                                    ? route('sessions.index')
-                                    : '#'
-                            }
-                            className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 transition-colors ${
-                                url.startsWith('/session')
-                                    ? 'bg-[#2c2c2c] font-semibold text-white'
-                                    : 'hover:bg-[#252525] hover:text-gray-200'
-                            }`}
-                        >
-                            <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                                />
-                            </svg>
-                            <span>Session</span>
-                        </Link>
-                    </div>
+                        {/* 3. COLLABORATIVE SPACE */}
+                        <div className="pt-2">
+                            <div className="flex items-center justify-between px-3 py-1.5 text-xs text-[#73736C]">
+                                {!isSidebarCollapsed && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setIsPublicOpen(!isPublicOpen)
+                                        }
+                                        className="flex items-center gap-2 font-semibold text-[#73736C] hover:text-[#30302D]"
+                                    >
+                                        <svg
+                                            className="h-4 w-4 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="1.8"
+                                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                            />
+                                        </svg>
+                                        <span>Collaborative</span>
+                                        <svg
+                                            className={`h-3 w-3 transition-transform ${isPublicOpen ? 'rotate-180' : ''}`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setResourceModalType('public');
+                                        setIsResourceModalOpen(true);
+                                    }}
+                                    className="flex h-5 w-5 items-center justify-center rounded-md border border-[#D8DDD5] bg-[#FFFFFF] text-xs font-bold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
+                                    title="Create collaborative space"
+                                >
+                                    +
+                                </button>
+                            </div>
+
+                            {!isSidebarCollapsed &&
+                                isPublicOpen &&
+                                publicResources.length > 0 && (
+                                    <div className="mt-1 space-y-0.5 pl-5 pr-1">
+                                        {publicResources.map((item) => {
+                                            const isOwner =
+                                                item.clerk_id ===
+                                                user?.clerk_id;
+                                            const isActive =
+                                                url.includes(
+                                                    `/resources/public/${item.id}`,
+                                                ) ||
+                                                url.includes(
+                                                    `/resources/${item.id}`,
+                                                );
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className={`group flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
+                                                        isActive
+                                                            ? 'bg-[#F0F0E9] font-bold text-[#762F50]'
+                                                            : 'text-[#73736C] hover:bg-[#F7F7F2] hover:text-[#30302D]'
+                                                    }`}
+                                                >
+                                                    <Link
+                                                        onClick={() =>
+                                                            setIsMobileMenuOpen(
+                                                                false,
+                                                            )
+                                                        }
+                                                        href={
+                                                            typeof route ===
+                                                            'function'
+                                                                ? route(
+                                                                      'resources.public',
+                                                                      item.id,
+                                                                  )
+                                                                : `/resources/public/${item.id}`
+                                                        }
+                                                        className="min-w-0 flex-1 truncate"
+                                                    >
+                                                        {item.course_name ||
+                                                            item.name ||
+                                                            item.title}
+                                                    </Link>
+                                                    {isOwner && (
+                                                        <Link
+                                                            method="delete"
+                                                            href={
+                                                                typeof route ===
+                                                                'function'
+                                                                    ? route(
+                                                                          'resources.destroy',
+                                                                          item.id,
+                                                                      )
+                                                                    : `/resources/${item.id}`
+                                                            }
+                                                            as="button"
+                                                            onClick={(e) => {
+                                                                if (
+                                                                    !window.confirm(
+                                                                        'Delete this collaborative space?',
+                                                                    )
+                                                                )
+                                                                    e.preventDefault();
+                                                            }}
+                                                            className="p-0.5 text-gray-400 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100"
+                                                            title="Delete space"
+                                                        >
+                                                            ✕
+                                                        </Link>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                        </div>
+                    </nav>
                 </div>
 
-                {/* BOTTOM SECTION: SETTINGS, PROFILE & LOGOUT */}
-                <div className="space-y-1 border-t border-[#2f2f2f] pt-3">
-                    <Link
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        href={route().has('settings') ? route('settings') : '#'}
-                        className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 transition-colors ${
-                            url === '/settings'
-                                ? 'bg-[#2c2c2c] text-white'
-                                : 'hover:bg-[#252525] hover:text-gray-200'
-                        }`}
-                    >
-                        <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                            />
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                        </svg>
-                        <span>Settings</span>
-                    </Link>
-
-                    {/* PROFILE & LOGOUT ROW */}
-                    <div className="flex items-center justify-between gap-1 pt-1">
-                        <Link
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            href={
-                                route().has('profile.edit')
-                                    ? route('profile.edit')
-                                    : '#'
-                            }
-                            className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-[#252525] hover:text-gray-200"
-                        >
-                            <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-neutral-700 bg-purple-600 text-[10px] font-bold text-white">
-                                {user?.profile_image_url ? (
-                                    <img
-                                        src={user.profile_image_url}
-                                        alt={user.name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : user?.name ? (
-                                    user.name.charAt(0).toUpperCase()
-                                ) : (
-                                    'U'
-                                )}
+                {/* BOTTOM FOOTER: LOGOUT & COLLAPSE TOGGLE (MATCHES FIGMA FRAME 8:247-259) */}
+                <div className="space-y-2 border-t border-[#D8DDD5] p-3">
+                    {/* User profile info & Log out */}
+                    <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#AD5266] text-xs font-bold text-white shadow-sm">
+                                {user?.name
+                                    ? user.name.charAt(0).toUpperCase()
+                                    : 'U'}
                             </div>
-                            <span className="truncate text-xs text-gray-300">
-                                {user?.name || 'Profile'}
-                            </span>
-                        </Link>
+                            {!isSidebarCollapsed && (
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-xs font-bold text-[#30302D]">
+                                        {user?.name || 'User'}
+                                    </p>
+                                    <p className="truncate text-[10px] text-[#73736C]">
+                                        {user?.email || ''}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
 
                         <button
                             type="button"
                             onClick={handleLogout}
-                            className="shrink-0 rounded-md p-1.5 text-gray-400 transition-colors hover:bg-[#252525] hover:text-red-400"
-                            title="Log Out"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#73736C] transition-colors hover:bg-rose-50 hover:text-rose-700"
+                            title="Log out"
+                            aria-label="Log out"
                         >
                             <svg
                                 className="h-4 w-4"
@@ -528,17 +507,57 @@ export default function AuthenticatedLayout({ children, resources }) {
                             </svg>
                         </button>
                     </div>
+
+                    {/* Toggle Sidebar Collapse (Figma Frame 8:256) */}
+                    <div className="hidden justify-end pt-1 md:flex">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setIsSidebarCollapsed(!isSidebarCollapsed)
+                            }
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D8DDD5] text-xs text-[#73736C] transition-colors hover:bg-[#F7F7F2] hover:text-[#30302D]"
+                            title={
+                                isSidebarCollapsed
+                                    ? 'Expand sidebar'
+                                    : 'Collapse sidebar'
+                            }
+                            aria-label="Toggle sidebar"
+                        >
+                            <svg
+                                className={`h-4 w-4 transition-transform ${isSidebarCollapsed ? 'rotate-180' : ''}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                                />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </aside>
-            <main className="ml-0 min-h-full w-full overflow-x-hidden pt-14 md:ml-64 md:w-[calc(100%-16rem)] md:pt-0">
+
+            {/* MAIN CONTENT WORKSPACE */}
+            <main
+                className={`min-h-screen w-full overflow-x-hidden pt-14 transition-all duration-300 md:pt-0 ${
+                    isSidebarCollapsed
+                        ? 'md:ml-20 md:w-[calc(100%-5rem)]'
+                        : 'md:ml-64 md:w-[calc(100%-16rem)]'
+                }`}
+            >
                 {children}
             </main>
 
+            {/* NEW RESOURCE MODAL */}
             <Resource
                 isOpen={isResourceModalOpen}
                 defaultResourceType={resourceModalType}
                 onClose={() => setIsResourceModalOpen(false)}
             />
-        </>
+        </div>
     );
 }

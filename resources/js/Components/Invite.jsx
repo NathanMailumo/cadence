@@ -5,9 +5,9 @@ export default function InviteModal({
     isOpen,
     onClose,
     resourceId,
+    spaceName = 'space',
     inviteLink = '',
 }) {
-    const [activeTab, setActiveTab] = useState('email');
     const [emailInput, setEmailInput] = useState('');
     const [emailTags, setEmailTags] = useState([]);
     const [validationError, setValidationError] = useState('');
@@ -24,7 +24,6 @@ export default function InviteModal({
         setEmailTags([]);
         setValidationError('');
         setCopied(false);
-        setActiveTab('email');
         onClose();
     };
 
@@ -91,7 +90,6 @@ export default function InviteModal({
             return;
         }
 
-        // Target single email or first tag for backend invite structure
         const targetEmail = currentTags[0];
 
         post(
@@ -103,16 +101,16 @@ export default function InviteModal({
                     email: targetEmail,
                 },
                 onSuccess: () => {
-                    handleClose(); // Closes modal automatically on successful request
+                    handleClose();
                 },
             },
         );
     };
 
     const handleCopyLink = async () => {
-        if (!inviteLink) return;
+        const linkToCopy = inviteLink || window.location.href;
         try {
-            await navigator.clipboard.writeText(inviteLink);
+            await navigator.clipboard.writeText(linkToCopy);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
@@ -123,141 +121,116 @@ export default function InviteModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-2xl border-2 border-black bg-white p-6 text-[#121212] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-                {/* HEADER */}
-                <div className="flex items-center justify-between border-b-2 border-black pb-3">
-                    <div className="flex items-center gap-2">
-                        <span className="text-lg">👥</span>
-                        <h2 className="text-base font-black">
-                            Invite Collaborators
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            onMouseDown={(e) => {
+                if (e.target === e.currentTarget) handleClose();
+            }}
+        >
+            <div className="w-full max-w-lg rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-6 shadow-2xl transition-all sm:p-7">
+                {/* HEADER (MATCHES FIGMA FRAME 14:2134) */}
+                <div className="flex items-start justify-between border-b border-[#F0F0E9] pb-4">
+                    <div>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
+                            Collaborative space
+                        </span>
+                        <h2 className="mt-1 text-xl font-bold text-[#30302D]" style={{ fontFamily: '"Manrope", sans-serif' }}>
+                            Invite people to {spaceName}
                         </h2>
+                        <p className="mt-1 text-xs text-[#73736C]">
+                            Add collaborators by email. Enter multiple addresses one at a time or separate them with commas.
+                        </p>
                     </div>
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border-2 border-black bg-white font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100"
+                        className="flex h-8 w-8 items-center justify-center rounded-full border border-[#D8DDD5] bg-[#FFFFFF] text-xs text-[#73736C] hover:bg-[#F7F7F2]"
                     >
                         ✕
                     </button>
                 </div>
 
-                {/* TAB SWITCHER */}
-                <div className="mt-4 flex gap-2 rounded-xl border-2 border-black bg-gray-100 p-1">
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('email')}
-                        className={`flex-1 rounded-lg py-1.5 text-xs font-black transition-all ${
-                            activeTab === 'email'
-                                ? 'border-2 border-black bg-sky-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                                : 'text-gray-600 hover:text-black'
-                        }`}
-                    >
-                        📧 Invite by Email
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('link')}
-                        className={`flex-1 rounded-lg py-1.5 text-xs font-black transition-all ${
-                            activeTab === 'link'
-                                ? 'border-2 border-black bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                                : 'text-gray-600 hover:text-black'
-                        }`}
-                    >
-                        🔗 Invite by Link
-                    </button>
-                </div>
-
-                {/* TAB CONTENT */}
-                <div className="mt-4">
-                    {activeTab === 'email' && (
-                        <form
-                            onSubmit={handleEmailSubmit}
-                            className="space-y-3"
-                        >
-                            <label className="block text-xs font-black uppercase text-gray-700">
-                                Email Address
-                            </label>
-
-                            {/* TAG INPUT CONTAINER */}
-                            <div className="flex flex-wrap items-start gap-1.5 rounded-lg border-2 border-black bg-white p-2 text-xs">
-                                {emailTags.map((email, index) => (
-                                    <span
-                                        key={index}
-                                        className="flex items-center gap-1 rounded-md border border-black bg-sky-200 px-2 py-0.5 text-[11px] font-bold text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
-                                    >
-                                        {email}
-                                        <button
-                                            type="button"
-                                            onClick={() => removeTag(index)}
-                                            className="ml-0.5 font-black text-red-600 hover:text-red-800"
-                                        >
-                                            ✕
-                                        </button>
-                                    </span>
-                                ))}
-
-                                <input
-                                    type="text"
-                                    placeholder={
-                                        emailTags.length === 0
-                                            ? 'Enter email address...'
-                                            : 'Add more...'
-                                    }
-                                    value={emailInput}
-                                    onChange={(e) => {
-                                        setEmailInput(e.target.value);
-                                        setValidationError('');
-                                    }}
-                                    onKeyDown={handleKeyDown}
-                                    onBlur={handleBlur}
-                                    className="min-w-[120px] flex-1 border-none bg-transparent p-0 text-xs font-medium text-black focus:outline-none focus:ring-0"
-                                />
-                            </div>
-
-                            {(validationError || errors.email) && (
-                                <p className="text-[11px] font-bold text-red-600">
-                                    {validationError || errors.email}
-                                </p>
-                            )}
-
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="w-full rounded-lg border-2 border-black bg-sky-400 py-2 text-xs font-black text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-50"
-                            >
-                                {processing
-                                    ? 'Sending Invitation...'
-                                    : 'Send Invitation'}
-                            </button>
-                        </form>
-                    )}
-
-                    {activeTab === 'link' && (
-                        <div className="space-y-3">
-                            <label className="block text-xs font-black uppercase text-gray-700">
-                                Shareable Invite Link
-                            </label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    readOnly
-                                    value={inviteLink}
-                                    placeholder="Generating invite link..."
-                                    className="w-full rounded-lg border-2 border-black bg-gray-50 p-2 font-mono text-xs text-gray-600 focus:outline-none"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleCopyLink}
-                                    disabled={!inviteLink}
-                                    className="h-9 shrink-0 rounded-lg border-2 border-black bg-yellow-400 px-3 text-xs font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-50"
+                {/* FORM */}
+                <form onSubmit={handleEmailSubmit} className="mt-5 space-y-4">
+                    <div>
+                        <label className="block text-xs font-semibold uppercase text-[#30302D]">
+                            Email addresses
+                        </label>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5 rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-2 focus-within:border-[#AD5266] focus-within:bg-[#FFFFFF] focus-within:ring-1 focus-within:ring-[#AD5266]">
+                            {emailTags.map((email, index) => (
+                                <span
+                                    key={index}
+                                    className="flex items-center gap-1 rounded-full bg-[#AD5266]/10 px-2.5 py-1 text-xs font-semibold text-[#762F50]"
                                 >
-                                    {copied ? 'Copied! ✓' : 'Copy'}
-                                </button>
-                            </div>
+                                    <span>{email}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeTag(index)}
+                                        className="text-gray-400 hover:text-rose-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </span>
+                            ))}
+                            <input
+                                type="email"
+                                placeholder={emailTags.length === 0 ? "name@example.com" : "Add another..."}
+                                value={emailInput}
+                                onChange={(e) => setEmailInput(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                onBlur={handleBlur}
+                                className="min-w-[140px] flex-1 border-0 bg-transparent p-1.5 text-sm text-[#30302D] placeholder:text-[#8E9088] focus:outline-none focus:ring-0"
+                            />
                         </div>
-                    )}
-                </div>
+                        {validationError && (
+                            <p className="mt-1 text-xs text-rose-600">{validationError}</p>
+                        )}
+                        {errors.email && (
+                            <p className="mt-1 text-xs text-rose-600">{errors.email}</p>
+                        )}
+                    </div>
+
+                    {/* SHARE LINK SECTION (FIGMA FRAME 14:2134) */}
+                    <div className="rounded-2xl border border-[#D8DDD5] bg-[#F7F7F2] p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs font-bold text-[#30302D]">
+                                    Share invitation link
+                                </p>
+                                <p className="text-[11px] text-[#73736C]">
+                                    Direct invite link for this workspace
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleCopyLink}
+                                className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3.5 py-1 text-xs font-semibold text-[#30302D] hover:bg-[#F0F0E9] transition-colors"
+                            >
+                                {copied ? '✓ Copied' : 'Copy link'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* FOOTER ACTIONS */}
+                    <div className="flex items-center justify-end gap-3 border-t border-[#F0F0E9] pt-4">
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="rounded-full px-4 py-2 text-xs font-semibold text-[#73736C] hover:text-[#30302D]"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="rounded-full bg-[#AD5266] px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] disabled:opacity-50"
+                        >
+                            {processing ? 'Sending...' : 'Send invitations'}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSignIn } from '@clerk/clerk-react';
 import { Head, Link } from '@inertiajs/react';
+import CadenceLogo from '@/Components/CadenceLogo';
 
 export default function ForgotPassword() {
     const { isLoaded, signIn, setActive } = useSignIn();
@@ -57,42 +58,31 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div
-            className="flex min-h-screen flex-col justify-center p-4 sm:p-6 lg:p-8"
-            style={{
-                backgroundColor: '#ffffff',
-                backgroundImage:
-                    'radial-gradient(rgba(0, 0, 0, 0.15) 1.5px, transparent 1.5px)',
-                backgroundSize: '16px 16px',
-            }}
-        >
-            <Head title="Reset Password" />
+        <div className="flex min-h-screen flex-col justify-center bg-[#F0F0E9] p-4 font-sans text-[#30302D] sm:p-6 lg:p-8">
+            <Head title="Cadence - Reset Password" />
 
             <div className="mx-auto w-full max-w-md">
-                <div className="mb-6 flex flex-col items-center justify-center gap-2 text-center">
-                    <div className="inline-block rounded-lg border-4 border-black bg-white px-4 py-1 text-2xl font-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                        TOS
-                    </div>
-                    <h1 className="text-3xl font-black uppercase tracking-tight text-black">
-                        TutorOS
-                    </h1>
+                <div className="mb-8 flex flex-col items-center justify-center text-center">
+                    <CadenceLogo className="h-9 w-auto" textClassName="text-2xl font-bold" />
+                    <p className="mt-2 text-xs text-[#73736C]">
+                        Reset your account password
+                    </p>
                 </div>
 
-                <div className="rounded-2xl border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:p-8">
+                <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-7 shadow-lg shadow-stone-200/50 sm:p-9">
                     {error && (
-                        <div className="mb-6 rounded-xl border-2 border-black bg-red-100 p-3 text-xs font-black text-red-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                        <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
                             {error}
                         </div>
                     )}
 
                     {!successfulCreation ? (
                         <form onSubmit={handleSendCode} className="space-y-4">
-                            <p className="text-xs font-bold text-gray-600">
-                                Enter your email address to receive a password
-                                reset code.
+                            <p className="text-xs text-[#73736C]">
+                                Enter your email address to receive a password reset code.
                             </p>
                             <div>
-                                <label className="mb-1 block text-xs font-black uppercase text-black">
+                                <label className="mb-1 block text-xs font-semibold uppercase text-[#30302D]">
                                     Email
                                 </label>
                                 <input
@@ -100,7 +90,7 @@ export default function ForgotPassword() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="border-3 w-full rounded-xl border-black p-3 text-sm font-bold text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] outline-none focus:bg-red-50"
+                                    className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none placeholder:text-[#8E9088] focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                     placeholder="you@example.com"
                                 />
                             </div>
@@ -108,20 +98,15 @@ export default function ForgotPassword() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="border-3 w-full rounded-xl border-black bg-red-600 p-3.5 text-sm font-black uppercase text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-0.5 hover:bg-red-700 active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50"
+                                className="w-full rounded-full bg-[#AD5266] p-3 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95 disabled:opacity-50"
                             >
-                                {loading
-                                    ? 'Sending Code...'
-                                    : 'Send Reset Code'}
+                                {loading ? 'Sending code...' : 'Send reset code'}
                             </button>
                         </form>
                     ) : (
-                        <form
-                            onSubmit={handleResetPassword}
-                            className="space-y-4"
-                        >
+                        <form onSubmit={handleResetPassword} className="space-y-4">
                             <div>
-                                <label className="mb-1 block text-xs font-black uppercase text-black">
+                                <label className="mb-1 block text-xs font-semibold uppercase text-[#30302D]">
                                     Reset Code
                                 </label>
                                 <input
@@ -129,23 +114,21 @@ export default function ForgotPassword() {
                                     value={code}
                                     onChange={(e) => setCode(e.target.value)}
                                     required
-                                    className="border-3 w-full rounded-xl border-black p-3 text-center text-lg font-black text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] outline-none focus:bg-red-50"
+                                    className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-center text-xl font-bold tracking-widest text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF]"
                                     placeholder="123456"
                                 />
                             </div>
 
                             <div>
-                                <label className="mb-1 block text-xs font-black uppercase text-black">
+                                <label className="mb-1 block text-xs font-semibold uppercase text-[#30302D]">
                                     New Password
                                 </label>
                                 <input
                                     type="password"
                                     value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
+                                    onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    className="border-3 w-full rounded-xl border-black p-3 text-sm font-bold text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] outline-none focus:bg-red-50"
+                                    className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -153,21 +136,16 @@ export default function ForgotPassword() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="border-3 w-full rounded-xl border-black bg-red-600 p-3.5 text-sm font-black uppercase text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-0.5 hover:bg-red-700 active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50"
+                                className="w-full rounded-full bg-[#AD5266] p-3 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] disabled:opacity-50"
                             >
-                                {loading
-                                    ? 'Resetting...'
-                                    : 'Reset Password & Log In'}
+                                {loading ? 'Resetting...' : 'Reset password & Log in'}
                             </button>
                         </form>
                     )}
 
-                    <div className="mt-6 text-center text-xs font-bold text-black">
-                        <Link
-                            href="/login"
-                            className="font-black underline hover:text-red-600"
-                        >
-                            ← Back to Log In
+                    <div className="mt-6 text-center text-xs text-[#73736C]">
+                        <Link href="/login" className="font-semibold text-[#AD5266] hover:underline">
+                            ← Back to Log in
                         </Link>
                     </div>
                 </div>

@@ -126,7 +126,7 @@ export default function Edit({ mustVerifyEmail, status }) {
     return (
         <AuthenticatedLayout>
             <div className="min-h-screen bg-[#F4F0EA] p-6 font-mono text-black md:p-12">
-                <Head title="TutorOS - Edit Profile" />
+                <Head title="Cadence - Edit Profile" />
 
                 <div className="mx-auto max-w-5xl space-y-8">
                     {/* Header Banner */}
@@ -187,7 +187,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                                             'User'}
                                     </h3>
                                     <span className="mt-1 inline-block border-2 border-black bg-red-50 px-2 py-0.5 text-[11px] font-extrabold uppercase text-[#FF5050]">
-                                        TutorOS Scholar
+                                        Cadence Scholar
                                     </span>
                                 </div>
 

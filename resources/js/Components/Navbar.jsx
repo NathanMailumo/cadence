@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useAuth, useClerk } from '@clerk/clerk-react';
+import CadenceLogo from './CadenceLogo';
 
 export default function Navbar() {
     const { isSignedIn, isLoaded } = useAuth();
@@ -10,33 +11,26 @@ export default function Navbar() {
     const isAuthenticated = isLoaded && (isSignedIn || !!auth?.user);
 
     return (
-        <nav className="border-b-4 border-black bg-white px-4 py-3 shadow-[0_4px_0_0_rgba(0,0,0,1)] sm:px-6 lg:px-8">
+        <nav className="border-b border-[#D8DDD5] bg-[#FFFFFF]/90 backdrop-blur-md px-4 py-3.5 sm:px-6 lg:px-8 sticky top-0 z-40 transition-all">
             <div className="mx-auto flex max-w-7xl items-center justify-between">
-                <Link href="/" className="flex items-center gap-2">
-                    <div className="rounded-lg border-2 border-black bg-[#FF6B35] px-2.5 py-0.5 text-lg font-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                        TOS
-                    </div>
-                    <span className="text-xl font-black uppercase tracking-tight text-black">
-                        TutorOS
-                    </span>
+                <Link href="/" className="flex items-center gap-2 group">
+                    <CadenceLogo className="h-7 w-auto transition-transform group-hover:scale-105" textClassName="text-xl" />
                 </Link>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 sm:gap-4">
                     {isAuthenticated ? (
                         <>
-                            {/* <Link
-                                href={route('dashboard')}
-                                className="rounded-xl border-2 border-black bg-white px-4 py-2 text-xs font-black uppercase text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:bg-gray-100 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                            <Link
+                                href={typeof route === 'function' ? route('dashboard') : '/dashboard'}
+                                className="rounded-full border border-[#D8DDD5] bg-[#F0F0E9] px-4 py-2 text-xs font-semibold text-[#30302D] transition-all hover:bg-[#E5E5DE] active:scale-95"
                             >
                                 Dashboard
-                            </Link> */}
+                            </Link>
 
                             <button
                                 type="button"
-                                onClick={() =>
-                                    signOut(() => router.visit('/login'))
-                                }
-                                className="rounded-xl border-2 border-black bg-[#E85D75] px-4 py-2 text-xs font-black uppercase text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:opacity-90 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                                onClick={() => signOut(() => window.location.assign('/login'))}
+                                className="rounded-full bg-[#762F50] px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-[#5E243F] active:scale-95 shadow-sm"
                             >
                                 Sign Out
                             </button>
@@ -44,17 +38,17 @@ export default function Navbar() {
                     ) : (
                         <>
                             <Link
-                                href={route('login')}
-                                className="rounded-xl border-2 border-black bg-white px-4 py-2 text-xs font-black uppercase text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:bg-gray-100 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                                href={typeof route === 'function' ? route('login') : '/login'}
+                                className="rounded-full px-4 py-2 text-xs font-semibold text-[#30302D] transition-colors hover:text-[#762F50]"
                             >
-                                Log In
+                                Log in
                             </Link>
 
                             <Link
-                                href={route('register')}
-                                className="rounded-xl border-2 border-black bg-[#FF6B35] px-4 py-2 text-xs font-black uppercase text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:bg-orange-600 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                                href={typeof route === 'function' ? route('register') : '/register'}
+                                className="rounded-full bg-[#AD5266] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95"
                             >
-                                Get Started
+                                Get started
                             </Link>
                         </>
                     )}

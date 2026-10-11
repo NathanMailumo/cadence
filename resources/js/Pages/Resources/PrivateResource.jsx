@@ -6,18 +6,17 @@ import YouTubePickerModal from '@/Components/YoutubePickerModal';
 
 export default function PrivateResource({ resource, items = [] }) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [activeAddType, setActiveAddType] = useState(null);
-
+    const [activeAddType, setActiveAddType] = useState('choose');
     const [isYtModalOpen, setIsYtModalOpen] = useState(false);
-    const [selectedPracticeImage, setSelectedPracticeImage] = useState(null);
+    // const [selectedPracticeImage, setSelectedPracticeImage] = useState(null);
 
-    const openAddModal = (type = 'note') => {
+    const openAddModal = (type = 'choose') => {
         setActiveAddType(type);
         setIsAddModalOpen(true);
     };
 
     const handleDelete = (item) => {
-        if (!window.confirm('Delete this resource card?')) {
+        if (!window.confirm(`Delete "${item.title}"?`)) {
             return;
         }
 
@@ -28,7 +27,6 @@ export default function PrivateResource({ resource, items = [] }) {
         );
     };
 
-    // save handler for youtube section
     const handleSaveVideo = (video) => {
         router.post(
             typeof route === 'function'
@@ -47,54 +45,61 @@ export default function PrivateResource({ resource, items = [] }) {
             },
             {
                 onSuccess: () => setIsYtModalOpen(false),
-                onError: (errors) => {
-                    console.error('Failed to save YouTube resource:', errors);
-                },
             },
         );
     };
 
-    // Card Template Renderer
     const renderCard = (item) => {
         const metadata = item.metadata || {};
 
         switch (item.type) {
             case 'video': {
-                const metadata = item.metadata || {};
                 return (
                     <div
                         key={item.id}
-                        className="relative flex flex-col justify-between rounded-xl border-2 border-black bg-[#1e1e1e] p-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-2 top-2 rounded border border-white/50 bg-red-600 px-2 py-1 text-[10px] font-black uppercase text-white"
-                            aria-label={`Delete ${item.title}`}
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
+                            title="Delete"
                         >
-                            Delete
+                            ✕
                         </button>
                         <div>
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-pink-400">
-                                <span className="flex items-center gap-1">
-                                    <span className="flex h-5 w-5 items-center justify-center rounded bg-pink-500/20">
+                            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
+                                <span className="flex items-center gap-1.5">
+                                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266]/10 text-[9px] text-[#AD5266]">
                                         ▶
                                     </span>
-                                    YouTube Video
+                                    VIDEO
                                 </span>
                                 {metadata.author_name && (
-                                    <span className="text-gray-400">
+                                    <span className="max-w-[130px] truncate font-normal text-[#73736C]">
                                         {metadata.author_name}
                                     </span>
                                 )}
                             </div>
-                            <h3 className="mt-2 text-sm font-bold leading-snug">
+                            <h3
+                                className="mt-3 text-sm font-bold leading-snug text-[#30302D]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
                                 {item.title}
                             </h3>
                             {item.description && (
-                                <p className="mt-1 line-clamp-2 text-xs text-gray-300">
+                                <p className="mt-1 line-clamp-2 text-xs text-[#73736C]">
                                     {item.description}
                                 </p>
+                            )}
+                            {metadata.thumbnail_url && (
+                                <div className="mt-3 overflow-hidden rounded-xl border border-[#F0F0E9]">
+                                    <img
+                                        src={metadata.thumbnail_url}
+                                        alt=""
+                                        className="h-28 w-full object-cover"
+                                    />
+                                </div>
                             )}
                         </div>
                         {item.url && (
@@ -102,55 +107,52 @@ export default function PrivateResource({ resource, items = [] }) {
                                 href={item.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="mt-3 truncate rounded-md bg-[#2d2d2d] px-2 py-1 font-mono text-[11px] text-gray-400 hover:text-white"
+                                className="mt-4 flex items-center justify-between truncate rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
                             >
-                                {item.url}
+                                <span className="truncate">
+                                    Watch on YouTube
+                                </span>
+                                <span>↗</span>
                             </a>
                         )}
                     </div>
                 );
             }
+
             case 'link':
                 return (
                     <div
                         key={item.id}
-                        className="relative flex flex-col justify-between rounded-xl border-2 border-black bg-white p-4 text-[#121212] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-2 top-2 rounded border-2 border-black bg-red-600 px-2 py-1 text-[10px] font-black uppercase text-white"
-                            aria-label={`Delete ${item.title}`}
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
+                            title="Delete"
                         >
-                            Delete
+                            ✕
                         </button>
                         <div>
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-orange-600">
+                            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
                                 <span className="flex items-center gap-1.5">
-                                    {metadata.favicon ? (
-                                        <img
-                                            src={metadata.favicon}
-                                            alt=""
-                                            className="h-4 w-4 rounded-sm"
-                                        />
-                                    ) : (
-                                        <span className="flex h-5 w-5 items-center justify-center rounded bg-orange-100">
-                                            🔗
-                                        </span>
-                                    )}
-                                    Web Link
+                                    <span>🔗</span>
+                                    LINK
                                 </span>
                                 {metadata.domain && (
-                                    <span className="lowercase text-gray-400">
+                                    <span className="text-[10px] lowercase text-gray-400">
                                         {metadata.domain}
                                     </span>
                                 )}
                             </div>
-                            <h3 className="mt-2 text-sm font-bold leading-snug">
+                            <h3
+                                className="mt-3 text-sm font-bold leading-snug text-[#30302D]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
                                 {item.title}
                             </h3>
                             {item.description && (
-                                <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+                                <p className="mt-1 line-clamp-3 text-xs text-[#73736C]">
                                     {item.description}
                                 </p>
                             )}
@@ -160,9 +162,10 @@ export default function PrivateResource({ resource, items = [] }) {
                                 href={item.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="mt-3 truncate text-xs font-bold text-orange-600 underline hover:text-orange-700"
+                                className="mt-4 flex items-center justify-between truncate rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
                             >
-                                {item.url}
+                                <span className="truncate">{item.url}</span>
+                                <span>↗</span>
                             </a>
                         )}
                     </div>
@@ -170,34 +173,33 @@ export default function PrivateResource({ resource, items = [] }) {
 
             case 'pq': {
                 const fileUrl = metadata.file_url;
-                const isPreviewableImage =
-                    metadata.mime_type?.startsWith('image/');
                 const isPdf = metadata.mime_type === 'application/pdf';
                 return (
                     <div
                         key={item.id}
-                        className="relative flex flex-col justify-between rounded-xl border-2 border-black bg-sky-100 p-4 text-sky-950 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-2 top-2 rounded border-2 border-black bg-red-600 px-2 py-1 text-[10px] font-black uppercase text-white"
-                            aria-label={`Delete ${item.title}`}
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
+                            title="Delete"
                         >
-                            Delete
+                            ✕
                         </button>
                         <div>
-                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-sky-700">
-                                <span className="flex h-5 w-5 items-center justify-center rounded bg-sky-300 font-bold">
-                                    📄
-                                </span>
-                                Practice Questions
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
+                                <span>📄</span>
+                                <span>PDF / QUESTIONS</span>
                             </div>
-                            <h3 className="mt-2 pr-16 text-sm font-black">
+                            <h3
+                                className="mt-3 text-sm font-bold text-[#30302D]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
                                 {item.title}
                             </h3>
                             {item.description && (
-                                <p className="mt-1 line-clamp-2 text-xs text-sky-800">
+                                <p className="mt-1 line-clamp-2 text-xs text-[#73736C]">
                                     {item.description}
                                 </p>
                             )}
@@ -205,43 +207,21 @@ export default function PrivateResource({ resource, items = [] }) {
                                 <iframe
                                     src={fileUrl}
                                     title={item.title}
-                                    className="mt-3 h-36 w-full rounded border-2 border-black bg-white"
+                                    className="mt-3 h-32 w-full rounded-xl border border-[#E5E7EB] bg-white"
                                 />
                             )}
-                            {fileUrl && isPreviewableImage && (
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setSelectedPracticeImage({
-                                            url: fileUrl,
-                                            title: item.title,
-                                        })
-                                    }
-                                    className="group relative mt-3 block w-full overflow-hidden rounded border-2 border-black bg-white text-left"
-                                    aria-label={`View ${item.title}`}
-                                >
-                                    <img
-                                        src={fileUrl}
-                                        alt={item.title}
-                                        className="max-h-36 w-full object-contain transition-transform duration-200 group-hover:scale-105"
-                                    />
-                                    <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-xs font-black uppercase text-white opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
-                                        Click to view
-                                    </span>
-                                </button>
-                            )}
-                            {fileUrl && !isPdf && !isPreviewableImage && (
-                                <a
-                                    href={fileUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="mt-3 block truncate text-xs font-bold text-sky-700 underline"
-                                >
-                                    Open{' '}
-                                    {metadata.file_name || 'practice questions'}
-                                </a>
-                            )}
                         </div>
+                        {fileUrl && (
+                            <a
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-4 flex items-center justify-between rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
+                            >
+                                <span>Open document</span>
+                                <span>↗</span>
+                            </a>
+                        )}
                     </div>
                 );
             }
@@ -252,36 +232,56 @@ export default function PrivateResource({ resource, items = [] }) {
                         key={item.id}
                         href={
                             item.study_session_id
-                                ? route('sessions.show', item.study_session_id)
+                                ? typeof route === 'function'
+                                    ? route(
+                                          'sessions.show',
+                                          item.study_session_id,
+                                      )
+                                    : `/session/${item.study_session_id}`
                                 : '#'
                         }
-                        className="relative flex flex-col justify-between rounded-xl border-2 border-black bg-white p-4 text-[#121212] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        className="group relative flex flex-col justify-between rounded-2xl border-2 border-[#AD5266]/30 bg-[#FDF8FA] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266] hover:shadow-md"
                     >
                         <button
                             type="button"
-                            onClick={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 handleDelete(item);
                             }}
-                            className="absolute right-2 top-2 z-10 rounded border-2 border-black bg-red-600 px-2 py-1 text-[10px] font-black uppercase text-white"
-                            aria-label={`Delete ${item.title}`}
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
+                            title="Delete"
                         >
-                            Delete
+                            ✕
                         </button>
                         <div>
-                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-blue-600">
-                                <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-100">
-                                    📋
+                            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
+                                <span className="flex items-center gap-1.5">
+                                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266] text-[9px] text-white">
+                                        ✦
+                                    </span>
+                                    REVISION PACK
                                 </span>
-                                Revision Pack
+                                <span className="rounded-full bg-[#AD5266]/10 px-2 py-0.5 text-[10px] font-bold text-[#762F50]">
+                                    AI
+                                </span>
                             </div>
-                            <h3 className="mt-2 text-sm font-bold leading-snug">
+                            <h3
+                                className="mt-3 text-sm font-bold text-[#30302D] transition-colors group-hover:text-[#AD5266]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
                                 {item.title}
                             </h3>
-                            <p className="mt-2 text-xs font-bold text-blue-600">
-                                Open session →
+                            <p className="mt-1 text-xs text-[#73736C]">
+                                {item.description ||
+                                    'Generated study session with summary & flashcards.'}
                             </p>
+                        </div>
+                        <div className="mt-5 flex items-center justify-between border-t border-[#AD5266]/15 pt-3 text-[11px] font-bold text-[#AD5266]">
+                            <span>Open revision pack</span>
+                            <span className="transition-transform group-hover:translate-x-1">
+                                →
+                            </span>
                         </div>
                     </Link>
                 );
@@ -291,28 +291,31 @@ export default function PrivateResource({ resource, items = [] }) {
                 return (
                     <div
                         key={item.id}
-                        className="relative flex flex-col justify-between rounded-xl border-2 border-black bg-[#fef08a] p-4 text-[#713f12] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FAF8F2] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#C5C9BE] hover:shadow-md"
                     >
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-2 top-2 rounded border-2 border-black bg-red-600 px-2 py-1 text-[10px] font-black uppercase text-white"
-                            aria-label={`Delete ${item.title}`}
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
+                            title="Delete"
                         >
-                            Delete
+                            ✕
                         </button>
                         <div>
-                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-900">
-                                <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-300/60">
-                                    📌
+                            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8A7146]">
+                                <span className="flex items-center gap-1.5">
+                                    <span>📌</span>
+                                    NOTE
                                 </span>
-                                Sticky Note
                             </div>
-                            <h3 className="mt-2 text-sm font-black leading-snug text-amber-950">
+                            <h3
+                                className="mt-3 text-sm font-bold text-[#30302D]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
                                 {item.title}
                             </h3>
                             {item.content && (
-                                <p className="mt-2 whitespace-pre-line font-serif text-xs leading-relaxed text-amber-900">
+                                <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-[#4A3E2C]">
                                     {item.content}
                                 </p>
                             )}
@@ -322,165 +325,97 @@ export default function PrivateResource({ resource, items = [] }) {
         }
     };
 
+    const spaceName = resource?.course_name || 'Private Space';
+
     return (
         <AuthenticatedLayout>
-            <div
-                className="flex min-h-[calc(100vh-3.5rem)] w-full max-w-7xl flex-col p-4 md:p-6"
-                style={{
-                    backgroundImage:
-                        'radial-gradient(#d1d5db 1.5px, transparent 1.5px)',
-                    backgroundSize: '24px 24px',
-                }}
-            >
-                {/* HEADER BAR */}
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-black bg-white p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                    <div className="flex items-center gap-2.5">
-                        <span className="rounded-md border border-black bg-sky-400 px-2 py-0.5 text-xs font-black uppercase text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
-                            {resource?.course_code || 'COURSE'}
-                        </span>
-                        <h1 className="text-base font-black text-[#121212]">
-                            {resource?.course_name || 'Resource Workspace'}
+            <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+                {/* HEADER BAR (MATCHES FIGMA FRAME 14:1103) */}
+                <div className="flex flex-col gap-4 border-b border-[#D8DDD5] pb-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <span className="rounded-full bg-[#F0F0E9] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
+                                Private space
+                            </span>
+                            {resource?.course_code && (
+                                <span className="text-xs font-semibold text-[#73736C]">
+                                    {resource.course_code}
+                                </span>
+                            )}
+                        </div>
+                        <h1
+                            className="mt-2 text-2xl font-bold tracking-tight text-[#30302D] sm:text-3xl"
+                            style={{ fontFamily: '"Manrope", sans-serif' }}
+                        >
+                            {spaceName}
                         </h1>
+                        <p className="mt-1 text-xs text-[#73736C]">
+                            Private · {items.length}{' '}
+                            {items.length === 1 ? 'resource' : 'resources'}
+                        </p>
                     </div>
 
-                    {/* TOP ACTION BUTTONS */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="mr-1 text-[11px] font-bold text-gray-500">
-                            Add:
-                        </span>
+                    <div className="flex items-center gap-3">
                         <button
                             type="button"
-                            onClick={() => openAddModal('link')}
-                            className="rounded-lg border-2 border-black bg-white px-2.5 py-1 text-xs font-black text-[#121212] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+                            onClick={() => openAddModal('choose')}
+                            className="rounded-full bg-[#AD5266] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95"
                         >
-                            + Link
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setIsYtModalOpen(true)}
-                            className="rounded-lg border-2 border-black bg-white px-2.5 py-1 text-xs font-black text-[#121212] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-                        >
-                            + Video
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => openAddModal('pq')}
-                            className="rounded-lg border-2 border-black bg-white px-2.5 py-1 text-xs font-black text-[#121212] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-                        >
-                            + Practice Questions
-                        </button>
-                        <Link
-                            href={route('sessions.create', {
-                                resource_id: resource?.id,
-                            })}
-                            className="rounded-lg border-2 border-black bg-white px-2.5 py-1 text-xs font-black text-[#121212] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-                        >
-                            + Revision
-                        </Link>
-                        <button
-                            type="button"
-                            onClick={() => openAddModal('note')}
-                            className="rounded-lg border-2 border-black bg-white px-2.5 py-1 text-xs font-black text-[#121212] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-                        >
-                            + Note
+                            + Add resource
                         </button>
                     </div>
                 </div>
 
-                {/* CONTENT AREA */}
-                <div className="flex flex-1 py-6">
+                {/* CONTENT AREA (MATCHES FIGMA CANVAS) */}
+                <div className="mt-8">
                     {items.length === 0 ? (
-                        /* EMPTY STATE */
-                        <div className="flex w-full flex-col items-center justify-center p-6 text-center">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-black bg-red-100 text-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-                                📄
+                        <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-8 text-center sm:p-12">
+                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0F0E9] text-xl text-[#AD5266]">
+                                ✦
                             </div>
-                            <h2 className="mt-3 text-base font-black text-[#121212]">
-                                No resources added yet
-                            </h2>
-                            <p className="mt-1 max-w-xs text-xs font-medium text-gray-500">
-                                Get started by adding links, video guides,
-                                practice questions, revision packs, or sticky
-                                notes.
+                            <h3
+                                className="mt-4 text-lg font-bold text-[#30302D]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
+                                This space is empty
+                            </h3>
+                            <p className="mx-auto mt-1 max-w-sm text-xs text-[#73736C]">
+                                Add videos, web links, sticky notes, past
+                                questions, or generate an AI revision pack.
                             </p>
-
-                            {/* <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                            <div className="mt-6">
                                 <button
                                     type="button"
-                                    onClick={() => openAddModal('link')}
-                                    className="rounded-lg border-2 border-black bg-white px-3 py-1 text-xs font-black text-[#121212] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+                                    onClick={() => openAddModal('choose')}
+                                    className="rounded-full bg-[#AD5266] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#974356]"
                                 >
-                                    + Link
+                                    + Add what matters
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => openAddModal('video')}
-                                    className="rounded-lg border-2 border-black bg-white px-3 py-1 text-xs font-black text-[#121212] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-                                >
-                                    + Video
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => openAddModal('note')}
-                                    className="rounded-lg border-2 border-black bg-red-600 px-3 py-1 text-xs font-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-red-700 hover:shadow-none"
-                                >
-                                    + Note
-                                </button>
-                            </div> */}
+                            </div>
                         </div>
                     ) : (
-                        /* GRID DISPLAY FOR CREATED CARDS */
-                        <div className="grid w-full items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {items.map((item) => renderCard(item))}
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* DYNAMIC RESOURCE ITEM MODAL */}
+            {/* RESOURCE ADD MODAL */}
             <ResourceItemModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
-                resourceId={resource?.id}
-                defaultType={activeAddType || 'note'}
+                resource={resource}
+                defaultType={activeAddType}
+                onOpenYoutube={() => setIsYtModalOpen(true)}
             />
+
+            {/* YOUTUBE PICKER MODAL */}
             <YouTubePickerModal
                 isOpen={isYtModalOpen}
                 onClose={() => setIsYtModalOpen(false)}
                 onSelectVideo={handleSaveVideo}
             />
-            {selectedPracticeImage && (
-                <div
-                    className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label={`Viewing ${selectedPracticeImage.title}`}
-                    onMouseDown={(event) => {
-                        if (event.target === event.currentTarget) {
-                            setSelectedPracticeImage(null);
-                        }
-                    }}
-                >
-                    <div className="relative max-h-[92vh] max-w-5xl rounded-xl border-2 border-black bg-white p-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                        <button
-                            type="button"
-                            onClick={() => setSelectedPracticeImage(null)}
-                            className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-lg border-2 border-black bg-red-600 font-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                            aria-label="Close image viewer"
-                        >
-                            X
-                        </button>
-                        <img
-                            src={selectedPracticeImage.url}
-                            alt={selectedPracticeImage.title}
-                            className="max-h-[86vh] max-w-[calc(100vw-2rem)] rounded object-contain"
-                        />
-                        <p className="px-2 pb-1 pt-2 text-center text-xs font-black text-[#121212]">
-                            {selectedPracticeImage.title}
-                        </p>
-                    </div>
-                </div>
-            )}
         </AuthenticatedLayout>
     );
 }

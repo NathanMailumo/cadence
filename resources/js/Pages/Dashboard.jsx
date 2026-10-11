@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import Resource from '@/Components/Resource';
 import { useUser } from '@clerk/clerk-react';
 
 export default function Dashboard({ resources = [], pendingInvitations = [] }) {
-    const { isLoaded } = useUser();
+    const { isLoaded, user } = useUser();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [createModalType, setCreateModalType] = useState('private');
 
     const handleAccept = (resourceId) => {
         router.post(
@@ -24,80 +25,113 @@ export default function Dashboard({ resources = [], pendingInvitations = [] }) {
         );
     };
 
+    const firstName = user?.firstName || user?.fullName?.split(' ')[0] || 'there';
+
+    // Separate private and collaborative spaces
+    const privateSpaces = resources.filter(
+        (r) => r.resource_type === 'private' && r.clerk_id === user?.id,
+    );
+    const collaborativeSpaces = resources.filter(
+        (r) => r.resource_type === 'public' || r.clerk_id !== user?.id,
+    );
+
+    const openCreateSpace = (type = 'private') => {
+        setCreateModalType(type);
+        setIsCreateModalOpen(true);
+    };
+
     if (!isLoaded) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-white font-black">
-                <p className="text-sm uppercase tracking-wider text-black">
-                    Loading Workspace...
-                </p>
+            <div className="flex min-h-screen items-center justify-center bg-[#F0F0E9]">
+                <div className="flex items-center gap-3">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#AD5266] border-t-transparent" />
+                    <span className="text-xs font-semibold text-[#73736C]">Loading Cadence...</span>
+                </div>
             </div>
         );
     }
 
     return (
         <AuthenticatedLayout resources={resources}>
-            <Head title="Dashboard" />
+            <Head title="Cadence - Dashboard" />
 
-            <div
-                className="relative flex min-h-[calc(100vh-56px)] w-full flex-col justify-start overflow-y-auto p-4 sm:p-6 md:min-h-screen lg:p-10"
-                style={{
-                    backgroundImage:
-                        'radial-gradient(#d1d5db 1.5px, transparent 1.5px)',
-                    backgroundSize: '24px 24px',
-                }}
-            >
-                {/* DASHBOARD HEADER */}
-                <div className="z-10 max-w-2xl space-y-2 pb-2 pt-1 sm:pt-2">
-                    <h1 className="flex flex-wrap items-center gap-2 text-2xl font-black tracking-tight text-[#121212] sm:text-3xl md:text-4xl">
-                        <span>Welcome to</span>{' '}
-                        <span className="text-red-600">TutorOS</span>{' '}
-                        <span className="inline-block animate-bounce">👋</span>
-                    </h1>
-                    <p className="text-xs font-bold leading-relaxed text-gray-600">
-                        Organize your study workflows. Collect videos, notes,
-                        web links, practice questions, and AI-generated revision
-                        packs all in one visual workspace.
-                    </p>
+            <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+                {/* TOP HEADER (MATCHES FIGMA FRAME 8:196 & 14:709) */}
+                <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <div className="inline-flex items-center gap-2 rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#AD5266]" />
+                            <span>Your Cadence</span>
+                        </div>
+                        <h1
+                            className="mt-3 text-3xl font-bold tracking-tight text-[#30302D] sm:text-4xl"
+                            style={{ fontFamily: '"Manrope", sans-serif', letterSpacing: '-0.03em' }}
+                        >
+                            Good {getGreeting()}, {firstName}.
+                        </h1>
+                        <p className="mt-1.5 text-sm text-[#73736C]">
+                            Pick up where you left off, or make room for something new.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => openCreateSpace('private')}
+                            className="rounded-full bg-[#AD5266] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95"
+                        >
+                            + Create a Space
+                        </button>
+                        {resources.length > 0 && (
+                            <Link
+                                href={
+                                    typeof route === 'function'
+                                        ? route('sessions.create', { resource_id: resources[0]?.id })
+                                        : `/sessions/create?resource_id=${resources[0]?.id}`
+                                }
+                                className="rounded-full border border-[#C5C9BE] bg-[#FFFFFF] px-5 py-2.5 text-xs font-semibold text-[#30302D] transition-all hover:bg-[#F7F7F2] active:scale-95"
+                            >
+                                New Revision Pack
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
-                {/* PENDING WORKSPACE INVITATIONS SECTION */}
+                {/* PENDING INVITATIONS NOTICE */}
                 {pendingInvitations.length > 0 && (
-                    <div className="my-4 max-w-4xl space-y-3">
-                        <h2 className="text-xs font-black uppercase tracking-wider text-black">
-                            📩 Pending Invitations ({pendingInvitations.length})
-                        </h2>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50/70 p-5">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm">📩</span>
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                                Pending Invitations ({pendingInvitations.length})
+                            </h2>
+                        </div>
+                        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                             {pendingInvitations.map((invite) => (
                                 <div
                                     key={invite.id}
-                                    className="flex items-center justify-between rounded-xl border-2 border-black bg-yellow-300 p-3 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                                    className="flex items-center justify-between rounded-xl border border-amber-200 bg-white p-3.5 shadow-sm"
                                 >
-                                    <div>
-                                        <p className="text-xs font-black text-black">
+                                    <div className="min-w-0 pr-3">
+                                        <p className="truncate text-xs font-bold text-[#30302D]">
                                             {invite.course_name}
                                         </p>
-                                        <p className="text-[10px] font-bold text-gray-800">
-                                            Invited by{' '}
-                                            {invite.user?.name ||
-                                                'Workspace Owner'}
+                                        <p className="truncate text-[11px] text-[#73736C]">
+                                            Invited by {invite.user?.name || 'Collaborator'}
                                         </p>
                                     </div>
-                                    <div className="flex gap-1.5">
+                                    <div className="flex gap-2 shrink-0">
                                         <button
                                             type="button"
-                                            onClick={() =>
-                                                handleAccept(invite.id)
-                                            }
-                                            className="rounded-lg border-2 border-black bg-green-400 px-2.5 py-1 text-xs font-black text-black shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+                                            onClick={() => handleAccept(invite.id)}
+                                            className="rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
                                         >
                                             Accept
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() =>
-                                                handleDecline(invite.id)
-                                            }
-                                            className="rounded-lg border-2 border-black bg-white px-2.5 py-1 text-xs font-black text-red-600 shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+                                            onClick={() => handleDecline(invite.id)}
+                                            className="rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
                                         >
                                             Decline
                                         </button>
@@ -108,171 +142,273 @@ export default function Dashboard({ resources = [], pendingInvitations = [] }) {
                     </div>
                 )}
 
-                {/* RESPONSIVE NEO-BRUTALIST CANVAS GRID */}
-                <div className="my-6 grid w-full max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {/* YOUTUBE CARD FEATURE */}
-                    <div className="w-full transition-all hover:rotate-0 hover:scale-[1.02] sm:-rotate-2">
-                        <div className="flex min-h-[230px] flex-col justify-between rounded-2xl border-2 border-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            <div>
-                                <div className="relative flex h-24 w-full flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-black bg-slate-900 p-2 text-center">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-black bg-red-600 text-xs font-black text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
-                                        ▶
-                                    </div>
-                                    <span className="mt-2 text-[10px] font-black uppercase tracking-wider text-white">
-                                        YouTube Link
-                                    </span>
-                                </div>
-                                <h3 className="mt-2.5 text-xs font-black text-[#121212]">
-                                    YouTube Videos
-                                </h3>
-                                <p className="mt-1 text-[10px] font-medium leading-snug text-gray-600">
-                                    Embed YouTube video links directly into your
-                                    workspace for quick reference and lecture
-                                    viewing.
-                                </p>
-                            </div>
-                            <div className="mt-3 w-fit rounded-md border border-red-200 bg-red-50 px-2 py-1 text-[9px] font-bold text-red-600">
-                                youtube.com
-                            </div>
+                {/* FEATURED QUICK ACCESS BANNER (MATCHES FIGMA FRAME 8:196) */}
+                <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    {/* Latest Revision Pack Card */}
+                    <div className="flex flex-col justify-between rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-6 shadow-sm lg:col-span-1">
+                        <div>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
+                                Latest Revision Pack
+                            </span>
+                            <h3
+                                className="mt-3 text-xl font-bold text-[#30302D]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
+                                Cell Biology Essentials
+                            </h3>
+                            <p className="mt-2 text-xs leading-relaxed text-[#73736C]">
+                                Summary, key concepts, flashcards, and practice questions are organized and ready.
+                            </p>
+                        </div>
+                        <div className="mt-6 flex items-center justify-between border-t border-[#F0F0E9] pt-4">
+                            <span className="text-[11px] font-medium text-[#73736C]">
+                                AI Study Pack
+                            </span>
+                            {resources.length > 0 ? (
+                                <Link
+                                    href={
+                                        typeof route === 'function'
+                                            ? route('resources.show', resources[0].id)
+                                            : `/resources/${resources[0].id}`
+                                    }
+                                    className="text-xs font-bold text-[#AD5266] hover:underline"
+                                >
+                                    Open space →
+                                </Link>
+                            ) : (
+                                <button
+                                    onClick={() => openCreateSpace('private')}
+                                    className="text-xs font-bold text-[#AD5266] hover:underline"
+                                >
+                                    Create a space →
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    {/* STICKY NOTE FEATURE */}
-                    <div className="w-full transition-all hover:rotate-0 hover:scale-[1.02] sm:rotate-1">
-                        <div className="flex min-h-[230px] flex-col justify-between rounded-2xl border-2 border-black bg-[#FEF08A] p-4 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    {/* Quick Space Stats & Shortcuts */}
+                    <div className="flex flex-col justify-between rounded-3xl border border-[#D8DDD5] bg-[#F7F7F2] p-6 lg:col-span-2">
+                        <div className="flex flex-wrap items-center justify-between gap-4">
                             <div>
-                                <div className="flex items-center justify-between border-b border-black/10 pb-1.5">
-                                    <span className="text-[9px] font-black uppercase text-black/60">
-                                        Sticky Note
-                                    </span>
-                                    <span className="text-[10px]">📌</span>
-                                </div>
-                                <h3 className="mt-2 text-xs font-black text-black">
-                                    Course Quick Notes
-                                </h3>
-                                <p className="mt-1.5 text-[10px] font-bold leading-tight text-black/80">
-                                    Jot down sticky notes for quick reminders,
-                                    key concepts, or homework tasks.
-                                </p>
-                            </div>
-                            <div className="mt-3 text-[9px] font-bold text-black/50">
-                                Click to edit note...
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* PRACTICE QUESTIONS FEATURE */}
-                    <div className="w-full transition-all hover:rotate-0 hover:scale-[1.02] sm:-rotate-2">
-                        <div className="flex min-h-[230px] flex-col justify-between rounded-2xl border-2 border-black bg-sky-100 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            <div>
-                                <div className="flex items-center justify-between border-b border-gray-100 pb-1">
-                                    <span className="text-[9px] font-black uppercase text-sky-700">
-                                        Practice Bank
-                                    </span>
-                                    <span className="rounded border border-black/20 bg-white px-1.5 py-0.5 text-[9px] font-black text-sky-800">
-                                        PDF / Images
-                                    </span>
-                                </div>
-                                <h3 className="mt-2 text-xs font-black text-[#121212]">
-                                    Past Practice Questions
-                                </h3>
-                                <p className="mb-2 mt-1 text-[10px] font-medium text-gray-500">
-                                    Upload past questions and view them inside
-                                    TutorOS while you revise.
-                                </p>
-                                <div className="rounded-lg border-2 border-black bg-white p-2 text-[10px] font-bold text-sky-800">
-                                    📄 Questions preview appears on each card
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* REVISION PACKS FEATURE */}
-                    <div className="w-full transition-all hover:rotate-0 hover:scale-[1.02] sm:rotate-2">
-                        <div className="flex min-h-[230px] flex-col justify-between rounded-2xl border-2 border-black bg-[#8A2BE2] p-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            <div>
-                                <div className="flex items-center justify-between">
-                                    <span className="rounded-md border border-black bg-white px-1.5 py-0.5 text-[8px] font-black uppercase text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
-                                        TutorOS AI
-                                    </span>
-                                    <span className="rounded-md border border-black bg-[#2ED573] px-1.5 py-0.5 text-[8px] font-black uppercase text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
-                                        Auto-Pack
-                                    </span>
-                                </div>
-                                <h3 className="mt-3 text-xs font-black leading-tight text-white">
-                                    AI Revision Packs
-                                </h3>
-                                <p className="mt-1.5 text-[10px] font-medium leading-tight text-white/90">
-                                    Generated automatically by TutorOS session
-                                    feature.
-                                </p>
-                            </div>
-                            <div className="mt-3 flex items-center justify-between border-t border-white/20 pt-2 text-[9px] font-bold">
-                                <span>Flashcards & Quiz</span>
-                                <span className="rounded bg-white/20 px-1.5 py-0.5 text-[8px]">
-                                    Session
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
+                                    Workspace Overview
                                 </span>
+                                <h3
+                                    className="mt-1 text-lg font-bold text-[#30302D]"
+                                    style={{ fontFamily: '"Manrope", sans-serif' }}
+                                >
+                                    {resources.length} Active {resources.length === 1 ? 'Space' : 'Spaces'}
+                                </h3>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => openCreateSpace('private')}
+                                    className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3.5 py-1.5 text-xs font-semibold text-[#30302D] hover:bg-[#F0F0E9] transition-colors"
+                                >
+                                    + Private space
+                                </button>
+                                <button
+                                    onClick={() => openCreateSpace('public')}
+                                    className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3.5 py-1.5 text-xs font-semibold text-[#30302D] hover:bg-[#F0F0E9] transition-colors"
+                                >
+                                    + Collaborative space
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                            <div className="rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] p-4">
+                                <span className="text-[10px] font-bold uppercase text-[#73736C]">Private</span>
+                                <p className="mt-1 text-xl font-bold text-[#30302D]">
+                                    {privateSpaces.length}
+                                </p>
+                                <p className="text-[11px] text-[#73736C]">Personal spaces</p>
+                            </div>
+                            <div className="rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] p-4">
+                                <span className="text-[10px] font-bold uppercase text-[#73736C]">Shared</span>
+                                <p className="mt-1 text-xl font-bold text-[#30302D]">
+                                    {collaborativeSpaces.length}
+                                </p>
+                                <p className="text-[11px] text-[#73736C]">Collaborative</p>
+                            </div>
+                            <div className="col-span-2 rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] p-4 sm:col-span-1">
+                                <span className="text-[10px] font-bold uppercase text-[#73736C]">Focus</span>
+                                <p className="mt-1 text-xl font-bold text-[#AD5266]">
+                                    Active
+                                </p>
+                                <p className="text-[11px] text-[#73736C]">All synced</p>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* WEBSITE LINK FEATURE */}
-                    <div className="w-full transition-all hover:rotate-0 hover:scale-[1.02] sm:-rotate-1">
-                        <div className="flex min-h-[230px] flex-col justify-between rounded-2xl border-2 border-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            <div>
-                                <div className="flex h-14 w-full items-center justify-between rounded-xl border-2 border-black bg-sky-500 p-2.5 text-white">
-                                    <div className="truncate text-xs font-black">
-                                        Topic Article
-                                    </div>
-                                    <div className="text-xs">🌐</div>
-                                </div>
-                                <h3 className="mt-2.5 text-xs font-black text-[#121212]">
-                                    Web Links & Research
-                                </h3>
-                                <p className="mt-1 text-[10px] font-medium leading-tight text-gray-600">
-                                    Save web links on a certain topic to quickly
-                                    return to articles.
-                                </p>
-                            </div>
-                            <div className="mt-3 truncate border-t border-gray-100 pt-1.5 text-[9px] font-bold text-sky-600">
-                                https://resource-link.org
-                            </div>
+                {/* YOUR SPACES SECTION (MATCHES FIGMA FRAME 8:196) */}
+                <div className="mt-12">
+                    <div className="flex items-center justify-between pb-4">
+                        <div>
+                            <h2
+                                className="text-xl font-bold text-[#30302D]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
+                                Your spaces
+                            </h2>
+                            <p className="text-xs text-[#73736C]">Keep learning close.</p>
                         </div>
                     </div>
 
-                    {/* CREATE NEW RESOURCE CARD */}
-                    <div className="w-full transition-all hover:rotate-0 hover:scale-[1.02] sm:rotate-2">
-                        <div className="flex min-h-[230px] flex-col items-center justify-between rounded-2xl border-2 border-dashed border-black bg-[#2ED573]/15 p-4 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            <div className="my-auto flex flex-col items-center">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-[#2ED573] text-lg font-black text-black shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]">
-                                    +
-                                </div>
-                                <h3 className="mt-3 text-xs font-black text-[#121212]">
-                                    Create New Resource
-                                </h3>
-                                <p className="mt-1 max-w-[140px] text-[10px] font-bold text-gray-600">
-                                    Start building your workspace by adding your
-                                    first card.
-                                </p>
+                    {resources.length === 0 ? (
+                        /* EMPTY ONBOARDING STATE (FIGMA FRAME 14:709) */
+                        <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-8 text-center sm:p-12">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F0F0E9] text-2xl text-[#AD5266]">
+                                ✦
                             </div>
+                            <h3
+                                className="mt-4 text-xl font-bold text-[#30302D]"
+                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                            >
+                                Your study space starts here.
+                            </h3>
+                            <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#73736C]">
+                                Bring your study resources together, collaborate with other students,
+                                and turn any course into a focused AI revision pack.
+                            </p>
+                            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                                <button
+                                    onClick={() => openCreateSpace('private')}
+                                    className="rounded-full bg-[#AD5266] px-6 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] transition-colors"
+                                >
+                                    Create a Space
+                                </button>
+                                <button
+                                    onClick={() => openCreateSpace('public')}
+                                    className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-6 py-2.5 text-xs font-semibold text-[#30302D] hover:bg-[#F7F7F2] transition-colors"
+                                >
+                                    Create Shared Space
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        /* SPACES GRID */
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {resources.map((space) => {
+                                const isPrivate = space.resource_type === 'private';
+                                const href = isPrivate
+                                    ? (typeof route === 'function' ? route('resources.private', space.id) : `/resources/private/${space.id}`)
+                                    : (typeof route === 'function' ? route('resources.public', space.id) : `/resources/public/${space.id}`);
 
+                                return (
+                                    <Link
+                                        key={space.id}
+                                        href={href}
+                                        className="group flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/40 hover:shadow-md"
+                                    >
+                                        <div>
+                                            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
+                                                <span className={isPrivate ? 'text-[#73736C]' : 'text-[#AD5266]'}>
+                                                    {isPrivate ? 'PRIVATE SPACE' : 'COLLABORATIVE SPACE'}
+                                                </span>
+                                                <span>{isPrivate ? '🔒' : '👥'}</span>
+                                            </div>
+                                            <h3
+                                                className="mt-3 text-lg font-bold text-[#30302D] group-hover:text-[#AD5266] transition-colors"
+                                                style={{ fontFamily: '"Manrope", sans-serif' }}
+                                            >
+                                                {space.course_name || space.name || 'Untitled space'}
+                                            </h3>
+                                            <p className="mt-1 text-xs text-[#73736C]">
+                                                {space.course_code ? `${space.course_code} · ` : ''}
+                                                {isPrivate ? 'Personal library' : 'Shared space'}
+                                            </p>
+                                        </div>
+
+                                        <div className="mt-6 flex items-center justify-between border-t border-[#F0F0E9] pt-3 text-xs text-[#73736C]">
+                                            <span>Open canvas</span>
+                                            <span className="font-semibold group-hover:translate-x-1 transition-transform">→</span>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+
+                            {/* Create New Space Card */}
                             <button
                                 type="button"
-                                onClick={() => setIsCreateModalOpen(true)}
-                                className="inline-flex w-full cursor-pointer items-center justify-center gap-1 rounded-xl border-2 border-black bg-white py-2 text-xs font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px]"
+                                onClick={() => openCreateSpace('private')}
+                                className="flex min-h-[160px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#D8DDD5] bg-[#F7F7F2]/60 p-6 text-center transition-colors hover:border-[#AD5266] hover:bg-[#FFFFFF]"
                             >
-                                <span>Add Resource</span>
-                                <span>→</span>
+                                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFFFFF] text-lg font-bold text-[#AD5266] shadow-sm">
+                                    +
+                                </span>
+                                <span className="mt-2 text-sm font-bold text-[#30302D]">
+                                    Create a new space
+                                </span>
+                                <span className="text-[11px] text-[#73736C]">
+                                    Gather resources & notes
+                                </span>
                             </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* GETTING STARTED THREE WAYS (FIGMA FRAME 14:709) */}
+                <div className="mt-16 border-t border-[#D8DDD5] pt-12">
+                    <span className="text-xs font-bold uppercase tracking-widest text-[#AD5266]">
+                        Everything in one rhythm
+                    </span>
+                    <h2
+                        className="mt-1 text-xl font-bold text-[#30302D] sm:text-2xl"
+                        style={{ fontFamily: '"Manrope", sans-serif' }}
+                    >
+                        Three ways to get started.
+                    </h2>
+                    <p className="mt-1 text-xs text-[#73736C]">
+                        You do not need to set everything up at once. Start with a space, add what matters, and let Cadence help from there.
+                    </p>
+
+                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div className="rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm">
+                            <span className="text-[11px] font-bold text-[#AD5266]">01 · TOGETHER</span>
+                            <h3 className="mt-1 text-sm font-bold text-[#30302D]" style={{ fontFamily: '"Manrope", sans-serif' }}>
+                                Collaborative Spaces
+                            </h3>
+                            <p className="mt-1 text-xs text-[#73736C]">
+                                Create a shared canvas for your class, project group, or study partners.
+                            </p>
+                        </div>
+                        <div className="rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm">
+                            <span className="text-[11px] font-bold text-[#AD5266]">02 · ORGANIZED</span>
+                            <h3 className="mt-1 text-sm font-bold text-[#30302D]" style={{ fontFamily: '"Manrope", sans-serif' }}>
+                                Study Resources
+                            </h3>
+                            <p className="mt-1 text-xs text-[#73736C]">
+                                Keep useful videos, links, notes, and past questions within easy reach.
+                            </p>
+                        </div>
+                        <div className="rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm">
+                            <span className="text-[11px] font-bold text-[#AD5266]">03 · FOCUSED</span>
+                            <h3 className="mt-1 text-sm font-bold text-[#30302D]" style={{ fontFamily: '"Manrope", sans-serif' }}>
+                                AI Revision Packs
+                            </h3>
+                            <p className="mt-1 text-xs text-[#73736C]">
+                                Generate summaries, flashcards, and practice questions for any topic.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {/* RESOURCE CREATION MODAL */}
             <Resource
                 isOpen={isCreateModalOpen}
+                defaultResourceType={createModalType}
                 onClose={() => setIsCreateModalOpen(false)}
             />
         </AuthenticatedLayout>
     );
+}
+
+function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'morning';
+    if (hour < 18) return 'afternoon';
+    return 'evening';
 }

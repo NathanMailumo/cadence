@@ -1,6 +1,6 @@
+import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, useForm, Link } from '@inertiajs/react';
 
 export default function SessionCreate({ resourceId = null }) {
     const [mode, setMode] = useState('topics'); // 'topics' or 'resource'
@@ -16,240 +16,186 @@ export default function SessionCreate({ resourceId = null }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('sessions.store'));
+        post(typeof route === 'function' ? route('sessions.store') : '/sessions/create');
     };
 
     return (
         <AuthenticatedLayout>
-            <Head title="Create Session" />
+            <Head title="Cadence - Create Revision Pack" />
 
-            {/* FULL SCREEN DOTTED BACKGROUND - FULLY CENTERED VERTICALLY & HORIZONTALLY */}
-            <div className="flex min-h-[calc(100vh-3.5rem)] w-full items-center justify-center bg-[#F8F9FA] bg-[radial-gradient(#d1d5db_1.5px,transparent_1.5px)] px-4 py-8 [background-size:16px_16px] sm:px-8 md:min-h-screen">
-                {/* CENTERED & CONSTRAINED CONTENT CONTAINER */}
-                <div className="w-full max-w-2xl space-y-6">
-                    {/* PAGE HEADER */}
-                    <div>
-                        <h1 className="text-2xl font-black tracking-tight text-[#121212] sm:text-3xl">
-                            Create Session
-                        </h1>
-                        <p className="mt-1 text-xs font-medium text-gray-500 sm:text-sm">
-                            Select an input method to generate your study
-                            materials.
-                        </p>
-                    </div>
-
-                    {/* MODE SELECTION TABS */}
-                    <div className="grid grid-cols-2 gap-2 rounded-xl border-2 border-black bg-white p-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setMode('topics');
-                                setData('input_option', 'text');
-                            }}
-                            className={`rounded-lg border-2 px-3 py-2 text-xs font-black transition-all sm:text-sm ${
-                                mode === 'topics'
-                                    ? 'border-black bg-[#FF6B35] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                                    : 'border-transparent text-gray-600 hover:bg-gray-100 hover:text-black'
-                            }`}
-                        >
-                            Prompt & Topics
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setMode('resource');
-                                setData('input_option', 'file');
-                            }}
-                            className={`rounded-lg border-2 px-3 py-2 text-xs font-black transition-all sm:text-sm ${
-                                mode === 'resource'
-                                    ? 'border-black bg-[#FF6B35] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                                    : 'border-transparent text-gray-600 hover:bg-gray-100 hover:text-black'
-                            }`}
-                        >
-                            Import Notes / Material
-                        </button>
-                    </div>
-
-                    {/* FORM CONTAINER */}
-                    <form
-                        onSubmit={handleSubmit}
-                        className="space-y-5 rounded-2xl border-2 border-black bg-white p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-7"
+            <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+                {/* PAGE HEADER */}
+                <div className="border-b border-[#D8DDD5] pb-6">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
+                        AI Study Tool
+                    </span>
+                    <h1
+                        className="mt-2 text-2xl font-bold tracking-tight text-[#30302D] sm:text-3xl"
+                        style={{ fontFamily: '"Manrope", sans-serif' }}
                     >
-                        {/* MODE INSTRUCTION SUBTEXT */}
-                        <p className="text-xs font-bold italic text-gray-600">
-                            {mode === 'topics'
-                                ? 'dont have any materials?... generate sessions without importing study materials'
-                                : 'import study materials with content specifics to generate study materials'}
-                        </p>
+                        Create a Revision Pack
+                    </h1>
+                    <p className="mt-1 text-xs text-[#73736C]">
+                        Generate structured study notes, flashcards, key concepts, and practice questions.
+                    </p>
+                </div>
 
-                        {/* COURSE IDENTIFICATION */}
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                            <div className="space-y-1 sm:col-span-2">
-                                <label className="block text-[11px] font-black uppercase tracking-wide text-black sm:text-xs">
-                                    Course Title{' '}
-                                    <span className="text-[#FF6B35]">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g... Data Structures and Algorithms"
-                                    value={data.course_title}
-                                    onChange={(e) =>
-                                        setData('course_title', e.target.value)
-                                    }
-                                    className="w-full rounded-lg border-2 border-black bg-gray-50 px-3 py-2 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:bg-white focus:outline-none focus:ring-0 sm:text-sm"
-                                    required
-                                />
-                                {errors.course_title && (
-                                    <p className="text-xs font-bold text-red-600">
-                                        {errors.course_title}
-                                    </p>
-                                )}
-                            </div>
+                {/* MODE SELECTION TABS */}
+                <div className="mt-8 flex rounded-full bg-[#FFFFFF] p-1.5 border border-[#D8DDD5] shadow-sm">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setMode('topics');
+                            setData('input_option', 'text');
+                        }}
+                        className={`flex-1 rounded-full py-2 text-xs font-semibold transition-all ${
+                            mode === 'topics'
+                                ? 'bg-[#AD5266] text-white shadow-sm'
+                                : 'text-[#73736C] hover:text-[#30302D]'
+                        }`}
+                    >
+                        Topics & Curriculum Directives
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setMode('resource');
+                            setData('input_option', 'file');
+                        }}
+                        className={`flex-1 rounded-full py-2 text-xs font-semibold transition-all ${
+                            mode === 'resource'
+                                ? 'bg-[#AD5266] text-white shadow-sm'
+                                : 'text-[#73736C] hover:text-[#30302D]'
+                        }`}
+                    >
+                        Upload Document / Slides
+                    </button>
+                </div>
 
-                            <div className="space-y-1">
-                                <label className="block text-[11px] font-black uppercase tracking-wide text-black sm:text-xs">
-                                    Course Code
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g., CS201"
-                                    value={data.course_code}
-                                    onChange={(e) =>
-                                        setData('course_code', e.target.value)
-                                    }
-                                    className="w-full rounded-lg border-2 border-black bg-gray-50 px-3 py-2 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:bg-white focus:outline-none focus:ring-0 sm:text-sm"
-                                />
-                                {errors.course_code && (
-                                    <p className="text-xs font-bold text-red-600">
-                                        {errors.course_code}
-                                    </p>
-                                )}
-                            </div>
+                {/* FORM CONTAINER */}
+                <form
+                    onSubmit={handleSubmit}
+                    className="mt-6 rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-6 shadow-sm sm:p-8"
+                >
+                    {/* COURSE IDENTIFICATION */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div className="sm:col-span-2">
+                            <label className="block text-xs font-semibold uppercase text-[#30302D]">
+                                Course Title <span className="text-[#AD5266]">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="e.g. Data Structures and Algorithms"
+                                value={data.course_title}
+                                onChange={(e) => setData('course_title', e.target.value)}
+                                className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
+                                required
+                            />
+                            {errors.course_title && (
+                                <p className="mt-1 text-xs text-rose-600">{errors.course_title}</p>
+                            )}
                         </div>
 
-                        {/* DYNAMIC CONTENT INPUT */}
+                        <div>
+                            <label className="block text-xs font-semibold uppercase text-[#30302D]">
+                                Course Code
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="e.g. CS201"
+                                value={data.course_code}
+                                onChange={(e) => setData('course_code', e.target.value)}
+                                className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
+                            />
+                            {errors.course_code && (
+                                <p className="mt-1 text-xs text-rose-600">{errors.course_code}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* DYNAMIC CONTENT INPUT */}
+                    <div className="mt-5">
                         {mode === 'topics' ? (
-                            /* PROMPT & TOPICS MODE */
-                            <div className="space-y-1">
-                                <label className="block text-[11px] font-black uppercase tracking-wide text-black sm:text-xs">
-                                    Study Directives & Topics Outline{' '}
-                                    <span className="text-[#FF6B35]">*</span>
+                            <div>
+                                <label className="block text-xs font-semibold uppercase text-[#30302D]">
+                                    Focus Area & Topics Outline <span className="text-[#AD5266]">*</span>
                                 </label>
                                 <textarea
-                                    rows={5}
-                                    placeholder="List topics or concepts to focus on..."
+                                    rows={6}
+                                    placeholder="List the specific topics, chapters, exam areas, or questions you want this revision pack to emphasize..."
                                     value={data.focus_prompt}
-                                    onChange={(e) =>
-                                        setData('focus_prompt', e.target.value)
-                                    }
-                                    className="w-full rounded-lg border-2 border-black bg-gray-50 p-3 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:bg-white focus:outline-none focus:ring-0 sm:text-sm"
+                                    onChange={(e) => setData('focus_prompt', e.target.value)}
+                                    className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                     required
                                 />
                                 {errors.focus_prompt && (
-                                    <p className="text-xs font-bold text-red-600">
-                                        {errors.focus_prompt}
-                                    </p>
+                                    <p className="mt-1 text-xs text-rose-600">{errors.focus_prompt}</p>
                                 )}
                             </div>
                         ) : (
-                            /* IMPORT MATERIAL MODE */
                             <div className="space-y-4">
-                                <div className="space-y-1">
-                                    <label className="block text-[11px] font-black uppercase tracking-wide text-black sm:text-xs">
-                                        Source Document{' '}
-                                        <span className="text-[#FF6B35]">
-                                            *
-                                        </span>
+                                <div>
+                                    <label className="block text-xs font-semibold uppercase text-[#30302D]">
+                                        Focus Area or Target Chapters <span className="text-[#AD5266]">*</span>
                                     </label>
-                                    <div className="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-black bg-gray-50 p-5 text-center transition-colors hover:bg-gray-100">
-                                        {data.file ? (
-                                            <div className="z-10 flex flex-col items-center gap-2">
-                                                <p className="text-xs font-black text-black">
-                                                    {data.file.name}
-                                                </p>
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setData('file', null);
-                                                    }}
-                                                    className="rounded border border-black bg-red-500 px-2 py-0.5 text-[10px] font-black text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-red-600"
-                                                >
-                                                    Remove File
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <p className="text-xs font-black text-black">
-                                                    Click to select or drop
-                                                    document here
-                                                </p>
-                                                <p className="mt-0.5 text-[10px] font-bold text-gray-500">
-                                                    PDF, TXT, or DOCX (Max 5MB)
-                                                </p>
-                                                <input
-                                                    type="file"
-                                                    accept=".pdf,.txt,.docx"
-                                                    onChange={(e) =>
-                                                        setData(
-                                                            'file',
-                                                            e.target.files[0],
-                                                        )
-                                                    }
-                                                    className="absolute inset-0 cursor-pointer opacity-0"
-                                                />
-                                            </>
-                                        )}
-                                    </div>
-                                    {errors.file && (
-                                        <p className="text-xs font-bold text-red-600">
-                                            {errors.file}
-                                        </p>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Focus on Chapter 4: Memory Hierarchy"
+                                        value={data.focus_prompt}
+                                        onChange={(e) => setData('focus_prompt', e.target.value)}
+                                        className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
+                                        required
+                                    />
+                                    {errors.focus_prompt && (
+                                        <p className="mt-1 text-xs text-rose-600">{errors.focus_prompt}</p>
                                     )}
                                 </div>
 
-                                {/* SPECIFIC FOCUS UNBOXED INPUT */}
-                                <div className="space-y-1">
-                                    <label
-                                        htmlFor="focus_prompt"
-                                        className="block text-[11px] font-black uppercase tracking-wide text-black sm:text-xs"
-                                    >
-                                        Specific Focus / Target Area{' '}
-                                        <span className="text-[10px] font-normal text-gray-500">
-                                            (Optional)
+                                <div className="rounded-2xl border-2 border-dashed border-[#D8DDD5] bg-[#F7F7F2] p-6 text-center">
+                                    <label className="block cursor-pointer">
+                                        <span className="text-sm font-semibold text-[#30302D]">
+                                            Upload course notes or slides
                                         </span>
+                                        <span className="block mt-1 text-[11px] text-[#73736C]">
+                                            PDF, DOCX, PPTX, or TXT · Maximum 5 MB
+                                        </span>
+                                        <input
+                                            type="file"
+                                            required
+                                            accept=".pdf,.docx,.txt,.pptx"
+                                            onChange={(e) => setData('file', e.target.files?.[0] || null)}
+                                            className="mt-3 block w-full text-xs text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-[#FFFFFF] file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-[#30302D] hover:file:bg-[#F0F0E9]"
+                                        />
                                     </label>
-                                    <input
-                                        id="focus_prompt"
-                                        type="text"
-                                        placeholder="List specific areas from imported files"
-                                        value={data.focus_prompt}
-                                        onChange={(e) =>
-                                            setData(
-                                                'focus_prompt',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full rounded-lg border-2 border-black bg-gray-50 px-3 py-2 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:bg-white focus:outline-none focus:ring-0 sm:text-sm"
-                                    />
+                                    {errors.file && (
+                                        <p className="mt-2 text-xs text-rose-600">{errors.file}</p>
+                                    )}
                                 </div>
                             </div>
                         )}
+                    </div>
 
-                        {/* SUBMIT BUTTON */}
-                        <div className="pt-2">
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="inline-flex w-full items-center justify-center rounded-xl border-2 border-black bg-[#FF6B35] px-5 py-3 text-xs font-black uppercase tracking-wider text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50 sm:text-sm"
-                            >
-                                {processing
-                                    ? 'Generating Study Workspace...'
-                                    : 'Generate Study Workspace'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    {/* SUBMIT BUTTON */}
+                    <div className="mt-8 flex items-center justify-end gap-3 border-t border-[#F0F0E9] pt-5">
+                        <Link
+                            href={
+                                resourceId
+                                    ? (typeof route === 'function' ? route('resources.show', resourceId) : `/resources/${resourceId}`)
+                                    : (typeof route === 'function' ? route('dashboard') : '/dashboard')
+                            }
+                            className="rounded-full px-5 py-2.5 text-xs font-semibold text-[#73736C] hover:text-[#30302D]"
+                        >
+                            Cancel
+                        </Link>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="rounded-full bg-[#AD5266] px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95 disabled:opacity-50"
+                        >
+                            {processing ? 'Compiling revision pack...' : 'Generate Revision Pack'}
+                        </button>
+                    </div>
+                </form>
             </div>
         </AuthenticatedLayout>
     );
