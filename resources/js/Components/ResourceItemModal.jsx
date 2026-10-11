@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
+import { X } from 'lucide-react';
 
 export default function ResourceItemModal({
     isOpen,
@@ -138,7 +139,7 @@ export default function ResourceItemModal({
                             >
                                 <div className="flex items-center gap-3.5">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600 font-bold">
-                                        ▶
+                                        Video
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-[#30302D] group-hover:text-[#AD5266]">
@@ -163,7 +164,7 @@ export default function ResourceItemModal({
                             >
                                 <div className="flex items-center gap-3.5">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 font-bold">
-                                        🔗
+                                        Link
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-[#30302D] group-hover:text-[#AD5266]">
@@ -188,7 +189,7 @@ export default function ResourceItemModal({
                             >
                                 <div className="flex items-center gap-3.5">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-900 font-bold">
-                                        📌
+                                        Note
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-[#30302D] group-hover:text-[#AD5266]">
@@ -213,7 +214,7 @@ export default function ResourceItemModal({
                             >
                                 <div className="flex items-center gap-3.5">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700 font-bold">
-                                        📄
+                                        Document
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-[#30302D] group-hover:text-[#AD5266]">
@@ -235,7 +236,7 @@ export default function ResourceItemModal({
                             >
                                 <div className="flex items-center gap-3.5">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#AD5266] text-white font-bold">
-                                        ✦
+                                        AI
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-[#762F50]">

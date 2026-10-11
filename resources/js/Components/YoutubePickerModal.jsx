@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { X } from 'lucide-react';
 
 export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
     const [mode, setMode] = useState('search'); // 'search' or 'direct'
@@ -110,7 +111,7 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                         onClick={onClose}
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-[#D8DDD5] bg-[#FFFFFF] text-xs text-[#73736C] hover:bg-[#F7F7F2]"
                     >
-                        ✕
+                        <X size={15} />
                     </button>
                 </div>
 

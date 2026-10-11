@@ -41,12 +41,20 @@ class HandleInertiaRequests extends Middleware
             'privateResources' => fn() => $user
                 ? Resource::where('clerk_id', $user->clerk_id)
                 ->where('resource_type', 'private')
+                ->withCount('resourceItems')
                 ->latest()
                 ->get()
                 : [],
             'publicResources' => fn() => $user
-                ? Resource::where('clerk_id', $user->clerk_id)
-                ->where('resource_type', 'public')
+                ? Resource::where('resource_type', 'public')
+                ->where(function ($query) use ($user) {
+                    $query->where('clerk_id', $user->clerk_id)
+                        ->orWhereHas('collaborators', function ($collaborators) use ($user) {
+                            $collaborators->where('users.clerk_id', $user->clerk_id)
+                                ->where('status', 'accepted');
+                        });
+                })
+                ->withCount('resourceItems')
                 ->latest()
                 ->get()
                 : [],
@@ -56,6 +64,7 @@ class HandleInertiaRequests extends Middleware
                     $q->where('users.clerk_id', $user->clerk_id)
                         ->where('status', 'accepted');
                 })
+                ->withCount('resourceItems')
                 ->latest()
                 ->get()
                 : [],

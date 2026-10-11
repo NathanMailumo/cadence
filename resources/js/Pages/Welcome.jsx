@@ -29,7 +29,7 @@ export default function Welcome() {
                 <div className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-20 sm:px-10 sm:py-24 lg:grid-cols-2 lg:gap-20 lg:px-12 lg:py-28">
                     <div className="max-w-xl">
                         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-[#AD5266]">
-                            <span aria-hidden="true">✣</span>
+                            <span aria-hidden="true">Cadence</span>
                             Learning, in your own rhythm
                         </p>
                         <h1 className="mt-6 text-6xl font-medium leading-[0.94] tracking-[-0.06em] text-[#30302D] transition-colors duration-300 hover:text-[#762F50] sm:text-7xl lg:text-[5.5rem]">
@@ -143,7 +143,7 @@ export default function Welcome() {
                 <div className="mt-12 grid gap-4 md:grid-cols-3">
                     <div className="flex min-h-60 flex-col justify-between rounded-lg border border-[#D8DDD5] bg-white p-6 transition duration-200 hover:-translate-y-2 hover:border-[#AD5266] hover:shadow-xl hover:shadow-stone-200/60">
                         <div className="flex justify-between">
-                            <Icon>▱</Icon>
+                            <Icon>Resources</Icon>
                             <span className="text-[10px] font-bold text-[#73736C]">
                                 01
                             </span>
@@ -177,7 +177,7 @@ export default function Welcome() {
                     </div>
                     <div className="flex min-h-60 flex-col justify-between rounded-lg bg-[#762F50] p-6 text-white transition duration-200 hover:-translate-y-2 hover:bg-[#87365B] hover:shadow-xl hover:shadow-[#762F50]/25">
                         <div className="flex justify-between">
-                            <span className="text-[#F1DCE4]">✣</span>
+                            <span className="text-[#F1DCE4]">Cadence</span>
                             <span className="text-[10px] font-bold text-[#E8C7D3]">
                                 03
                             </span>

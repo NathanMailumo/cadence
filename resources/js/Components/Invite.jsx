@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
+import { X } from 'lucide-react';
 
 export default function InviteModal({
     isOpen,
@@ -148,7 +149,7 @@ export default function InviteModal({
                         onClick={handleClose}
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-[#D8DDD5] bg-[#FFFFFF] text-xs text-[#73736C] hover:bg-[#F7F7F2]"
                     >
-                        ✕
+                        <X size={15} />
                     </button>
                 </div>
 
@@ -170,7 +171,7 @@ export default function InviteModal({
                                         onClick={() => removeTag(index)}
                                         className="text-gray-400 hover:text-rose-600"
                                     >
-                                        ✕
+                                        <X size={13} />
                                     </button>
                                 </span>
                             ))}

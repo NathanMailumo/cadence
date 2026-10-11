@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, router } from '@inertiajs/react';
+import { FolderOpen, Plus } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ResourceCanvas from '@/Components/ResourceCanvas';
 import ResourceItemModal from '@/Components/ResourceItemModal';
 import YouTubePickerModal from '@/Components/YoutubePickerModal';
 
@@ -71,7 +73,7 @@ export default function PrivateResource({ resource, items = [] }) {
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                                 <span className="flex items-center gap-1.5">
                                     <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266]/10 text-[9px] text-[#AD5266]">
-                                        ▶
+                                        Video
                                     </span>
                                     VIDEO
                                 </span>
@@ -136,7 +138,7 @@ export default function PrivateResource({ resource, items = [] }) {
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
                                 <span className="flex items-center gap-1.5">
-                                    <span>🔗</span>
+                                    <span>Link</span>
                                     LINK
                                 </span>
                                 {metadata.domain && (
@@ -174,6 +176,7 @@ export default function PrivateResource({ resource, items = [] }) {
             case 'pq': {
                 const fileUrl = metadata.file_url;
                 const isPdf = metadata.mime_type === 'application/pdf';
+                const isImage = metadata.mime_type?.startsWith('image/');
                 return (
                     <div
                         key={item.id}
@@ -189,7 +192,7 @@ export default function PrivateResource({ resource, items = [] }) {
                         </button>
                         <div>
                             <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
-                                <span>📄</span>
+                                <span>Document</span>
                                 <span>PDF / QUESTIONS</span>
                             </div>
                             <h3
@@ -209,6 +212,20 @@ export default function PrivateResource({ resource, items = [] }) {
                                     title={item.title}
                                     className="mt-3 h-32 w-full rounded-xl border border-[#E5E7EB] bg-white"
                                 />
+                            )}
+                            {fileUrl && isImage && (
+                                <a
+                                    href={fileUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="mt-3 block overflow-hidden rounded-xl border border-[#E5E7EB] bg-white"
+                                >
+                                    <img
+                                        src={fileUrl}
+                                        alt={item.title}
+                                        className="h-32 w-full object-contain"
+                                    />
+                                </a>
                             )}
                         </div>
                         {fileUrl && (
@@ -258,7 +275,7 @@ export default function PrivateResource({ resource, items = [] }) {
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                                 <span className="flex items-center gap-1.5">
                                     <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266] text-[9px] text-white">
-                                        ✦
+                                        AI
                                     </span>
                                     REVISION PACK
                                 </span>
@@ -304,7 +321,7 @@ export default function PrivateResource({ resource, items = [] }) {
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8A7146]">
                                 <span className="flex items-center gap-1.5">
-                                    <span>📌</span>
+                                    <span>Note</span>
                                     NOTE
                                 </span>
                             </div>
@@ -329,76 +346,60 @@ export default function PrivateResource({ resource, items = [] }) {
 
     return (
         <AuthenticatedLayout>
-            <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-                {/* HEADER BAR (MATCHES FIGMA FRAME 14:1103) */}
-                <div className="flex flex-col gap-4 border-b border-[#D8DDD5] pb-6 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <span className="rounded-full bg-[#F0F0E9] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
+            <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden bg-[#F0F0E9]">
+                <header className="flex w-full items-center justify-between border-b border-gray-100 bg-white px-8 py-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F1E5EA] text-[#762F50]">
+                            <FolderOpen size={19} strokeWidth={1.8} />
+                        </span>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#AD5266]">
                                 Private space
-                            </span>
-                            {resource?.course_code && (
-                                <span className="text-xs font-semibold text-[#73736C]">
-                                    {resource.course_code}
-                                </span>
-                            )}
+                            </p>
+                            <h1 className="truncate text-xl font-medium tracking-[-0.03em] text-[#30302D]">
+                                {spaceName}
+                            </h1>
+                            <p className="text-xs text-[#73736C]">
+                                {items.length}{' '}
+                                {items.length === 1 ? 'resource' : 'resources'}
+                            </p>
                         </div>
-                        <h1
-                            className="mt-2 text-2xl font-bold tracking-tight text-[#30302D] sm:text-3xl"
-                            style={{ fontFamily: '"Manrope", sans-serif' }}
-                        >
-                            {spaceName}
-                        </h1>
-                        <p className="mt-1 text-xs text-[#73736C]">
-                            Private · {items.length}{' '}
-                            {items.length === 1 ? 'resource' : 'resources'}
-                        </p>
                     </div>
-
-                    <div className="flex items-center gap-3">
+                    <div className="flex shrink-0 items-center gap-4">
                         <button
                             type="button"
                             onClick={() => openAddModal('choose')}
-                            className="rounded-full bg-[#AD5266] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#762F50] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#5E243F]"
                         >
-                            + Add resource
+                            <Plus size={15} /> Add resource
                         </button>
                     </div>
-                </div>
+                </header>
 
-                {/* CONTENT AREA (MATCHES FIGMA CANVAS) */}
-                <div className="mt-8">
-                    {items.length === 0 ? (
-                        <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-8 text-center sm:p-12">
-                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0F0E9] text-xl text-[#AD5266]">
-                                ✦
-                            </div>
-                            <h3
-                                className="mt-4 text-lg font-bold text-[#30302D]"
-                                style={{ fontFamily: '"Manrope", sans-serif' }}
-                            >
-                                This space is empty
-                            </h3>
-                            <p className="mx-auto mt-1 max-w-sm text-xs text-[#73736C]">
-                                Add videos, web links, sticky notes, past
-                                questions, or generate an AI revision pack.
-                            </p>
-                            <div className="mt-6">
-                                <button
-                                    type="button"
-                                    onClick={() => openAddModal('choose')}
-                                    className="rounded-full bg-[#AD5266] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#974356]"
-                                >
-                                    + Add what matters
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {items.map((item) => renderCard(item))}
-                        </div>
-                    )}
-                </div>
+                <main className="relative flex-1 overflow-y-auto bg-[#F9F8F6] p-8 [background-image:radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+                    <div className="h-full">
+                        <ResourceCanvas
+                            items={items}
+                            renderCard={renderCard}
+                            emptyState={
+                                <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+                                    <FolderOpen
+                                        className="text-[#AD5266]"
+                                        size={32}
+                                        strokeWidth={1.6}
+                                    />
+                                    <h2 className="mt-4 text-lg font-bold text-[#30302D]">
+                                        No resources added yet
+                                    </h2>
+                                    <p className="mt-2 text-sm text-[#73736C]">
+                                        Click &quot;Add resource&quot; to get
+                                        started.
+                                    </p>
+                                </div>
+                            }
+                        />
+                    </div>
+                </main>
             </div>
 
             {/* RESOURCE ADD MODAL */}

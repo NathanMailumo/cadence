@@ -155,7 +155,7 @@ export default function Invited({
                                                     className="rounded-full p-1.5 text-gray-400 hover:text-rose-600 transition-colors"
                                                     title="Remove from workspace"
                                                 >
-                                                    ✕
+                                                    Remove
                                                 </button>
                                             )}
                                         </div>

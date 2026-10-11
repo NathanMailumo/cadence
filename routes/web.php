@@ -1,12 +1,10 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ResourceItemController;
 use App\Http\Controllers\ResourceUserController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\YouTubeController;
 use App\Http\Controllers\ClerkSyncController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -70,13 +68,6 @@ Route::middleware(['web', 'auth'])->group(function () {
     // Invite Status Routes
     Route::post('/resources/{resource}/accept', [ResourceUserController::class, 'acceptInvite'])->name('resources.invitations.accept');
     Route::post('/resources/{resource}/decline', [ResourceUserController::class, 'declineInvite'])->name('resources.invitations.decline');
-
-    // Profile Routes
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    // Settings Route
-    Route::get('/settings', [SettingController::class, 'showSettings'])->name('settings');
 
     // YouTube Controller
     Route::get('/youtube/search', [YouTubeController::class, 'search'])->name('youtube.search');

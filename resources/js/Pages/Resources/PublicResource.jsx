@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, router } from '@inertiajs/react';
+import { FolderOpen, Plus } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ResourceCanvas from '@/Components/ResourceCanvas';
 import ResourceItemModal from '@/Components/ResourceItemModal';
 import InviteModal from '@/Components/Invite';
 import YouTubePickerModal from '@/Components/YoutubePickerModal';
@@ -67,7 +69,7 @@ export default function PublicResource({
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 rounded-full p-1 text-gray-400 hover:bg-rose-50 hover:text-rose-600 transition-all z-10"
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
                             title="Delete"
                         >
                             ✕
@@ -76,18 +78,18 @@ export default function PublicResource({
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                                 <span className="flex items-center gap-1.5">
                                     <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266]/10 text-[9px] text-[#AD5266]">
-                                        ▶
+                                        Video
                                     </span>
                                     VIDEO
                                 </span>
                                 {metadata.author_name && (
-                                    <span className="text-[#73736C] font-normal truncate max-w-[130px]">
+                                    <span className="max-w-[130px] truncate font-normal text-[#73736C]">
                                         {metadata.author_name}
                                     </span>
                                 )}
                             </div>
                             <h3
-                                className="mt-3 text-sm font-bold text-[#30302D] leading-snug"
+                                className="mt-3 text-sm font-bold leading-snug text-[#30302D]"
                                 style={{ fontFamily: '"Manrope", sans-serif' }}
                             >
                                 {item.title}
@@ -112,9 +114,11 @@ export default function PublicResource({
                                 href={item.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="mt-4 flex items-center justify-between truncate rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] hover:bg-[#F0F0E9] transition-colors"
+                                className="mt-4 flex items-center justify-between truncate rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
                             >
-                                <span className="truncate">Watch on YouTube</span>
+                                <span className="truncate">
+                                    Watch on YouTube
+                                </span>
                                 <span>↗</span>
                             </a>
                         )}
@@ -131,7 +135,7 @@ export default function PublicResource({
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 rounded-full p-1 text-gray-400 hover:bg-rose-50 hover:text-rose-600 transition-all z-10"
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
                             title="Delete"
                         >
                             ✕
@@ -139,17 +143,17 @@ export default function PublicResource({
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
                                 <span className="flex items-center gap-1.5">
-                                    <span>🔗</span>
+                                    <span>Link</span>
                                     LINK
                                 </span>
                                 {metadata.domain && (
-                                    <span className="text-[10px] text-gray-400 lowercase">
+                                    <span className="text-[10px] lowercase text-gray-400">
                                         {metadata.domain}
                                     </span>
                                 )}
                             </div>
                             <h3
-                                className="mt-3 text-sm font-bold text-[#30302D] leading-snug"
+                                className="mt-3 text-sm font-bold leading-snug text-[#30302D]"
                                 style={{ fontFamily: '"Manrope", sans-serif' }}
                             >
                                 {item.title}
@@ -165,7 +169,7 @@ export default function PublicResource({
                                 href={item.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="mt-4 flex items-center justify-between truncate rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] hover:bg-[#F0F0E9] transition-colors"
+                                className="mt-4 flex items-center justify-between truncate rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
                             >
                                 <span className="truncate">{item.url}</span>
                                 <span>↗</span>
@@ -177,6 +181,7 @@ export default function PublicResource({
             case 'pq': {
                 const fileUrl = metadata.file_url;
                 const isPdf = metadata.mime_type === 'application/pdf';
+                const isImage = metadata.mime_type?.startsWith('image/');
                 return (
                     <div
                         key={item.id}
@@ -185,14 +190,14 @@ export default function PublicResource({
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 rounded-full p-1 text-gray-400 hover:bg-rose-50 hover:text-rose-600 transition-all z-10"
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
                             title="Delete"
                         >
                             ✕
                         </button>
                         <div>
                             <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
-                                <span>📄</span>
+                                <span>Document</span>
                                 <span>PDF / QUESTIONS</span>
                             </div>
                             <h3
@@ -213,13 +218,27 @@ export default function PublicResource({
                                     className="mt-3 h-32 w-full rounded-xl border border-[#E5E7EB] bg-white"
                                 />
                             )}
+                            {fileUrl && isImage && (
+                                <a
+                                    href={fileUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="mt-3 block overflow-hidden rounded-xl border border-[#E5E7EB] bg-white"
+                                >
+                                    <img
+                                        src={fileUrl}
+                                        alt={item.title}
+                                        className="h-32 w-full object-contain"
+                                    />
+                                </a>
+                            )}
                         </div>
                         {fileUrl && (
                             <a
                                 href={fileUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="mt-4 flex items-center justify-between rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] hover:bg-[#F0F0E9] transition-colors"
+                                className="mt-4 flex items-center justify-between rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
                             >
                                 <span>Open document</span>
                                 <span>↗</span>
@@ -235,7 +254,12 @@ export default function PublicResource({
                         key={item.id}
                         href={
                             item.study_session_id
-                                ? (typeof route === 'function' ? route('sessions.show', item.study_session_id) : `/session/${item.study_session_id}`)
+                                ? typeof route === 'function'
+                                    ? route(
+                                          'sessions.show',
+                                          item.study_session_id,
+                                      )
+                                    : `/session/${item.study_session_id}`
                                 : '#'
                         }
                         className="group relative flex flex-col justify-between rounded-2xl border-2 border-[#AD5266]/30 bg-[#FDF8FA] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266] hover:shadow-md"
@@ -247,7 +271,7 @@ export default function PublicResource({
                                 e.stopPropagation();
                                 handleDelete(item);
                             }}
-                            className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 rounded-full p-1 text-gray-400 hover:bg-rose-50 hover:text-rose-600 transition-all z-10"
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
                             title="Delete"
                         >
                             ✕
@@ -256,7 +280,7 @@ export default function PublicResource({
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                                 <span className="flex items-center gap-1.5">
                                     <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266] text-[9px] text-white">
-                                        ✦
+                                        AI
                                     </span>
                                     REVISION PACK
                                 </span>
@@ -265,18 +289,21 @@ export default function PublicResource({
                                 </span>
                             </div>
                             <h3
-                                className="mt-3 text-sm font-bold text-[#30302D] group-hover:text-[#AD5266] transition-colors"
+                                className="mt-3 text-sm font-bold text-[#30302D] transition-colors group-hover:text-[#AD5266]"
                                 style={{ fontFamily: '"Manrope", sans-serif' }}
                             >
                                 {item.title}
                             </h3>
                             <p className="mt-1 text-xs text-[#73736C]">
-                                {item.description || 'Generated study session with summary & flashcards.'}
+                                {item.description ||
+                                    'Generated study session with summary & flashcards.'}
                             </p>
                         </div>
                         <div className="mt-5 flex items-center justify-between border-t border-[#AD5266]/15 pt-3 text-[11px] font-bold text-[#AD5266]">
                             <span>Open revision pack</span>
-                            <span className="transition-transform group-hover:translate-x-1">→</span>
+                            <span className="transition-transform group-hover:translate-x-1">
+                                →
+                            </span>
                         </div>
                     </Link>
                 );
@@ -291,7 +318,7 @@ export default function PublicResource({
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 rounded-full p-1 text-gray-400 hover:bg-rose-50 hover:text-rose-600 transition-all z-10"
+                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
                             title="Delete"
                         >
                             ✕
@@ -299,7 +326,7 @@ export default function PublicResource({
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8A7146]">
                                 <span className="flex items-center gap-1.5">
-                                    <span>📌</span>
+                                    <span>Note</span>
                                     NOTE
                                 </span>
                             </div>
@@ -324,105 +351,68 @@ export default function PublicResource({
 
     return (
         <AuthenticatedLayout>
-            <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-                {/* HEADER BAR (MATCHES FIGMA FRAME 14:1360 & 14:1628) */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#D8DDD5] pb-6">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <span className="rounded-full bg-[#AD5266]/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#762F50]">
+            <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden bg-[#F0F0E9]">
+                <header className="flex w-full items-center justify-between border-b border-gray-100 bg-white px-8 py-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F1E5EA] text-[#762F50]">
+                            <FolderOpen size={19} strokeWidth={1.8} />
+                        </span>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#AD5266]">
                                 Collaborative space
-                            </span>
-                            {resource?.course_code && (
-                                <span className="text-xs font-semibold text-[#73736C]">
-                                    {resource.course_code}
-                                </span>
-                            )}
+                            </p>
+                            <h1 className="truncate text-xl font-medium tracking-[-0.03em] text-[#30302D]">
+                                {spaceName}
+                            </h1>
+                            <p className="text-xs text-[#73736C]">
+                                {items.length}{' '}
+                                {items.length === 1 ? 'resource' : 'resources'}
+                            </p>
                         </div>
-                        <h1
-                            className="mt-2 text-2xl font-bold tracking-tight text-[#30302D] sm:text-3xl"
-                            style={{ fontFamily: '"Manrope", sans-serif' }}
-                        >
-                            {spaceName}
-                        </h1>
-                        <p className="mt-1 text-xs text-[#73736C]">
-                            Collaborative · {items.length} {items.length === 1 ? 'resource' : 'resources'}
-                        </p>
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex shrink-0 items-center gap-4">
                         {canInvite && (
-                            <Link
-                                href={
-                                    typeof route === 'function'
-                                        ? route('resources.collaborators.index', resource.id)
-                                        : `/resources/${resource.id}/collaborators`
-                                }
-                                className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-4 py-2.5 text-xs font-semibold text-[#30302D] hover:bg-[#F7F7F2] transition-colors"
+                            <button
+                                type="button"
+                                onClick={() => setIsInviteModalOpen(true)}
+                                className="rounded-lg border border-[#D8DDD5] bg-white px-4 py-3 text-xs font-bold text-[#30302D] hover:bg-[#F7F7F2]"
                             >
-                                👥 Manage collaborators
-                            </Link>
+                                Invite classmates
+                            </button>
                         )}
                         <button
                             type="button"
                             onClick={() => openAddModal('choose')}
-                            className="rounded-full bg-[#AD5266] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#762F50] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#5E243F]"
                         >
-                            + Add resource
+                            <Plus size={15} /> Add resource
                         </button>
                     </div>
-                </div>
-
-                {/* CANVAS TOOLBAR (MATCHES FIGMA FRAME 14:1628: '80% · Drag canvas to pan · Pinch to zoom') */}
-                <div className="mt-4 flex items-center justify-between px-2 text-xs text-[#73736C]">
-                    <span className="text-[11px]">
-                        Canvas View · {items.length} cards placed
-                    </span>
-                    <span className="text-[11px] font-medium text-gray-400 hidden sm:inline">
-                        Organized collective workspace
-                    </span>
-                </div>
-
-                {/* CONTENT CARDS CANVAS */}
-                <div className="mt-4">
-                    {items.length === 0 ? (
-                        <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-8 text-center sm:p-12">
-                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0F0E9] text-xl text-[#AD5266]">
-                                ✦
-                            </div>
-                            <h3
-                                className="mt-4 text-lg font-bold text-[#30302D]"
-                                style={{ fontFamily: '"Manrope", sans-serif' }}
-                            >
-                                No resources in this collaborative space yet
-                            </h3>
-                            <p className="mx-auto mt-1 max-w-sm text-xs text-[#73736C]">
-                                Add videos, web links, sticky notes, past questions, or generate an AI revision pack for your group.
-                            </p>
-                            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => openAddModal('choose')}
-                                    className="rounded-full bg-[#AD5266] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] transition-colors"
-                                >
-                                    + Add resource
-                                </button>
-                                {canInvite && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsInviteModalOpen(true)}
-                                        className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-5 py-2.5 text-xs font-semibold text-[#30302D] hover:bg-[#F7F7F2] transition-colors"
-                                    >
-                                        Invite classmates
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {items.map((item) => renderCard(item))}
-                        </div>
-                    )}
-                </div>
+                </header>
+                <main className="relative flex-1 overflow-y-auto bg-[#F9F8F6] p-8 [background-image:radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+                    <div className="h-full">
+                        <ResourceCanvas
+                            items={items}
+                            renderCard={renderCard}
+                            emptyState={
+                                <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+                                    <FolderOpen
+                                        className="text-[#AD5266]"
+                                        size={32}
+                                        strokeWidth={1.6}
+                                    />
+                                    <h2 className="mt-4 text-lg font-bold text-[#30302D]">
+                                        No resources added yet
+                                    </h2>
+                                    <p className="mt-2 text-sm text-[#73736C]">
+                                        Click &quot;Add resource&quot; to get
+                                        started.
+                                    </p>
+                                </div>
+                            }
+                        />
+                    </div>
+                </main>
             </div>
 
             {/* RESOURCE ADD MODAL */}

@@ -146,7 +146,7 @@ export default function SessionShow({ session }) {
                                 onClick={handlePrint}
                                 className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3.5 py-1.5 text-xs font-semibold text-[#30302D] hover:bg-[#F7F7F2] transition-colors shadow-sm"
                             >
-                                🖨️ Print / PDF
+                                Print / PDF
                             </button>
                         </div>
                     )}
@@ -246,7 +246,7 @@ export default function SessionShow({ session }) {
                             <div className="relative mx-auto flex h-16 w-16 items-center justify-center">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#AD5266] opacity-20" />
                                 <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#AD5266] text-xl font-bold text-white shadow-md">
-                                    ✦
+                                    AI
                                 </span>
                             </div>
 
@@ -292,7 +292,7 @@ export default function SessionShow({ session }) {
                                         {isFlipped ? 'Answer / Explanation' : 'Question / Concept'}
                                     </span>
                                     <span className="text-xs text-[#73736C]">
-                                        {isFlipped ? '🔄 Flip back' : '💡 Click to reveal'}
+                                        {isFlipped ? 'Flip back' : 'Click to reveal'}
                                     </span>
                                 </div>
 

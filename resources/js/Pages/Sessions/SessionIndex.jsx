@@ -38,7 +38,7 @@ export default function SessionIndex({ sessions = [] }) {
                     {sessions.length === 0 ? (
                         <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-8 text-center sm:p-12">
                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0F0E9] text-xl text-[#AD5266]">
-                                ✦
+                                AI
                             </div>
                             <h3
                                 className="mt-4 text-lg font-bold text-[#30302D]"
@@ -74,7 +74,7 @@ export default function SessionIndex({ sessions = [] }) {
                                         <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                                             <span className="flex items-center gap-1.5">
                                                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266] text-[9px] text-white">
-                                                    ✦
+                                                    AI
                                                 </span>
                                                 {session.course_code || 'REVISION PACK'}
                                             </span>
