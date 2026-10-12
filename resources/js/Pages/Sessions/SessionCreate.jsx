@@ -16,7 +16,11 @@ export default function SessionCreate({ resourceId = null }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(typeof route === 'function' ? route('sessions.store') : '/sessions/create');
+        post(
+            typeof route === 'function'
+                ? route('sessions.store')
+                : '/sessions/create',
+        );
     };
 
     return (
@@ -36,12 +40,13 @@ export default function SessionCreate({ resourceId = null }) {
                         Create a Revision Pack
                     </h1>
                     <p className="mt-1 text-xs text-[#73736C]">
-                        Generate structured study notes, flashcards, key concepts, and practice questions.
+                        Generate structured study notes, flashcards, key
+                        concepts, and practice questions.
                     </p>
                 </div>
 
                 {/* MODE SELECTION TABS */}
-                <div className="mt-8 flex rounded-full bg-[#FFFFFF] p-1.5 border border-[#D8DDD5] shadow-sm">
+                <div className="mt-8 flex rounded-full border border-[#D8DDD5] bg-[#FFFFFF] p-1.5 shadow-sm">
                     <button
                         type="button"
                         onClick={() => {
@@ -81,18 +86,23 @@ export default function SessionCreate({ resourceId = null }) {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div className="sm:col-span-2">
                             <label className="block text-xs font-semibold uppercase text-[#30302D]">
-                                Course Title <span className="text-[#AD5266]">*</span>
+                                Course Title{' '}
+                                <span className="text-[#AD5266]">*</span>
                             </label>
                             <input
                                 type="text"
                                 placeholder="e.g. Data Structures and Algorithms"
                                 value={data.course_title}
-                                onChange={(e) => setData('course_title', e.target.value)}
+                                onChange={(e) =>
+                                    setData('course_title', e.target.value)
+                                }
                                 className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                 required
                             />
                             {errors.course_title && (
-                                <p className="mt-1 text-xs text-rose-600">{errors.course_title}</p>
+                                <p className="mt-1 text-xs text-rose-600">
+                                    {errors.course_title}
+                                </p>
                             )}
                         </div>
 
@@ -104,11 +114,15 @@ export default function SessionCreate({ resourceId = null }) {
                                 type="text"
                                 placeholder="e.g. CS201"
                                 value={data.course_code}
-                                onChange={(e) => setData('course_code', e.target.value)}
+                                onChange={(e) =>
+                                    setData('course_code', e.target.value)
+                                }
                                 className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                             />
                             {errors.course_code && (
-                                <p className="mt-1 text-xs text-rose-600">{errors.course_code}</p>
+                                <p className="mt-1 text-xs text-rose-600">
+                                    {errors.course_code}
+                                </p>
                             )}
                         </div>
                     </div>
@@ -118,36 +132,51 @@ export default function SessionCreate({ resourceId = null }) {
                         {mode === 'topics' ? (
                             <div>
                                 <label className="block text-xs font-semibold uppercase text-[#30302D]">
-                                    Focus Area & Topics Outline <span className="text-[#AD5266]">*</span>
+                                    Focus Area & Topics Outline{' '}
+                                    <span className="text-[#AD5266]">*</span>
                                 </label>
                                 <textarea
                                     rows={6}
                                     placeholder="List the specific topics, chapters, exam areas, or questions you want this revision pack to emphasize..."
                                     value={data.focus_prompt}
-                                    onChange={(e) => setData('focus_prompt', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('focus_prompt', e.target.value)
+                                    }
                                     className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                     required
                                 />
                                 {errors.focus_prompt && (
-                                    <p className="mt-1 text-xs text-rose-600">{errors.focus_prompt}</p>
+                                    <p className="mt-1 text-xs text-rose-600">
+                                        {errors.focus_prompt}
+                                    </p>
                                 )}
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-xs font-semibold uppercase text-[#30302D]">
-                                        Focus Area or Target Chapters <span className="text-[#AD5266]">*</span>
+                                        Focus Area or Target Chapters{' '}
+                                        <span className="text-[#AD5266]">
+                                            *
+                                        </span>
                                     </label>
                                     <input
                                         type="text"
                                         placeholder="e.g. Focus on Chapter 4: Memory Hierarchy"
                                         value={data.focus_prompt}
-                                        onChange={(e) => setData('focus_prompt', e.target.value)}
+                                        onChange={(e) =>
+                                            setData(
+                                                'focus_prompt',
+                                                e.target.value,
+                                            )
+                                        }
                                         className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                         required
                                     />
                                     {errors.focus_prompt && (
-                                        <p className="mt-1 text-xs text-rose-600">{errors.focus_prompt}</p>
+                                        <p className="mt-1 text-xs text-rose-600">
+                                            {errors.focus_prompt}
+                                        </p>
                                     )}
                                 </div>
 
@@ -156,19 +185,27 @@ export default function SessionCreate({ resourceId = null }) {
                                         <span className="text-sm font-semibold text-[#30302D]">
                                             Upload course notes or slides
                                         </span>
-                                        <span className="block mt-1 text-[11px] text-[#73736C]">
-                                            PDF, DOCX, PPTX, or TXT · Maximum 5 MB
+                                        <span className="mt-1 block text-[11px] text-[#73736C]">
+                                            PDF, DOCX, PPTX, or TXT · Maximum 5
+                                            MB
                                         </span>
                                         <input
                                             type="file"
                                             required
                                             accept=".pdf,.docx,.txt,.pptx"
-                                            onChange={(e) => setData('file', e.target.files?.[0] || null)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'file',
+                                                    e.target.files?.[0] || null,
+                                                )
+                                            }
                                             className="mt-3 block w-full text-xs text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-[#FFFFFF] file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-[#30302D] hover:file:bg-[#F0F0E9]"
                                         />
                                     </label>
                                     {errors.file && (
-                                        <p className="mt-2 text-xs text-rose-600">{errors.file}</p>
+                                        <p className="mt-2 text-xs text-rose-600">
+                                            {errors.file}
+                                        </p>
                                     )}
                                 </div>
                             </div>
@@ -180,8 +217,12 @@ export default function SessionCreate({ resourceId = null }) {
                         <Link
                             href={
                                 resourceId
-                                    ? (typeof route === 'function' ? route('resources.show', resourceId) : `/resources/${resourceId}`)
-                                    : (typeof route === 'function' ? route('dashboard') : '/dashboard')
+                                    ? typeof route === 'function'
+                                        ? route('resources.show', resourceId)
+                                        : `/resources/${resourceId}`
+                                    : typeof route === 'function'
+                                      ? route('dashboard')
+                                      : '/dashboard'
                             }
                             className="rounded-full px-5 py-2.5 text-xs font-semibold text-[#73736C] hover:text-[#30302D]"
                         >
@@ -192,7 +233,9 @@ export default function SessionCreate({ resourceId = null }) {
                             disabled={processing}
                             className="rounded-full bg-[#AD5266] px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95 disabled:opacity-50"
                         >
-                            {processing ? 'Compiling revision pack...' : 'Generate Revision Pack'}
+                            {processing
+                                ? 'Compiling revision pack...'
+                                : 'Generate Revision Pack'}
                         </button>
                     </div>
                 </form>

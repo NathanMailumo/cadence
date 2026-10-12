@@ -9,7 +9,7 @@ export default function CadenceLogo({
 }) {
     return (
         <div
-            className={`inline-flex items-center gap-2.5 font-display select-none ${props.className || ''}`}
+            className={`inline-flex select-none items-center gap-2.5 font-display ${props.className || ''}`}
         >
             <CadenceMark className={className} />
             {showText && (

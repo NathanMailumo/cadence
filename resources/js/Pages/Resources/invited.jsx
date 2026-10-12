@@ -33,7 +33,7 @@ export default function Invited({
         <AuthenticatedLayout>
             <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
                 {/* HEADER (MATCHES FIGMA FRAME 14:1966) */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#D8DDD5] pb-6">
+                <div className="flex flex-col gap-4 border-b border-[#D8DDD5] pb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <div className="flex items-center gap-2">
                             <Link
@@ -42,7 +42,7 @@ export default function Invited({
                                         ? route('resources.show', resource.id)
                                         : `/resources/${resource.id}`
                                 }
-                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#73736C] hover:text-[#30302D] transition-colors"
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#73736C] transition-colors hover:text-[#30302D]"
                             >
                                 <span>← Back to space</span>
                             </Link>
@@ -58,7 +58,8 @@ export default function Invited({
                             Manage collaborators
                         </h1>
                         <p className="mt-1 text-xs text-[#73736C]">
-                            {spaceName} · Manage who can access this resource space.
+                            {spaceName} · Manage who can access this resource
+                            space.
                         </p>
                     </div>
 
@@ -86,7 +87,10 @@ export default function Invited({
                                 People with access
                             </h2>
                             <p className="text-xs text-[#73736C]">
-                                Collaborators · {collaborators.length} {collaborators.length === 1 ? 'person' : 'people'}
+                                Collaborators · {collaborators.length}{' '}
+                                {collaborators.length === 1
+                                    ? 'person'
+                                    : 'people'}
                             </p>
                         </div>
                     </div>
@@ -94,13 +98,15 @@ export default function Invited({
                     {collaborators.length === 0 ? (
                         <div className="py-12 text-center">
                             <p className="text-xs text-[#73736C]">
-                                No collaborators invited yet. Use the "Add users" button above to invite classmates.
+                                No collaborators invited yet. Use the "Add
+                                users" button above to invite classmates.
                             </p>
                         </div>
                     ) : (
                         <div className="divide-y divide-[#F0F0E9]">
                             {collaborators.map((user) => {
-                                const isPending = user.pivot?.status === 'pending';
+                                const isPending =
+                                    user.pivot?.status === 'pending';
                                 const initials = user.name
                                     ? user.name
                                           .split(' ')
@@ -113,9 +119,9 @@ export default function Invited({
                                 return (
                                     <div
                                         key={user.id}
-                                        className="flex items-center justify-between py-4 text-xs transition-colors hover:bg-[#FDFBF7] px-2 rounded-xl"
+                                        className="flex items-center justify-between rounded-xl px-2 py-4 text-xs transition-colors hover:bg-[#FDFBF7]"
                                     >
-                                        <div className="flex items-center gap-3.5 min-w-0">
+                                        <div className="flex min-w-0 items-center gap-3.5">
                                             {/* Avatar with initials */}
                                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F0F0E9] text-xs font-bold text-[#762F50]">
                                                 {initials}
@@ -123,9 +129,11 @@ export default function Invited({
                                             <div className="min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     <p className="truncate font-bold text-[#30302D]">
-                                                        {user.name || 'Anonymous User'}
+                                                        {user.name ||
+                                                            'Anonymous User'}
                                                     </p>
-                                                    {user.pivot?.role === 'owner' && (
+                                                    {user.pivot?.role ===
+                                                        'owner' && (
                                                         <span className="rounded-full bg-[#AD5266]/10 px-2 py-0.5 text-[10px] font-bold text-[#762F50]">
                                                             Owner
                                                         </span>
@@ -139,25 +147,34 @@ export default function Invited({
 
                                         <div className="flex items-center gap-3">
                                             {isPending ? (
-                                                <span className="rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[10px] font-bold text-amber-800">
+                                                <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-800">
                                                     Pending invite
                                                 </span>
                                             ) : (
                                                 <span className="rounded-full bg-[#F0F0E9] px-2.5 py-1 text-[10px] font-semibold text-[#73736C]">
-                                                    {user.pivot?.role === 'owner' ? 'Owner' : 'Editor'}
+                                                    {user.pivot?.role ===
+                                                    'owner'
+                                                        ? 'Owner'
+                                                        : 'Editor'}
                                                 </span>
                                             )}
 
-                                            {canInvite && user.pivot?.role !== 'owner' && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveUser(user.id)}
-                                                    className="rounded-full p-1.5 text-gray-400 hover:text-rose-600 transition-colors"
-                                                    title="Remove from workspace"
-                                                >
-                                                    Remove
-                                                </button>
-                                            )}
+                                            {canInvite &&
+                                                user.pivot?.role !==
+                                                    'owner' && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handleRemoveUser(
+                                                                user.id,
+                                                            )
+                                                        }
+                                                        className="rounded-full p-1.5 text-gray-400 transition-colors hover:text-rose-600"
+                                                        title="Remove from workspace"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                )}
                                         </div>
                                     </div>
                                 );

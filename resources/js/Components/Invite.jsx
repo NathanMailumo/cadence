@@ -137,11 +137,15 @@ export default function InviteModal({
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                             Collaborative space
                         </span>
-                        <h2 className="mt-1 text-xl font-bold text-[#30302D]" style={{ fontFamily: '"Manrope", sans-serif' }}>
+                        <h2
+                            className="mt-1 text-xl font-bold text-[#30302D]"
+                            style={{ fontFamily: '"Manrope", sans-serif' }}
+                        >
                             Invite people to {spaceName}
                         </h2>
                         <p className="mt-1 text-xs text-[#73736C]">
-                            Add collaborators by email. Enter multiple addresses one at a time or separate them with commas.
+                            Add collaborators by email. Enter multiple addresses
+                            one at a time or separate them with commas.
                         </p>
                     </div>
                     <button
@@ -177,7 +181,11 @@ export default function InviteModal({
                             ))}
                             <input
                                 type="email"
-                                placeholder={emailTags.length === 0 ? "name@example.com" : "Add another..."}
+                                placeholder={
+                                    emailTags.length === 0
+                                        ? 'name@example.com'
+                                        : 'Add another...'
+                                }
                                 value={emailInput}
                                 onChange={(e) => setEmailInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
@@ -186,10 +194,14 @@ export default function InviteModal({
                             />
                         </div>
                         {validationError && (
-                            <p className="mt-1 text-xs text-rose-600">{validationError}</p>
+                            <p className="mt-1 text-xs text-rose-600">
+                                {validationError}
+                            </p>
                         )}
                         {errors.email && (
-                            <p className="mt-1 text-xs text-rose-600">{errors.email}</p>
+                            <p className="mt-1 text-xs text-rose-600">
+                                {errors.email}
+                            </p>
                         )}
                     </div>
 
@@ -207,7 +219,7 @@ export default function InviteModal({
                             <button
                                 type="button"
                                 onClick={handleCopyLink}
-                                className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3.5 py-1 text-xs font-semibold text-[#30302D] hover:bg-[#F0F0E9] transition-colors"
+                                className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3.5 py-1 text-xs font-semibold text-[#30302D] transition-colors hover:bg-[#F0F0E9]"
                             >
                                 {copied ? '✓ Copied' : 'Copy link'}
                             </button>

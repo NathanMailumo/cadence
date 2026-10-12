@@ -63,7 +63,10 @@ export default function ForgotPassword() {
 
             <div className="mx-auto w-full max-w-md">
                 <div className="mb-8 flex flex-col items-center justify-center text-center">
-                    <CadenceLogo className="h-9 w-auto" textClassName="text-2xl font-bold" />
+                    <CadenceLogo
+                        className="h-9 w-auto"
+                        textClassName="text-2xl font-bold"
+                    />
                     <p className="mt-2 text-xs text-[#73736C]">
                         Reset your account password
                     </p>
@@ -79,7 +82,8 @@ export default function ForgotPassword() {
                     {!successfulCreation ? (
                         <form onSubmit={handleSendCode} className="space-y-4">
                             <p className="text-xs text-[#73736C]">
-                                Enter your email address to receive a password reset code.
+                                Enter your email address to receive a password
+                                reset code.
                             </p>
                             <div>
                                 <label className="mb-1 block text-xs font-semibold uppercase text-[#30302D]">
@@ -100,11 +104,16 @@ export default function ForgotPassword() {
                                 disabled={loading}
                                 className="w-full rounded-full bg-[#AD5266] p-3 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95 disabled:opacity-50"
                             >
-                                {loading ? 'Sending code...' : 'Send reset code'}
+                                {loading
+                                    ? 'Sending code...'
+                                    : 'Send reset code'}
                             </button>
                         </form>
                     ) : (
-                        <form onSubmit={handleResetPassword} className="space-y-4">
+                        <form
+                            onSubmit={handleResetPassword}
+                            className="space-y-4"
+                        >
                             <div>
                                 <label className="mb-1 block text-xs font-semibold uppercase text-[#30302D]">
                                     Reset Code
@@ -126,7 +135,9 @@ export default function ForgotPassword() {
                                 <input
                                     type="password"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
                                     required
                                     className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                                     placeholder="••••••••"
@@ -138,13 +149,18 @@ export default function ForgotPassword() {
                                 disabled={loading}
                                 className="w-full rounded-full bg-[#AD5266] p-3 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] disabled:opacity-50"
                             >
-                                {loading ? 'Resetting...' : 'Reset password & Log in'}
+                                {loading
+                                    ? 'Resetting...'
+                                    : 'Reset password & Log in'}
                             </button>
                         </form>
                     )}
 
                     <div className="mt-6 text-center text-xs text-[#73736C]">
-                        <Link href="/login" className="font-semibold text-[#AD5266] hover:underline">
+                        <Link
+                            href="/login"
+                            className="font-semibold text-[#AD5266] hover:underline"
+                        >
                             ← Back to Log in
                         </Link>
                     </div>

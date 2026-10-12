@@ -9,7 +9,7 @@ export default function SessionIndex({ sessions = [] }) {
 
             <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
                 {/* PAGE HEADER */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#D8DDD5] pb-6">
+                <div className="flex flex-col gap-4 border-b border-[#D8DDD5] pb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                             Study Hub
@@ -21,12 +21,17 @@ export default function SessionIndex({ sessions = [] }) {
                             Revision Packs
                         </h1>
                         <p className="mt-1 text-xs text-[#73736C]">
-                            Your generated AI study packs and revision materials.
+                            Your generated AI study packs and revision
+                            materials.
                         </p>
                     </div>
 
                     <Link
-                        href={typeof route === 'function' ? route('sessions.create') : '/sessions/create'}
+                        href={
+                            typeof route === 'function'
+                                ? route('sessions.create')
+                                : '/sessions/create'
+                        }
                         className="rounded-full bg-[#AD5266] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95"
                     >
                         + New Revision Pack
@@ -47,12 +52,18 @@ export default function SessionIndex({ sessions = [] }) {
                                 No revision packs yet
                             </h3>
                             <p className="mx-auto mt-1 max-w-sm text-xs text-[#73736C]">
-                                Generate your first AI revision pack to turn course topics into summaries, flashcards, and practice questions.
+                                Generate your first AI revision pack to turn
+                                course topics into summaries, flashcards, and
+                                practice questions.
                             </p>
                             <div className="mt-6">
                                 <Link
-                                    href={typeof route === 'function' ? route('sessions.create') : '/sessions/create'}
-                                    className="rounded-full bg-[#AD5266] px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] transition-colors"
+                                    href={
+                                        typeof route === 'function'
+                                            ? route('sessions.create')
+                                            : '/sessions/create'
+                                    }
+                                    className="rounded-full bg-[#AD5266] px-5 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#974356]"
                                 >
                                     Create a Revision Pack
                                 </Link>
@@ -76,15 +87,19 @@ export default function SessionIndex({ sessions = [] }) {
                                                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266] text-[9px] text-white">
                                                     AI
                                                 </span>
-                                                {session.course_code || 'REVISION PACK'}
+                                                {session.course_code ||
+                                                    'REVISION PACK'}
                                             </span>
                                             <span className="rounded-full bg-[#AD5266]/10 px-2 py-0.5 text-[10px] font-bold text-[#762F50]">
                                                 AI
                                             </span>
                                         </div>
                                         <h3
-                                            className="mt-3 text-base font-bold text-[#30302D] group-hover:text-[#AD5266] transition-colors"
-                                            style={{ fontFamily: '"Manrope", sans-serif' }}
+                                            className="mt-3 text-base font-bold text-[#30302D] transition-colors group-hover:text-[#AD5266]"
+                                            style={{
+                                                fontFamily:
+                                                    '"Manrope", sans-serif',
+                                            }}
                                         >
                                             {session.course_title}
                                         </h3>
@@ -97,7 +112,9 @@ export default function SessionIndex({ sessions = [] }) {
 
                                     <div className="mt-6 flex items-center justify-between border-t border-[#AD5266]/15 pt-3 text-[11px] font-bold text-[#AD5266]">
                                         <span>Open revision pack</span>
-                                        <span className="transition-transform group-hover:translate-x-1">→</span>
+                                        <span className="transition-transform group-hover:translate-x-1">
+                                            →
+                                        </span>
                                     </div>
                                 </Link>
                             ))}

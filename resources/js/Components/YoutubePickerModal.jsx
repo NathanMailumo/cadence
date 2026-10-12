@@ -27,14 +27,17 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                 setError('No videos found. Try a direct URL!');
             }
         } catch (err) {
-            setError('Search provider unavailable. You can paste a direct YouTube link.');
+            setError(
+                'Search provider unavailable. You can paste a direct YouTube link.',
+            );
         } finally {
             setLoading(false);
         }
     };
 
     const getYouTubeId = (url) => {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const regExp =
+            /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
         return match && match[2].length === 11 ? match[2] : null;
     };
@@ -102,7 +105,10 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                             Add a resource
                         </span>
-                        <h2 className="mt-1 text-xl font-bold text-[#30302D]" style={{ fontFamily: '"Manrope", sans-serif' }}>
+                        <h2
+                            className="mt-1 text-xl font-bold text-[#30302D]"
+                            style={{ fontFamily: '"Manrope", sans-serif' }}
+                        >
                             Add a YouTube video
                         </h2>
                     </div>
@@ -167,10 +173,12 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                             </button>
                         </form>
 
-                        {error && <p className="text-xs text-rose-600">{error}</p>}
+                        {error && (
+                            <p className="text-xs text-rose-600">{error}</p>
+                        )}
 
                         {/* Search Results */}
-                        <div className="max-h-60 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                        <div className="custom-scrollbar max-h-60 space-y-2 overflow-y-auto pr-1">
                             {results.length > 0 ? (
                                 results.map((v) => (
                                     <div
@@ -195,14 +203,18 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                                 ))
                             ) : (
                                 <div className="py-8 text-center text-xs text-[#73736C]">
-                                    Search results will appear here. Results use Cadence's YouTube provider when connected.
+                                    Search results will appear here. Results use
+                                    Cadence's YouTube provider when connected.
                                 </div>
                             )}
                         </div>
                     </div>
                 ) : (
                     /* MODE 2: DIRECT URL (MATCHES FIGMA FRAME 14:3080) */
-                    <form onSubmit={handleDirectUrlSubmit} className="mt-4 space-y-4">
+                    <form
+                        onSubmit={handleDirectUrlSubmit}
+                        className="mt-4 space-y-4"
+                    >
                         <div>
                             <label className="block text-xs font-semibold uppercase text-[#30302D]">
                                 YouTube video URL
@@ -216,9 +228,14 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                                 className="mt-1.5 w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] placeholder:text-[#8E9088] focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
                             />
                             <p className="mt-1.5 text-[11px] text-[#73736C]">
-                                Supports standard YouTube, Shorts, embed, and youtu.be links.
+                                Supports standard YouTube, Shorts, embed, and
+                                youtu.be links.
                             </p>
-                            {error && <p className="mt-1 text-xs text-rose-600">{error}</p>}
+                            {error && (
+                                <p className="mt-1 text-xs text-rose-600">
+                                    {error}
+                                </p>
+                            )}
                         </div>
 
                         <div className="flex justify-end gap-3 pt-2">
