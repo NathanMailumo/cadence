@@ -434,7 +434,6 @@ export default function SessionShow({ session }) {
                                             rehypePlugins={[rehypeKatex]}
                                             components={{
                                                 h1: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => {
@@ -462,7 +461,6 @@ export default function SessionShow({ session }) {
                                                     );
                                                 },
                                                 h2: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => {
@@ -490,7 +488,6 @@ export default function SessionShow({ session }) {
                                                     );
                                                 },
                                                 h3: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => {
@@ -517,11 +514,7 @@ export default function SessionShow({ session }) {
                                                         </h3>
                                                     );
                                                 },
-                                                p: ({
-                                                    node,
-                                                    children,
-                                                    ...props
-                                                }) => (
+                                                p: ({ children, ...props }) => (
                                                     <p
                                                         className="mb-3 mt-3 text-sm leading-relaxed text-[#30302D]"
                                                         {...props}
@@ -530,7 +523,6 @@ export default function SessionShow({ session }) {
                                                     </p>
                                                 ),
                                                 ul: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => (
@@ -542,7 +534,6 @@ export default function SessionShow({ session }) {
                                                     </ul>
                                                 ),
                                                 ol: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => (
@@ -554,7 +545,6 @@ export default function SessionShow({ session }) {
                                                     </ol>
                                                 ),
                                                 li: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => (
@@ -566,7 +556,6 @@ export default function SessionShow({ session }) {
                                                     </li>
                                                 ),
                                                 blockquote: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => (
@@ -578,7 +567,6 @@ export default function SessionShow({ session }) {
                                                     </blockquote>
                                                 ),
                                                 code: ({
-                                                    node,
                                                     inline,
                                                     children,
                                                     ...props
@@ -602,7 +590,6 @@ export default function SessionShow({ session }) {
                                                     );
                                                 },
                                                 table: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => (
@@ -616,7 +603,6 @@ export default function SessionShow({ session }) {
                                                     </div>
                                                 ),
                                                 th: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => (
@@ -628,7 +614,6 @@ export default function SessionShow({ session }) {
                                                     </th>
                                                 ),
                                                 td: ({
-                                                    node,
                                                     children,
                                                     ...props
                                                 }) => (
