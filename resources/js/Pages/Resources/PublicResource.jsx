@@ -11,6 +11,7 @@ export default function PublicResource({
     resource,
     items = [],
     canInvite = false,
+    inviteLink = '',
 }) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [activeAddType, setActiveAddType] = useState('choose');
@@ -442,6 +443,7 @@ export default function PublicResource({
                 onClose={() => setIsInviteModalOpen(false)}
                 resourceId={resource.id}
                 spaceName={spaceName}
+                inviteLink={inviteLink}
             />
         </AuthenticatedLayout>
     );

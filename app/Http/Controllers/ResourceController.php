@@ -70,6 +70,7 @@ class ResourceController extends Controller
             'resource'  => $resource,
             'items'     => $resource->resourceItems,
             'canInvite' => $isOwner,
+            'inviteLink' => route('resources.invitations.link', $resource),
         ]);
     }
 
@@ -108,6 +109,7 @@ class ResourceController extends Controller
             'resource'  => $resource,
             'items'     => $resource->resourceItems,
             'canInvite' => $isOwner,
+            'inviteLink' => route('resources.invitations.link', $resource),
         ]);
     }
 }

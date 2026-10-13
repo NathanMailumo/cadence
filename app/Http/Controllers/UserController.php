@@ -16,6 +16,7 @@ class UserController extends Controller
             ->orWhereHas('collaborators', function ($q) use ($user) {
                 $q->where('users.clerk_id', $user->clerk_id)->where('status', 'accepted');
             })
+            ->withCount('resourceItems')
             ->get();
 
         $pendingInvitations = Resource::whereHas('collaborators', function ($q) use ($user) {

@@ -7,7 +7,7 @@ export default function InviteModal({
     onClose,
     resourceId,
     spaceName = 'space',
-    inviteLink = '',
+    inviteLink,
 }) {
     const [emailInput, setEmailInput] = useState('');
     const [emailTags, setEmailTags] = useState([]);
@@ -109,7 +109,11 @@ export default function InviteModal({
     };
 
     const handleCopyLink = async () => {
-        const linkToCopy = inviteLink || window.location.href;
+        const linkToCopy = inviteLink;
+        if (!linkToCopy) {
+            console.error('No invitation link was provided.');
+            return;
+        }
         try {
             await navigator.clipboard.writeText(linkToCopy);
             setCopied(true);

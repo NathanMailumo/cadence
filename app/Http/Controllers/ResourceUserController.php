@@ -53,6 +53,25 @@ class ResourceUserController extends Controller
 
         return redirect()->back()->with('success', 'User invited successfully.');
     }
+
+    /**
+     * Allow an authenticated user to join a collaborative space from its link.
+     */
+    public function acceptInviteLink(Resource $resource)
+    {
+        abort_unless($resource->resource_type === 'public', 404);
+
+        $user = Auth::user();
+
+        if ($resource->clerk_id !== $user->clerk_id) {
+            $resource->collaborators()->syncWithoutDetaching([
+                $user->clerk_id => ['status' => 'accepted'],
+            ]);
+        }
+
+        return redirect()->route('resources.public', $resource->id)
+            ->with('success', 'You have joined the workspace!');
+    }
     // accepting a pending invitation
     public function acceptInvite(Resource $resource)
     {

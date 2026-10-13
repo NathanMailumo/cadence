@@ -280,7 +280,11 @@ export default function AuthenticatedLayout({ children }) {
                         <LogOut size={16} strokeWidth={1.8} />
                         Log out
                     </button>
-                    <div className="flex items-center gap-3 px-3">
+                    <Link
+                        href="/profile"
+                        onClick={closeMobileMenu}
+                        className="flex items-center gap-3 px-3"
+                    >
                         <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#F1E5EA] text-sm font-bold text-[#762F50]">
                             {user?.profile_image_url ? (
                                 <img
@@ -295,14 +299,14 @@ export default function AuthenticatedLayout({ children }) {
                             )}
                         </div>
                         <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-[#30302D]">
+                            <p className="truncate text-sm font-semibold text-[#30302D] hover:text-[#762F50]">
                                 {user?.name || 'Cadence user'}
                             </p>
                             <p className="truncate text-[11px] text-[#A5A59D]">
                                 {user?.email || 'Study workspace'}
                             </p>
                         </div>
-                    </div>
+                    </Link>
                 </div>
             </aside>
 
@@ -403,6 +407,14 @@ export default function AuthenticatedLayout({ children }) {
                             </p>
                         </div>
                     </div>
+                    <Link
+                        href="/profile"
+                        onClick={() => setIsMobileAccountMenuOpen(false)}
+                        className="mt-2 flex w-full items-center rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-[#762F50] transition hover:bg-[#F1E5EA]"
+                        role="menuitem"
+                    >
+                        Account settings
+                    </Link>
                     <button
                         type="button"
                         onClick={handleLogout}

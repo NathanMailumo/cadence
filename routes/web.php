@@ -7,6 +7,7 @@ use App\Http\Controllers\ResourceUserController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\YouTubeController;
 use App\Http\Controllers\ClerkSyncController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Sessions Routes
     Route::post('/sessions/create', [SessionController::class, 'studycreate'])->name('sessions.store');
@@ -61,6 +64,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     // Collaborators & Members
     Route::get('/resources/{resource}/collaborators', [ResourceUserController::class, 'members'])->name('resources.collaborators.index');
     Route::post('/resources/{resource}/invite', [ResourceUserController::class, 'invite'])->name('resources.invite');
+    Route::get('/resources/{resource}/invite', [ResourceUserController::class, 'acceptInviteLink'])->name('resources.invitations.link');
     Route::delete('/resources/{resource}/collaborators/{user}', [ResourceUserController::class, 'removeCollaborator'])->name('resources.collaborators.destroy');
 
     // Invite Status Routes
