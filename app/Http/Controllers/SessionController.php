@@ -18,36 +18,10 @@ use App\Services\OpenRouterService;
 use App\Models\Session_Output;
 use App\Jobs\ProcessStudySession;
 use App\Models\Resource;
-use App\Models\ResourceItem;
 
 class SessionController extends Controller
 {
-    public function sessionIndex()
-    {
-        $sessions = Study_Session::where('clerk_id', Auth::user()->clerk_id)
-            ->with(['sessionFile', 'sessionOutput'])
-            ->latest()
-            ->get();
-
-        return Inertia::render('Sessions/SessionIndex', [
-            'sessions' => $sessions,
-        ]);
-    }
-
-    public function sessionCreate(Request $request)
-    {
-        $resourceId = $request->input('resource_id') ?: null;
-
-        if ($resourceId) {
-            $this->accessibleResource($resourceId);
-        }
-
-        return Inertia::render('Sessions/SessionCreate', [
-            'resourceId' => $resourceId,
-        ]);
-    }
-
-    private function accessibleResource(?int $resourceId): ?Resource
+    private function accessibleResource(?string $resourceId): ?Resource
     {
         if (!$resourceId) {
             return null;
@@ -157,23 +131,7 @@ class SessionController extends Controller
 
         $sessionData = Arr::except($incomingFields, ['file']);
 
-        $session = DB::transaction(function () use ($sessionData, $resource) {
-            $session = Study_Session::create($sessionData);
-
-            if ($resource) {
-                ResourceItem::create([
-                    'clerk_id' => Auth::user()->clerk_id,
-                    'resource_id' => $resource->id,
-                    'study_session_id' => $session->id,
-                    'type' => 'revision',
-                    'title' => $session->course_title . ' Revision Pack',
-                    'description' => 'Generated study session',
-                    'status' => 'active',
-                ]);
-            }
-
-            return $session;
-        });
+        $session = DB::transaction(fn () => Study_Session::create($sessionData));
 
         $extractedText = '';
 
@@ -210,6 +168,9 @@ class SessionController extends Controller
             'sessionOutput',
             'resource',
         ])->findOrFail($id);
+
+        abort_unless($session->clerk_id === Auth::user()->clerk_id, 403);
+        $this->accessibleResource($session->resource_id);
 
         return Inertia::render('Sessions/SessionShow', compact('session'));
     }

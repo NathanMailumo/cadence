@@ -16,7 +16,7 @@ export default function SessionShow({ session }) {
         outputContent === FAILED_OUTPUT,
     );
     const [copied, setCopied] = useState(false);
-    const [activeTab, setActiveTab] = useState('notes'); // 'notes' or 'flashcards'
+    const [activeTab, setActiveTab] = useState('notes');
     const [activeCardIndex, setActiveCardIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
@@ -68,13 +68,11 @@ export default function SessionShow({ session }) {
         return extracted;
     }, [outputContent]);
 
-    // Extract potential flashcards (Q&A pairs or bullet points with colon/dash)
     const flashcards = useMemo(() => {
         if (!outputContent) return [];
+
         const cards = [];
-        const lines = outputContent.split('\n');
-        for (const line of lines) {
-            // Match pattern like "- Concept: Definition" or "Q: ... A: ..."
+        for (const line of outputContent.split('\n')) {
             const colonMatch = line.match(/^[-*]\s+\*\*([^*]+)\*\*:\s*(.+)$/);
             if (colonMatch) {
                 cards.push({
@@ -83,16 +81,18 @@ export default function SessionShow({ session }) {
                 });
                 continue;
             }
+
             const qaMatch = line.match(
                 /^(?:Q|Question):\s*(.+?)(?:\s*(?:A|Answer):\s*(.+))?$/i,
             );
-            if (qaMatch && qaMatch[2]) {
+            if (qaMatch?.[2]) {
                 cards.push({
                     question: qaMatch[1].trim(),
                     answer: qaMatch[2].trim(),
                 });
             }
         }
+
         return cards.slice(0, 20);
     }, [outputContent]);
 
@@ -136,9 +136,9 @@ export default function SessionShow({ session }) {
                     <div className="flex items-center gap-2 text-xs text-[#73736C]">
                         <Link
                             href={spaceUrl}
-                            className="font-semibold text-[#30302D] transition-colors hover:text-[#AD5266]"
+                            className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3.5 py-1.5 font-semibold text-[#30302D] shadow-sm transition-colors hover:bg-[#F7F7F2] hover:text-[#AD5266]"
                         >
-                            ← Back to {spaceName}
+                            ← Back to {spaceName} space
                         </Link>
                         <span className="text-gray-300">/</span>
                         <span className="rounded-full bg-[#AD5266]/10 px-2 py-0.5 text-[10px] font-bold text-[#762F50]">
@@ -201,39 +201,35 @@ export default function SessionShow({ session }) {
                             <span className="rounded-xl bg-[#F0F0E9] px-3 py-1 text-xs font-semibold text-[#73736C]">
                                 {readingTime}
                             </span>
-                            <span className="rounded-xl bg-[#F0F0E9] px-3 py-1 text-xs font-semibold text-[#73736C]">
-                                {session.session_output?.model_used
-                                    ? `Model: ${session.session_output.model_used}`
-                                    : 'Cadence AI'}
-                            </span>
                         </div>
                     </div>
 
-                    {/* VIEW MODE TABS (IF FLASHCARDS ARE AVAILABLE) */}
                     {hasOutput && flashcards.length > 0 && (
-                        <div className="mt-6 flex w-fit rounded-full bg-[#F0F0E9] p-1 text-xs font-semibold">
-                            <button
-                                type="button"
-                                onClick={() => setActiveTab('notes')}
-                                className={`rounded-full px-4 py-1.5 transition-all ${
-                                    activeTab === 'notes'
-                                        ? 'bg-[#FFFFFF] text-[#30302D] shadow-sm'
-                                        : 'text-[#73736C] hover:text-[#30302D]'
-                                }`}
-                            >
-                                Study Guide
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setActiveTab('flashcards')}
-                                className={`rounded-full px-4 py-1.5 transition-all ${
-                                    activeTab === 'flashcards'
-                                        ? 'bg-[#FFFFFF] text-[#30302D] shadow-sm'
-                                        : 'text-[#73736C] hover:text-[#30302D]'
-                                }`}
-                            >
-                                Interactive Flashcards ({flashcards.length})
-                            </button>
+                        <div className="mt-6 flex w-full justify-end">
+                            <div className="flex w-fit rounded-full bg-[#F0F0E9] p-1 text-xs font-semibold">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('notes')}
+                                    className={`rounded-full px-4 py-1.5 transition-all ${
+                                        activeTab === 'notes'
+                                            ? 'bg-[#FFFFFF] text-[#30302D] shadow-sm'
+                                            : 'text-[#73736C] hover:text-[#30302D]'
+                                    }`}
+                                >
+                                    Study Guide
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('flashcards')}
+                                    className={`rounded-full px-4 py-1.5 transition-all ${
+                                        activeTab === 'flashcards'
+                                            ? 'bg-[#FFFFFF] text-[#30302D] shadow-sm'
+                                            : 'text-[#73736C] hover:text-[#30302D]'
+                                    }`}
+                                >
+                                    Interactive Flashcards ({flashcards.length})
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -300,9 +296,8 @@ export default function SessionShow({ session }) {
                             </div>
                         </div>
                     ) : activeTab === 'flashcards' && flashcards.length > 0 ? (
-                        /* 3. FLASHCARDS MODE */
-                        <div className="mx-auto max-w-2xl py-4">
-                            <div className="flex items-center justify-between pb-3 text-xs font-semibold text-[#73736C]">
+                        <div className="mx-auto w-full max-w-3xl py-4">
+                            <div className="flex items-center justify-between px-1 pb-3 text-xs font-semibold text-[#73736C]">
                                 <span>
                                     Card {activeCardIndex + 1} of{' '}
                                     {flashcards.length}
@@ -310,16 +305,16 @@ export default function SessionShow({ session }) {
                                 <span>Click card to reveal answer</span>
                             </div>
 
-                            {/* Flip Card */}
-                            <div
-                                onClick={() => setIsFlipped(!isFlipped)}
-                                className={`flex min-h-[260px] cursor-pointer flex-col justify-between rounded-3xl border-2 p-8 shadow-md transition-all duration-300 ${
+                            <button
+                                type="button"
+                                onClick={() => setIsFlipped((value) => !value)}
+                                className={`flex min-h-[280px] w-full cursor-pointer flex-col justify-between rounded-3xl border-2 p-8 text-left shadow-md transition-all duration-300 sm:p-10 ${
                                     isFlipped
                                         ? 'border-[#AD5266] bg-[#FBF5F7]'
                                         : 'border-[#D8DDD5] bg-[#FFFFFF] hover:border-[#AD5266]/50'
                                 }`}
                             >
-                                <div className="flex items-center justify-between">
+                                <div className="flex w-full items-center justify-between">
                                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                                         {isFlipped
                                             ? 'Answer / Explanation'
@@ -332,34 +327,45 @@ export default function SessionShow({ session }) {
                                     </span>
                                 </div>
 
-                                <div className="my-6">
-                                    <p
-                                        className="text-lg font-bold leading-relaxed text-[#30302D]"
-                                        style={{
-                                            fontFamily: '"Manrope", sans-serif',
+                                <div className="my-6 min-w-0 text-lg font-bold leading-relaxed text-[#30302D] [&_.katex-display]:my-4 [&_.katex-display]:overflow-x-auto [&_.katex-display]:py-1 [&_.katex]:text-[1em]">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkMath]}
+                                        rehypePlugins={[rehypeKatex]}
+                                        components={{
+                                            p: ({ children, ...props }) => (
+                                                <p
+                                                    className="mb-3 last:mb-0"
+                                                    style={{
+                                                        fontFamily:
+                                                            '"Manrope", sans-serif',
+                                                    }}
+                                                    {...props}
+                                                >
+                                                    {children}
+                                                </p>
+                                            ),
                                         }}
                                     >
                                         {isFlipped
                                             ? flashcards[activeCardIndex].answer
                                             : flashcards[activeCardIndex]
                                                   .question}
-                                    </p>
+                                    </ReactMarkdown>
                                 </div>
 
-                                <div className="text-[11px] text-[#73736C]">
+                                <span className="text-[11px] text-[#73736C]">
                                     Cadence Flashcard Trainer
-                                </div>
-                            </div>
+                                </span>
+                            </button>
 
-                            {/* Card controls */}
-                            <div className="mt-6 flex items-center justify-between">
+                            <div className="mt-6 flex items-center justify-between px-1">
                                 <button
                                     type="button"
                                     disabled={activeCardIndex === 0}
                                     onClick={() => {
                                         setIsFlipped(false);
-                                        setActiveCardIndex((i) =>
-                                            Math.max(0, i - 1),
+                                        setActiveCardIndex((index) =>
+                                            Math.max(0, index - 1),
                                         );
                                     }}
                                     className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-5 py-2 text-xs font-semibold text-[#30302D] hover:bg-[#F7F7F2] disabled:opacity-40"
@@ -368,7 +374,9 @@ export default function SessionShow({ session }) {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setIsFlipped(!isFlipped)}
+                                    onClick={() =>
+                                        setIsFlipped((value) => !value)
+                                    }
                                     className="rounded-full bg-[#F0F0E9] px-4 py-2 text-xs font-semibold text-[#762F50] hover:bg-[#EAEAE4]"
                                 >
                                     Flip Card
@@ -381,10 +389,10 @@ export default function SessionShow({ session }) {
                                     }
                                     onClick={() => {
                                         setIsFlipped(false);
-                                        setActiveCardIndex((i) =>
+                                        setActiveCardIndex((index) =>
                                             Math.min(
                                                 flashcards.length - 1,
-                                                i + 1,
+                                                index + 1,
                                             ),
                                         );
                                     }}
@@ -395,7 +403,7 @@ export default function SessionShow({ session }) {
                             </div>
                         </div>
                     ) : (
-                        /* 4. STUDY GUIDE READING MODE */
+                        /* 3. STUDY GUIDE READING MODE */
                         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
                             {/* Sticky Table of Contents Sidebar */}
                             {headings.length > 2 && (

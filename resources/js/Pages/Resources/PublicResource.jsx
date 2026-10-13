@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, router } from '@inertiajs/react';
-import { FolderOpen, Plus } from 'lucide-react';
+import { FolderOpen, Plus, Trash2 } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ResourceCanvas from '@/Components/ResourceCanvas';
 import ResourceItemModal from '@/Components/ResourceItemModal';
@@ -64,15 +64,16 @@ export default function PublicResource({
                 return (
                     <div
                         key={item.id}
-                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 pr-16 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
-                            title="Delete"
+                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                            title="Delete resource"
+                            aria-label={`Delete ${item.title}`}
                         >
-                            ✕
+                            <Trash2 size={15} strokeWidth={1.8} />
                         </button>
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
@@ -130,15 +131,16 @@ export default function PublicResource({
                 return (
                     <div
                         key={item.id}
-                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 pr-16 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
-                            title="Delete"
+                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                            title="Delete resource"
+                            aria-label={`Delete ${item.title}`}
                         >
-                            ✕
+                            <Trash2 size={15} strokeWidth={1.8} />
                         </button>
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
@@ -185,15 +187,16 @@ export default function PublicResource({
                 return (
                     <div
                         key={item.id}
-                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 pr-16 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
-                            title="Delete"
+                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                            title="Delete resource"
+                            aria-label={`Delete ${item.title}`}
                         >
-                            ✕
+                            <Trash2 size={15} strokeWidth={1.8} />
                         </button>
                         <div>
                             <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
@@ -271,10 +274,11 @@ export default function PublicResource({
                                 e.stopPropagation();
                                 handleDelete(item);
                             }}
-                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
-                            title="Delete"
+                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                            title="Delete resource"
+                            aria-label={`Delete ${item.title}`}
                         >
-                            ✕
+                            <Trash2 size={15} strokeWidth={1.8} />
                         </button>
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
@@ -318,10 +322,11 @@ export default function PublicResource({
                         <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 z-10 rounded-full p-1 text-gray-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
-                            title="Delete"
+                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                            title="Delete resource"
+                            aria-label={`Delete ${item.title}`}
                         >
-                            ✕
+                            <Trash2 size={15} strokeWidth={1.8} />
                         </button>
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8A7146]">
@@ -351,8 +356,8 @@ export default function PublicResource({
 
     return (
         <AuthenticatedLayout>
-            <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden bg-[#F0F0E9]">
-                <header className="flex w-full items-center justify-between border-b border-gray-100 bg-white px-8 py-4">
+            <div className="flex min-h-full min-w-0 flex-1 flex-col bg-[#F0F0E9]">
+                <header className="flex w-full flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-3 sm:px-8 sm:py-4">
                     <div className="flex min-w-0 items-center gap-3">
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F1E5EA] text-[#762F50]">
                             <FolderOpen size={19} strokeWidth={1.8} />
@@ -361,7 +366,7 @@ export default function PublicResource({
                             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#AD5266]">
                                 Collaborative space
                             </p>
-                            <h1 className="truncate text-xl font-medium tracking-[-0.03em] text-[#30302D]">
+                            <h1 className="truncate text-base font-medium tracking-[-0.03em] text-[#30302D] sm:text-xl">
                                 {spaceName}
                             </h1>
                             <p className="text-xs text-[#73736C]">
@@ -370,12 +375,12 @@ export default function PublicResource({
                             </p>
                         </div>
                     </div>
-                    <div className="flex shrink-0 items-center gap-4">
+                    <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto sm:gap-4">
                         {canInvite && (
                             <button
                                 type="button"
                                 onClick={() => setIsInviteModalOpen(true)}
-                                className="rounded-lg border border-[#D8DDD5] bg-white px-4 py-3 text-xs font-bold text-[#30302D] hover:bg-[#F7F7F2]"
+                                className="min-w-0 flex-1 rounded-lg border border-[#D8DDD5] bg-white px-3 py-2.5 text-[11px] font-bold text-[#30302D] hover:bg-[#F7F7F2] sm:flex-none sm:px-4 sm:py-3 sm:text-xs"
                             >
                                 Invite classmates
                             </button>
@@ -383,13 +388,13 @@ export default function PublicResource({
                         <button
                             type="button"
                             onClick={() => openAddModal('choose')}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#762F50] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#5E243F]"
+                            className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#762F50] px-3 py-2.5 text-[11px] font-bold text-white transition hover:bg-[#5E243F] sm:flex-none sm:gap-2 sm:px-4 sm:py-3 sm:text-xs"
                         >
                             <Plus size={15} /> Add resource
                         </button>
                     </div>
                 </header>
-                <main className="relative flex-1 overflow-y-auto bg-[#F9F8F6] p-8 [background-image:radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+                <main className="relative min-h-0 flex-1 overflow-y-auto bg-[#F9F8F6] p-3 pb-20 [background-image:radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] sm:p-8 sm:pb-8">
                     <div className="h-full">
                         <ResourceCanvas
                             items={items}

@@ -41,8 +41,6 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
 
     // Sessions Routes
-    Route::get('/sessions', [SessionController::class, 'sessionIndex'])->name('sessions.index');
-    Route::get('/sessions/create', [SessionController::class, 'sessionCreate'])->name('sessions.create');
     Route::post('/sessions/create', [SessionController::class, 'studycreate'])->name('sessions.store');
     Route::get('/session/{id}', [SessionController::class, 'session_show'])->name('sessions.show');
 

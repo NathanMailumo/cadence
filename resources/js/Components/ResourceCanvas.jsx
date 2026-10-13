@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Minus, Move, Plus } from 'lucide-react';
 
 const MIN_ZOOM = 0.5;
@@ -14,9 +14,18 @@ function distance(first, second) {
 export default function ResourceCanvas({ items, renderCard, emptyState }) {
     const [zoom, setZoom] = useState(1);
     const [pan, setPan] = useState({ x: 0, y: 0 });
+    const [isMobile, setIsMobile] = useState(false);
     const pointers = useRef(new Map());
     const drag = useRef(null);
     const pinch = useRef(null);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 767px)');
+        const updateMobile = () => setIsMobile(mediaQuery.matches);
+        updateMobile();
+        mediaQuery.addEventListener('change', updateMobile);
+        return () => mediaQuery.removeEventListener('change', updateMobile);
+    }, []);
 
     const updateZoom = (value) =>
         setZoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value)));
@@ -88,6 +97,14 @@ export default function ResourceCanvas({ items, renderCard, emptyState }) {
         >
             {items.length === 0 ? (
                 emptyState
+            ) : isMobile ? (
+                <div className="grid grid-cols-2 gap-3 overflow-y-auto p-1 pb-24 sm:grid-cols-3">
+                    {items.map((item) => (
+                        <div key={item.id} className="min-w-0">
+                            {renderCard(item)}
+                        </div>
+                    ))}
+                </div>
             ) : (
                 <div
                     className="absolute left-0 top-0 h-[1100px] w-[1600px] origin-top-left"
@@ -110,7 +127,7 @@ export default function ResourceCanvas({ items, renderCard, emptyState }) {
                 </div>
             )}
 
-            <div className="absolute bottom-5 right-5 z-20 flex items-center gap-2 rounded-xl border border-[#D8DDD5] bg-white/95 p-2 shadow-lg backdrop-blur">
+            <div className="absolute bottom-5 right-5 z-20 hidden items-center gap-2 rounded-xl border border-[#D8DDD5] bg-white/95 p-2 shadow-lg backdrop-blur md:flex">
                 <button
                     type="button"
                     onClick={() => updateZoom(zoom - 0.1)}
