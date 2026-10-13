@@ -8,6 +8,7 @@ import {
     LockKeyhole,
     LogOut,
     Plus,
+    Trash2,
     Users,
 } from 'lucide-react';
 import Resource from '@/Components/Resource';
@@ -64,6 +65,24 @@ export default function AuthenticatedLayout({ children }) {
                 : `/resources/private/${resource.id}`;
     };
 
+    const handleDeleteResource = (resource) => {
+        if (
+            !window.confirm(
+                `Remove "${resource.course_name}"? Its data will be preserved but the space will no longer be active.`,
+            )
+        ) {
+            return;
+        }
+
+        router.delete(`/resources/${resource.id}`, {
+            onSuccess: () => {
+                router.reload({
+                    only: ['privateResources', 'publicResources'],
+                });
+            },
+        });
+    };
+
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#F0F0E9] font-sans text-[#30302D] antialiased">
             <header className="fixed left-0 right-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-[#D8DDD5] bg-white px-4 md:hidden">
@@ -75,9 +94,7 @@ export default function AuthenticatedLayout({ children }) {
                         <button
                             type="button"
                             onClick={() =>
-                                setIsMobileSpaceMenuOpen(
-                                    !isMobileSpaceMenuOpen,
-                                )
+                                setIsMobileSpaceMenuOpen(!isMobileSpaceMenuOpen)
                             }
                             className="flex w-full items-center gap-2 rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] px-3 py-2 text-left shadow-sm transition hover:border-[#C6A4B3] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#C6A4B3]/40"
                             aria-haspopup="menu"
@@ -96,7 +113,8 @@ export default function AuthenticatedLayout({ children }) {
                                 />
                             )}
                             <span className="min-w-0 flex-1 truncate text-xs font-bold text-[#762F50]">
-                                {currentResource?.course_name || 'Select a space'}
+                                {currentResource?.course_name ||
+                                    'Select a space'}
                             </span>
                             <ChevronDown
                                 size={15}
@@ -117,7 +135,9 @@ export default function AuthenticatedLayout({ children }) {
                                             <button
                                                 key={resource.id}
                                                 type="button"
-                                                onClick={() => goToResource(resource)}
+                                                onClick={() =>
+                                                    goToResource(resource)
+                                                }
                                                 className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-[#30302D] transition hover:bg-[#F1E5EA] hover:text-[#762F50]"
                                             >
                                                 <LockKeyhole
@@ -147,7 +167,9 @@ export default function AuthenticatedLayout({ children }) {
                                             <button
                                                 key={resource.id}
                                                 type="button"
-                                                onClick={() => goToResource(resource)}
+                                                onClick={() =>
+                                                    goToResource(resource)
+                                                }
                                                 className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-[#30302D] transition hover:bg-[#F1E5EA] hover:text-[#762F50]"
                                             >
                                                 <Users
@@ -237,14 +259,30 @@ export default function AuthenticatedLayout({ children }) {
                         </button>
                         <div className="ml-8 space-y-1">
                             {privateResources.map((resource) => (
-                                <Link
+                                <div
                                     key={resource.id}
-                                    href={`/resources/private/${resource.id}`}
-                                    onClick={closeMobileMenu}
-                                    className="block truncate rounded-md px-2 py-1.5 text-xs text-[#8E9088] transition hover:bg-[#F7F7F2] hover:text-[#762F50]"
+                                    className="group flex items-center gap-1"
                                 >
-                                    {resource.course_name}
-                                </Link>
+                                    <Link
+                                        href={`/resources/private/${resource.id}`}
+                                        onClick={closeMobileMenu}
+                                        className="min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-xs text-[#8E9088] transition hover:bg-[#F7F7F2] hover:text-[#762F50]"
+                                    >
+                                        {resource.course_name}
+                                    </Link>
+                                    {resource.clerk_id === user?.clerk_id && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleDeleteResource(resource)
+                                            }
+                                            className="rounded-md p-1.5 text-[#A5A59D] opacity-100 transition hover:bg-[#FCE8ED] hover:text-[#AD5266] md:opacity-0 md:group-hover:opacity-100"
+                                            aria-label={`Remove ${resource.course_name}`}
+                                        >
+                                            <Trash2 size={13} />
+                                        </button>
+                                    )}
+                                </div>
                             ))}
                         </div>
                         <button
@@ -258,14 +296,30 @@ export default function AuthenticatedLayout({ children }) {
                         </button>
                         <div className="ml-8 space-y-1">
                             {publicResources.map((resource) => (
-                                <Link
+                                <div
                                     key={resource.id}
-                                    href={`/resources/public/${resource.id}`}
-                                    onClick={closeMobileMenu}
-                                    className="block truncate rounded-md px-2 py-1.5 text-xs text-[#8E9088] transition hover:bg-[#F7F7F2] hover:text-[#762F50]"
+                                    className="group flex items-center gap-1"
                                 >
-                                    {resource.course_name}
-                                </Link>
+                                    <Link
+                                        href={`/resources/public/${resource.id}`}
+                                        onClick={closeMobileMenu}
+                                        className="min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-xs text-[#8E9088] transition hover:bg-[#F7F7F2] hover:text-[#762F50]"
+                                    >
+                                        {resource.course_name}
+                                    </Link>
+                                    {resource.clerk_id === user?.clerk_id && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleDeleteResource(resource)
+                                            }
+                                            className="rounded-md p-1.5 text-[#A5A59D] opacity-100 transition hover:bg-[#FCE8ED] hover:text-[#AD5266] md:opacity-0 md:group-hover:opacity-100"
+                                            aria-label={`Remove ${resource.course_name}`}
+                                        >
+                                            <Trash2 size={13} />
+                                        </button>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     </nav>

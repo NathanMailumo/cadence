@@ -42,6 +42,7 @@ class User extends Authenticatable
     public function sharedResources(): BelongsToMany
     {
         return $this->belongsToMany(Resource::class, 'resource_users', 'clerk_id', 'resource_id', 'clerk_id', 'id')
+            ->wherePivot('lifecycle_status', 'active')
             ->withPivot('status')
             ->withTimestamps();
     }

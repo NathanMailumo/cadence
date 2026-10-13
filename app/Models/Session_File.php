@@ -21,6 +21,7 @@ class Session_File extends Model
         'file_type',
         'file_size',
         'extracted_text',
+        'status',
     ];
 
     /**

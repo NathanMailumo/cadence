@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ResourceController extends Controller
 {
     public function resourceIndex(Request $request)
     {
-        $latest = Resource::where('clerk_id', $request->user()->clerk_id)->latest()->first();
+        $latest = Resource::where('status', 'active')
+            ->where('clerk_id', $request->user()->clerk_id)
+            ->latest()
+            ->first();
 
         if ($latest) {
             return redirect()->route('resources.show', $latest->id);
@@ -29,7 +33,7 @@ class ResourceController extends Controller
 
         $validated['clerk_id'] = $request->user()->clerk_id;
 
-        $resource = Resource::create($validated);
+        $resource = Resource::create([...$validated, 'status' => 'active']);
 
         if ($resource->resource_type === 'private') {
             return redirect()->route('resources.private', $resource->id);
@@ -42,7 +46,27 @@ class ResourceController extends Controller
     {
         abort_unless($resource->clerk_id === $request->user()->clerk_id, 403);
 
-        $resource->delete();
+        DB::transaction(function () use ($resource) {
+            $sessions = $resource->studySessions()
+                ->with(['sessionOutput', 'sessionFile'])
+                ->get();
+
+            $resource->update(['status' => 'deleted']);
+            $resource->resourceItems()->update(['status' => 'deleted']);
+            $resource->studySessions()->update(['status' => 'deleted']);
+
+            DB::table('resource_users')
+                ->where('resource_id', $resource->id)
+                ->update([
+                    'lifecycle_status' => 'deleted',
+                    'updated_at' => now(),
+                ]);
+
+            $sessions->each(function ($session) {
+                $session->sessionOutput?->update(['status' => 'deleted']);
+                $session->sessionFile?->update(['status' => 'deleted']);
+            });
+        });
 
         return redirect()->route('dashboard');
     }
@@ -52,6 +76,8 @@ class ResourceController extends Controller
      */
     public function show(Resource $resource)
     {
+        abort_unless($resource->status === 'active', 404);
+
         // Check ownership or active collaboration access
         $isOwner = $resource->clerk_id === Auth::user()->clerk_id;
         $isCollaborator = $resource->collaborators()
@@ -76,6 +102,8 @@ class ResourceController extends Controller
 
     public function privateResource(Request $request, Resource $resource)
     {
+        abort_unless($resource->status === 'active', 404);
+
         if ($resource->clerk_id !== $request->user()->clerk_id) {
             abort(403, 'Unauthorized access to this private resource.');
         }
@@ -92,6 +120,8 @@ class ResourceController extends Controller
 
     public function publicResource(Request $request, Resource $resource)
     {
+        abort_unless($resource->status === 'active', 404);
+
         $isOwner = $resource->clerk_id === Auth::user()->clerk_id;
         $isCollaborator = $resource->collaborators()
             ->where('users.clerk_id', Auth::user()->clerk_id)

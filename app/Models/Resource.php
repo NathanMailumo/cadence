@@ -24,6 +24,11 @@ class Resource extends Model
         'clerk_id',
         // 'study_session_id',
         'resource_type',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'string',
     ];
 
     public function user(): BelongsTo
@@ -46,12 +51,13 @@ class Resource extends Model
     {
         // Explicitly set table name to 'resource_users'
         return $this->belongsToMany(User::class, 'resource_users', 'resource_id', 'clerk_id', 'id', 'clerk_id')
-            ->withPivot(['role', 'status'])
+            ->wherePivot('lifecycle_status', 'active')
+            ->withPivot(['role', 'status', 'lifecycle_status'])
             ->withTimestamps();
     }
 
     public function studySessions():HasMany
     {
-        return $this->hasMany(Study_Session::class);
+        return $this->hasMany(Study_Session::class)->where('status', 'active');
     }
 }

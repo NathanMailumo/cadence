@@ -12,17 +12,21 @@ class UserController extends Controller
     {
         $user = $request->user();
 
-        $resources = Resource::where('clerk_id', $user->clerk_id)
+        $resources = Resource::where('status', 'active')
+            ->where(function ($query) use ($user) {
+                $query->where('clerk_id', $user->clerk_id)
             ->orWhereHas('collaborators', function ($q) use ($user) {
                 $q->where('users.clerk_id', $user->clerk_id)->where('status', 'accepted');
+            });
             })
             ->withCount('resourceItems')
             ->get();
 
-        $pendingInvitations = Resource::whereHas('collaborators', function ($q) use ($user) {
+        $pendingInvitations = Resource::where('status', 'active')
+            ->whereHas('collaborators', function ($q) use ($user) {
             $q->where('users.clerk_id', $user->clerk_id)
                 ->where('status', 'pending');
-        })->with('user:id,name,email')->get();
+            })->with('user:id,name,email')->get();
 
         return Inertia::render('Dashboard', compact('resources', 'pendingInvitations'));
     }

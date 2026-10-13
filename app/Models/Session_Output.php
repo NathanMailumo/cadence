@@ -19,6 +19,7 @@ class Session_Output extends Model
         'content',
         'model_used',
         'prompt_tokens',
+        'status',
     ];
 
     /**

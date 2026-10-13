@@ -28,11 +28,13 @@ class Study_Session extends Model
         'focus_prompt',
         'resource_id',
         'raw_notes',
+        'status',
     ];
 
     public function sessionFile(): HasOne
     {
-        return $this->hasOne(Session_File::class, 'study_session_id');
+        return $this->hasOne(Session_File::class, 'study_session_id')
+            ->where('status', 'active');
     }
 
     // public function session_file(): HasOne
@@ -45,7 +47,8 @@ class Study_Session extends Model
      */
     public function sessionOutput(): HasOne
     {
-        return $this->hasOne(Session_Output::class, 'study_session_id');
+        return $this->hasOne(Session_Output::class, 'study_session_id')
+            ->where('status', 'active');
     }
 
     public function resource(): BelongsTo

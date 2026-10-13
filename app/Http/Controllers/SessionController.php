@@ -28,6 +28,7 @@ class SessionController extends Controller
         }
 
         $resource = Resource::findOrFail($resourceId);
+        abort_unless($resource->status === 'active', 404);
         $hasAccess = $resource->clerk_id === Auth::user()->clerk_id
             || $resource->collaborators()
                 ->where('users.clerk_id', Auth::user()->clerk_id)
@@ -169,6 +170,7 @@ class SessionController extends Controller
             'resource',
         ])->findOrFail($id);
 
+        abort_unless($session->status === 'active', 404);
         abort_unless($session->clerk_id === Auth::user()->clerk_id, 403);
         $this->accessibleResource($session->resource_id);
 

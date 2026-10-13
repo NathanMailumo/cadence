@@ -33,6 +33,7 @@ class ResourceItem extends Model
 
     protected $casts = [
         'metadata' => 'array',
+        'status' => 'string',
     ];
 
     public function user(): BelongsTo
