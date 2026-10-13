@@ -2,6 +2,100 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes cadence-loader-assemble {
+    0% {
+        opacity: 0;
+        transform: translate(var(--loader-x), var(--loader-y)) scale(0.62);
+    }
+    70% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1.04);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+}
+
+.cadence-loader {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cadence-loader--fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    min-height: 100dvh;
+    min-width: 100vw;
+}
+
+.cadence-loader--overlay {
+    background: rgb(240 240 233 / 0.82);
+    backdrop-filter: blur(3px);
+}
+
+.cadence-loader__mark {
+    overflow: visible;
+}
+
+.cadence-loader__shape {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cadence-loader-assemble 850ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cadence-loader__shape--one {
+    --loader-x: -16px;
+    --loader-y: -12px;
+    animation-delay: 0ms;
+}
+
+.cadence-loader__shape--two {
+    --loader-x: -10px;
+    --loader-y: 10px;
+    animation-delay: 75ms;
+}
+
+.cadence-loader__shape--three {
+    --loader-x: 14px;
+    --loader-y: -14px;
+    animation-delay: 145ms;
+}
+
+.cadence-loader__shape--four {
+    --loader-x: 15px;
+    --loader-y: 8px;
+    animation-delay: 215ms;
+}
+
+.cadence-loader__shape--five {
+    --loader-x: -14px;
+    --loader-y: 16px;
+    animation-delay: 285ms;
+}
+
+.cadence-loader__shape--six {
+    --loader-x: -4px;
+    --loader-y: 18px;
+    animation-delay: 355ms;
+}
+
+.cadence-loader__shape--seven {
+    --loader-x: 20px;
+    --loader-y: 4px;
+    animation-delay: 425ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cadence-loader__shape {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}
+
 @layer utilities {
     /* Custom thin scrollbar for dark theme sidebar and panels */
     .custom-scrollbar::-webkit-scrollbar {
@@ -24,8 +118,8 @@
     }
 }
 
-html, body {
+html,
+body {
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
 }
-

@@ -3,6 +3,7 @@ import { useSignIn, useClerk, useUser } from '@clerk/clerk-react';
 import { Head, Link, router } from '@inertiajs/react';
 import Navbar from '@/Components/Navbar';
 import CadenceLogo from '@/Components/CadenceLogo';
+import CadenceLoader from '@/Components/CadenceLoader';
 
 export default function Login() {
     const { isLoaded: isSignInLoaded, signIn, setActive } = useSignIn();
@@ -21,6 +22,7 @@ export default function Login() {
         if (syncInProgress.current) return;
 
         syncInProgress.current = true;
+        setLoading(true);
         router.post(
             '/clerk-sync',
             {
@@ -32,6 +34,7 @@ export default function Login() {
             {
                 onError: (errors) => {
                     syncInProgress.current = false;
+                    setLoading(false);
                     setError(
                         errors.email ||
                             errors.clerk_id ||
@@ -53,14 +56,23 @@ export default function Login() {
         }
     }, [isUserLoaded, isSignedIn, user]);
 
-    const handleGoogleLogin = () => {
+    const handleGoogleLogin = async () => {
         if (!isSignInLoaded) return;
 
-        signIn.authenticateWithRedirect({
-            strategy: 'oauth_google',
-            redirectUrl: `${window.location.origin}/sso-callback`,
-            redirectUrlComplete: `${window.location.origin}/sso-callback?complete=1`,
-        });
+        setLoading(true);
+        try {
+            await signIn.authenticateWithRedirect({
+                strategy: 'oauth_google',
+                redirectUrl: `${window.location.origin}/sso-callback`,
+                redirectUrlComplete: `${window.location.origin}/sso-callback?complete=1`,
+            });
+        } catch (err) {
+            setLoading(false);
+            setError(
+                err.errors?.[0]?.message ||
+                    'Unable to continue with Google. Please try again.',
+            );
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -166,6 +178,14 @@ export default function Login() {
 
     return (
         <div className="flex min-h-screen flex-col bg-[#F0F0E9] font-sans text-[#30302D]">
+            {loading && (
+                <CadenceLoader
+                    fullScreen
+                    overlay
+                    size="lg"
+                    label="Signing you in"
+                />
+            )}
             <Head title="Cadence - Log In" />
             <Navbar />
 

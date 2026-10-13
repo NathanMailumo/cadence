@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import CadenceLoader from '@/Components/CadenceLoader';
 import 'katex/dist/katex.css';
 
 export default function SessionShow({ session }) {
@@ -263,12 +264,10 @@ export default function SessionShow({ session }) {
                     ) : !hasOutput ? (
                         /* 2. LOADING STATE WITH CADENCE PULSE */
                         <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-12 text-center shadow-sm">
-                            <div className="relative mx-auto flex h-16 w-16 items-center justify-center">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#AD5266] opacity-20" />
-                                <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#AD5266] text-xl font-bold text-white shadow-md">
-                                    AI
-                                </span>
-                            </div>
+                            <CadenceLoader
+                                size="lg"
+                                label="Generating your revision pack"
+                            />
 
                             <h2
                                 className="mt-6 text-xl font-bold text-[#30302D]"

@@ -3,6 +3,7 @@ import { useSignUp, useClerk } from '@clerk/clerk-react';
 import { Head, Link, router } from '@inertiajs/react';
 import Navbar from '@/Components/Navbar';
 import CadenceLogo from '@/Components/CadenceLogo';
+import CadenceLoader from '@/Components/CadenceLoader';
 
 export default function Register() {
     const { isLoaded: isSignUpLoaded, signUp, setActive } = useSignUp();
@@ -18,6 +19,7 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
 
     const syncAndRedirect = (clerkUserId, userEmail) => {
+        setLoading(true);
         router.post(
             '/clerk-sync',
             {
@@ -28,6 +30,7 @@ export default function Register() {
             },
             {
                 onError: (errors) => {
+                    setLoading(false);
                     setError(
                         errors.email ||
                             errors.clerk_id ||
@@ -137,6 +140,14 @@ export default function Register() {
 
     return (
         <div className="flex min-h-screen flex-col bg-[#F0F0E9] font-sans text-[#30302D]">
+            {loading && (
+                <CadenceLoader
+                    fullScreen
+                    overlay
+                    size="lg"
+                    label="Creating your Cadence account"
+                />
+            )}
             <Head title="Cadence - Get Started" />
             <Navbar />
 
