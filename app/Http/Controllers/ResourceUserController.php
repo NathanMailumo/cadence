@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ResourceUserController extends Controller
 {
@@ -48,50 +50,47 @@ class ResourceUserController extends Controller
         }
 
         $resource->collaborators()->syncWithoutDetaching([
-            $userToInvite->clerk_id => ['status' => 'pending'],
+            $userToInvite->clerk_id => [
+                // 'id' => (string) Str::uuid(),
+                'status' => 'pending',
+            ],
         ]);
 
         return redirect()->back()->with('success', 'User invited successfully.');
     }
 
-    /**
-     * Allow an authenticated user to join a collaborative space from its link.
-     */
-    public function acceptInviteLink(Resource $resource)
-    {
-        abort_unless($resource->resource_type === 'public', 404);
-
-        $user = Auth::user();
-
-        if ($resource->clerk_id !== $user->clerk_id) {
-            $resource->collaborators()->syncWithoutDetaching([
-                $user->clerk_id => ['status' => 'accepted'],
-            ]);
-        }
-
-        return redirect()->route('resources.public', $resource->id)
-            ->with('success', 'You have joined the workspace!');
-    }
-    // accepting a pending invitation
     public function acceptInvite(Resource $resource)
     {
-        $resource->collaborators()->updateExistingPivot(Auth::user()->clerk_id, [
-            'status' => 'accepted'
-        ]);
+        $user = Auth::user();
+
+        // Directly update the pivot record using the query builder
+        DB::table('resource_users')
+            ->where('resource_id', $resource->id)
+            ->where('clerk_id', $user->clerk_id)
+            ->update([
+                'status' => 'accepted',
+                'updated_at' => now(),
+            ]);
 
         return redirect()->route('resources.public', $resource->id)
             ->with('success', 'You have joined the workspace!');
     }
 
-    // decline an invite
     public function declineInvite(Resource $resource)
     {
-        $resource->collaborators()->updateExistingPivot(Auth::user()->clerk_id, [
-            'status' => 'declined'
-        ]);
+        $user = Auth::user();
 
-        return redirect()->route('resources.public', $resource->id)
-            ->with('success', 'You have joined the workspace!');
+        // Directly update the pivot record using the query builder
+        DB::table('resource_users')
+            ->where('resource_id', $resource->id)
+            ->where('clerk_id', $user->clerk_id)
+            ->update([
+                'status' => 'declined',
+                'updated_at' => now(),
+            ]);
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Invitation declined.');
     }
 
 

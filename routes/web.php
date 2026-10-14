@@ -68,9 +68,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::delete('/resources/{resource}/collaborators/{user}', [ResourceUserController::class, 'removeCollaborator'])->name('resources.collaborators.destroy');
 
     // Invite Status Routes
-    Route::post('/resources/{resource}/accept', [ResourceUserController::class, 'acceptInvite'])->name('resources.invitations.accept');
-    Route::post('/resources/{resource}/decline', [ResourceUserController::class, 'declineInvite'])->name('resources.invitations.decline');
-
+// Invite Status Routes
+Route::post('/resources/{resource}/accept', [ResourceUserController::class, 'acceptInvite'])->name('resources.invitations.accept');
+Route::post('/resources/{resource}/decline', [ResourceUserController::class, 'declineInvite'])->name('resources.invitations.decline');
     // YouTube Controller
     Route::get('/youtube/search', [YouTubeController::class, 'search'])->name('youtube.search');
 });

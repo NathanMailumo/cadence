@@ -91,11 +91,13 @@ class ResourceItemController extends Controller
 
     public function destroy(Request $request, ResourceItem $resourceItem)
     {
-        abort_unless(
-            $resourceItem->clerk_id === $request->user()->clerk_id
-                && $resourceItem->resource->clerk_id === $request->user()->clerk_id,
-            403
-        );
+        $user = $request->user();
+
+        // Allow deletion if the user is the space owner OR the item creator
+        $isOwner = $resourceItem->resource->clerk_id === $user->clerk_id;
+        $isCreator = $resourceItem->clerk_id === $user->clerk_id;
+
+        abort_unless($isOwner || $isCreator, 403, 'Unauthorized action.');
 
         $resourceItem->update(['status' => 'notActive']);
 

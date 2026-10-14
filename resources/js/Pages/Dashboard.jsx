@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import {
     ArrowUpRight,
     FolderOpen,
@@ -58,6 +58,8 @@ export default function Dashboard() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [createModalType, setCreateModalType] = useState('private');
     const resources = props.resources || [];
+    const pendingInvitations = props.pendingInvitations || [];
+    const [dismissedInvites, setDismissedInvites] = useState([]);
 
     const groupedResources = {
         private: resources.filter(
@@ -72,6 +74,40 @@ export default function Dashboard() {
         setCreateModalType(type);
         setIsCreateModalOpen(true);
     };
+
+    const handleAcceptInvite = (invite) => {
+        router.post(
+            typeof route === 'function'
+                ? route('resources.invitations.accept', invite.id)
+                : `/resources/${invite.id}/accept`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    router.reload();
+                },
+            },
+        );
+    };
+
+    const handleDeclineInvite = (invite) => {
+        router.post(
+            typeof route === 'function'
+                ? route('resources.invitations.decline', invite.id)
+                : `/resources/${invite.id}/decline`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setDismissedInvites((prev) => [...prev, invite.id]);
+                },
+            },
+        );
+    };
+
+    const activeInvites = pendingInvitations.filter(
+        (inv) => !dismissedInvites.includes(inv.id),
+    );
 
     return (
         <AuthenticatedLayout>
@@ -211,6 +247,45 @@ export default function Dashboard() {
                     </section>
                 )}
             </div>
+
+            {/* PENDING INVITATION NOTIFICATION TOAST (BOTTOM RIGHT) */}
+            {activeInvites.length > 0 && (
+                <div className="fixed bottom-6 right-6 z-50 flex w-full max-w-sm flex-col gap-3">
+                    {activeInvites.map((invite) => (
+                        <div
+                            key={invite.id}
+                            className="rounded-2xl border border-[#D8DDD5] bg-white p-5 shadow-[0_12px_30px_rgba(48,48,45,0.15)]"
+                        >
+                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#AD5266]">
+                                Workspace invitation
+                            </p>
+                            <h4 className="mt-1 text-sm font-bold text-[#30302D]">
+                                &ldquo;{invite.course_name}&rdquo;
+                            </h4>
+                            <p className="mt-1 text-xs text-[#73736C]">
+                                You have been invited to join this collaborative
+                                space.
+                            </p>
+                            <div className="mt-4 flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleAcceptInvite(invite)}
+                                    className="flex-1 rounded-xl bg-[#762F50] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#5E243F]"
+                                >
+                                    Accept
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleDeclineInvite(invite)}
+                                    className="flex-1 rounded-xl border border-[#D8DDD5] bg-white px-3 py-2 text-xs font-bold text-[#73736C] transition hover:bg-[#F7F7F2] hover:text-[#30302D]"
+                                >
+                                    Decline
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <Resource
                 isOpen={isCreateModalOpen}

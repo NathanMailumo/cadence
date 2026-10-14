@@ -66,11 +66,7 @@ export default function AuthenticatedLayout({ children }) {
     };
 
     const handleDeleteResource = (resource) => {
-        if (
-            !window.confirm(
-                `Remove "${resource.course_name}"? Its data will be preserved but the space will no longer be active.`,
-            )
-        ) {
+        if (!window.confirm(`Remove "${resource.course_name}"?`)) {
             return;
         }
 
@@ -270,18 +266,16 @@ export default function AuthenticatedLayout({ children }) {
                                     >
                                         {resource.course_name}
                                     </Link>
-                                    {resource.clerk_id === user?.clerk_id && (
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handleDeleteResource(resource)
-                                            }
-                                            className="rounded-md p-1.5 text-[#A5A59D] opacity-100 transition hover:bg-[#FCE8ED] hover:text-[#AD5266] md:opacity-0 md:group-hover:opacity-100"
-                                            aria-label={`Remove ${resource.course_name}`}
-                                        >
-                                            <Trash2 size={13} />
-                                        </button>
-                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleDeleteResource(resource)
+                                        }
+                                        className="rounded-md p-1.5 text-[#A5A59D] opacity-100 transition hover:bg-[#FCE8ED] hover:text-[#AD5266] md:opacity-0 md:group-hover:opacity-100"
+                                        aria-label={`Remove ${resource.course_name}`}
+                                    >
+                                        <Trash2 size={13} />
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -307,18 +301,16 @@ export default function AuthenticatedLayout({ children }) {
                                     >
                                         {resource.course_name}
                                     </Link>
-                                    {resource.clerk_id === user?.clerk_id && (
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handleDeleteResource(resource)
-                                            }
-                                            className="rounded-md p-1.5 text-[#A5A59D] opacity-100 transition hover:bg-[#FCE8ED] hover:text-[#AD5266] md:opacity-0 md:group-hover:opacity-100"
-                                            aria-label={`Remove ${resource.course_name}`}
-                                        >
-                                            <Trash2 size={13} />
-                                        </button>
-                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleDeleteResource(resource)
+                                        }
+                                        className="rounded-md p-1.5 text-[#A5A59D] opacity-100 transition hover:bg-[#FCE8ED] hover:text-[#AD5266] md:opacity-0 md:group-hover:opacity-100"
+                                        aria-label={`Remove ${resource.course_name}`}
+                                    >
+                                        <Trash2 size={13} />
+                                    </button>
                                 </div>
                             ))}
                         </div>

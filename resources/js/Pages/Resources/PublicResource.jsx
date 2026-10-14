@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { FolderOpen, Plus, Trash2 } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ResourceCanvas from '@/Components/ResourceCanvas';
@@ -13,10 +13,32 @@ export default function PublicResource({
     canInvite = false,
     inviteLink = '',
 }) {
+    const { props } = usePage();
+    const currentClerkId = props.auth?.user?.clerk_id
+        ? String(props.auth.user.clerk_id).trim()
+        : null;
+    const ownerClerkId = resource?.clerk_id
+        ? String(resource.clerk_id).trim()
+        : null;
+
+    const isWorkspaceOwner = Boolean(
+        currentClerkId && ownerClerkId && currentClerkId === ownerClerkId,
+    );
+
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [activeAddType, setActiveAddType] = useState('choose');
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isYtModalOpen, setIsYtModalOpen] = useState(false);
+
+    // Owners can delete any item; invited members can only delete items they added
+    const canDeleteItem = (item) => {
+        if (!currentClerkId) return false;
+        if (isWorkspaceOwner) return true;
+        const itemClerkId = item?.clerk_id
+            ? String(item.clerk_id).trim()
+            : null;
+        return Boolean(itemClerkId && itemClerkId === currentClerkId);
+    };
 
     const openAddModal = (type = 'choose') => {
         setActiveAddType(type);
@@ -67,15 +89,17 @@ export default function PublicResource({
                         key={item.id}
                         className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 pr-16 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
-                        <button
-                            type="button"
-                            onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
-                            title="Delete resource"
-                            aria-label={`Delete ${item.title}`}
-                        >
-                            <Trash2 size={15} strokeWidth={1.8} />
-                        </button>
+                        {canDeleteItem(item) && (
+                            <button
+                                type="button"
+                                onClick={() => handleDelete(item)}
+                                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                                title="Delete resource"
+                                aria-label={`Delete ${item.title}`}
+                            >
+                                <Trash2 size={15} strokeWidth={1.8} />
+                            </button>
+                        )}
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                                 <span className="flex items-center gap-1.5">
@@ -134,15 +158,17 @@ export default function PublicResource({
                         key={item.id}
                         className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 pr-16 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
-                        <button
-                            type="button"
-                            onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
-                            title="Delete resource"
-                            aria-label={`Delete ${item.title}`}
-                        >
-                            <Trash2 size={15} strokeWidth={1.8} />
-                        </button>
+                        {canDeleteItem(item) && (
+                            <button
+                                type="button"
+                                onClick={() => handleDelete(item)}
+                                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                                title="Delete resource"
+                                aria-label={`Delete ${item.title}`}
+                            >
+                                <Trash2 size={15} strokeWidth={1.8} />
+                            </button>
+                        )}
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
                                 <span className="flex items-center gap-1.5">
@@ -190,15 +216,17 @@ export default function PublicResource({
                         key={item.id}
                         className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 pr-16 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
-                        <button
-                            type="button"
-                            onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
-                            title="Delete resource"
-                            aria-label={`Delete ${item.title}`}
-                        >
-                            <Trash2 size={15} strokeWidth={1.8} />
-                        </button>
+                        {canDeleteItem(item) && (
+                            <button
+                                type="button"
+                                onClick={() => handleDelete(item)}
+                                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                                title="Delete resource"
+                                aria-label={`Delete ${item.title}`}
+                            >
+                                <Trash2 size={15} strokeWidth={1.8} />
+                            </button>
+                        )}
                         <div>
                             <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#73736C]">
                                 <span>Document</span>
@@ -268,19 +296,21 @@ export default function PublicResource({
                         }
                         className="group relative flex flex-col justify-between rounded-2xl border-2 border-[#AD5266]/30 bg-[#FDF8FA] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266] hover:shadow-md"
                     >
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleDelete(item);
-                            }}
-                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
-                            title="Delete resource"
-                            aria-label={`Delete ${item.title}`}
-                        >
-                            <Trash2 size={15} strokeWidth={1.8} />
-                        </button>
+                        {canDeleteItem(item) && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleDelete(item);
+                                }}
+                                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                                title="Delete resource"
+                                aria-label={`Delete ${item.title}`}
+                            >
+                                <Trash2 size={15} strokeWidth={1.8} />
+                            </button>
+                        )}
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
                                 <span className="flex items-center gap-1.5">
@@ -320,15 +350,17 @@ export default function PublicResource({
                         key={item.id}
                         className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FAF8F2] p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#C5C9BE] hover:shadow-md"
                     >
-                        <button
-                            type="button"
-                            onClick={() => handleDelete(item)}
-                            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
-                            title="Delete resource"
-                            aria-label={`Delete ${item.title}`}
-                        >
-                            <Trash2 size={15} strokeWidth={1.8} />
-                        </button>
+                        {canDeleteItem(item) && (
+                            <button
+                                type="button"
+                                onClick={() => handleDelete(item)}
+                                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                                title="Delete resource"
+                                aria-label={`Delete ${item.title}`}
+                            >
+                                <Trash2 size={15} strokeWidth={1.8} />
+                            </button>
+                        )}
                         <div>
                             <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8A7146]">
                                 <span className="flex items-center gap-1.5">

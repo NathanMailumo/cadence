@@ -47,16 +47,14 @@ class Resource extends Model
     /**
      * Get the collaborators invited to this resource workspace.
      */
-    public function collaborators(): BelongsToMany
+    public function collaborators()
     {
-        // Explicitly set table name to 'resource_users'
         return $this->belongsToMany(User::class, 'resource_users', 'resource_id', 'clerk_id', 'id', 'clerk_id')
-            ->wherePivot('lifecycle_status', 'active')
-            ->withPivot(['role', 'status', 'lifecycle_status'])
+            ->withPivot(['role', 'status'])
             ->withTimestamps();
     }
 
-    public function studySessions():HasMany
+    public function studySessions(): HasMany
     {
         return $this->hasMany(Study_Session::class)->where('status', 'active');
     }

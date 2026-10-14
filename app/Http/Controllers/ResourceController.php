@@ -44,41 +44,41 @@ class ResourceController extends Controller
 
     public function destroy(Request $request, Resource $resource)
     {
-        abort_unless($resource->clerk_id === $request->user()->clerk_id, 403);
+        $user = $request->user();
+        $isOwner = $resource->clerk_id === $user->clerk_id;
 
-        DB::transaction(function () use ($resource) {
-            $sessions = $resource->studySessions()
-                ->with(['sessionOutput', 'sessionFile'])
-                ->get();
+        if ($isOwner) {
+            // Owner deletes the resource globally for everyone
+            DB::transaction(function () use ($resource) {
+                $sessions = $resource->studySessions()
+                    ->with(['sessionOutput', 'sessionFile'])
+                    ->get();
 
-            $resource->update(['status' => 'deleted']);
-            $resource->resourceItems()->update(['status' => 'deleted']);
-            $resource->studySessions()->update(['status' => 'deleted']);
+                $resource->update(['status' => 'deleted']);
+                $resource->resourceItems()->update(['status' => 'deleted']);
+                $resource->studySessions()->update(['status' => 'deleted']);
 
-            DB::table('resource_users')
-                ->where('resource_id', $resource->id)
-                ->update([
-                    'lifecycle_status' => 'deleted',
-                    'updated_at' => now(),
-                ]);
+                DB::table('resource_users')
+                    ->where('resource_id', $resource->id)
+                    ->delete();
 
-            $sessions->each(function ($session) {
-                $session->sessionOutput?->update(['status' => 'deleted']);
-                $session->sessionFile?->update(['status' => 'deleted']);
+                $sessions->each(function ($session) {
+                    $session->sessionOutput?->update(['status' => 'deleted']);
+                    $session->sessionFile?->update(['status' => 'deleted']);
+                });
             });
-        });
+        } else {
+            // Invited collaborator removes the space individually for themselves only
+            $resource->collaborators()->detach($user->clerk_id);
+        }
 
         return redirect()->route('dashboard');
     }
 
-    /**
-     * Main workspace view for public/collaborative resources.
-     */
     public function show(Resource $resource)
     {
         abort_unless($resource->status === 'active', 404);
 
-        // Check ownership or active collaboration access
         $isOwner = $resource->clerk_id === Auth::user()->clerk_id;
         $isCollaborator = $resource->collaborators()
             ->where('users.clerk_id', Auth::user()->clerk_id)
@@ -88,14 +88,16 @@ class ResourceController extends Controller
             abort(403, 'You do not have access to this workspace.');
         }
 
+        // Include clerk_id explicitly when loading items
         $resource->load(['resourceItems' => function ($query) {
-            $query->latest();
+            $query->select('id', 'resource_id', 'clerk_id', 'type', 'title', 'url', 'content', 'description', 'metadata', 'study_session_id', 'created_at')
+                ->latest();
         }]);
 
         return Inertia::render('Resources/PublicResource', [
-            'resource'  => $resource,
-            'items'     => $resource->resourceItems,
-            'canInvite' => $isOwner,
+            'resource'   => $resource,
+            'items'      => $resource->resourceItems,
+            'canInvite'  => $isOwner,
             'inviteLink' => route('resources.invitations.link', $resource),
         ]);
     }
@@ -132,13 +134,14 @@ class ResourceController extends Controller
         }
 
         $resource->load(['resourceItems' => function ($query) {
-            $query->latest();
+            $query->select('id', 'resource_id', 'clerk_id', 'type', 'title', 'url', 'content', 'description', 'metadata', 'study_session_id', 'created_at')
+                ->latest();
         }]);
 
         return Inertia::render('Resources/PublicResource', [
-            'resource'  => $resource,
-            'items'     => $resource->resourceItems,
-            'canInvite' => $isOwner,
+            'resource'   => $resource,
+            'items'      => $resource->resourceItems,
+            'canInvite'  => $isOwner,
             'inviteLink' => route('resources.invitations.link', $resource),
         ]);
     }
