@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
-import { FolderOpen, Plus, Trash2 } from 'lucide-react';
+import { FolderOpen, Plus, Trash2, Users } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ResourceCanvas from '@/Components/ResourceCanvas';
 import ResourceItemModal from '@/Components/ResourceItemModal';
@@ -29,8 +29,18 @@ export default function PublicResource({
     const [activeAddType, setActiveAddType] = useState('choose');
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isYtModalOpen, setIsYtModalOpen] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
-    // Owners can delete any item; invited members can only delete items they added
+    const collaborators = resource?.collaborators || [];
+    const hasCollaborators = collaborators.length > 0;
+
+    const showToast = (message) => {
+        setToastMessage(message);
+        setTimeout(() => {
+            setToastMessage('');
+        }, 4000);
+    };
+
     const canDeleteItem = (item) => {
         if (!currentClerkId) return false;
         if (isWorkspaceOwner) return true;
@@ -409,15 +419,30 @@ export default function PublicResource({
                         </div>
                     </div>
                     <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto sm:gap-4">
-                        {canInvite && (
-                            <button
-                                type="button"
-                                onClick={() => setIsInviteModalOpen(true)}
-                                className="min-w-0 flex-1 rounded-lg border border-[#D8DDD5] bg-white px-3 py-2.5 text-[11px] font-bold text-[#30302D] hover:bg-[#F7F7F2] sm:flex-none sm:px-4 sm:py-3 sm:text-xs"
-                            >
-                                Invite classmates
-                            </button>
-                        )}
+                        {canInvite &&
+                            (hasCollaborators ? (
+                                <Link
+                                    href={
+                                        typeof route === 'function'
+                                            ? route(
+                                                  'resources.members',
+                                                  resource.id,
+                                              )
+                                            : `/resources/${resource.id}/invited`
+                                    }
+                                    className="inline-flex items-center gap-2 rounded-lg border border-[#D8DDD5] bg-white px-3 py-2.5 text-[11px] font-bold text-[#30302D] hover:bg-[#F7F7F2] sm:px-4 sm:py-3 sm:text-xs"
+                                >
+                                    <Users size={15} /> Manage users
+                                </Link>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsInviteModalOpen(true)}
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#D8DDD5] bg-white px-3 py-2.5 text-[11px] font-bold text-[#30302D] hover:bg-[#F7F7F2] sm:px-4 sm:py-3 sm:text-xs"
+                                >
+                                    <Plus size={15} /> Invite
+                                </button>
+                            ))}
                         <button
                             type="button"
                             onClick={() => openAddModal('choose')}
@@ -453,6 +478,13 @@ export default function PublicResource({
                 </main>
             </div>
 
+            {/* SUCCESS TOAST NOTIFICATION (BOTTOM-RIGHT) */}
+            {toastMessage && (
+                <div className="fixed bottom-6 right-6 z-50 animate-bounce rounded-xl bg-[#762F50] px-4 py-3 text-xs font-bold text-white shadow-xl">
+                    {toastMessage}
+                </div>
+            )}
+
             {/* RESOURCE ADD MODAL */}
             <ResourceItemModal
                 isOpen={isAddModalOpen}
@@ -476,6 +508,7 @@ export default function PublicResource({
                 resourceId={resource.id}
                 spaceName={spaceName}
                 inviteLink={inviteLink}
+                onSuccess={() => showToast('Invitation sent successfully!')}
             />
         </AuthenticatedLayout>
     );

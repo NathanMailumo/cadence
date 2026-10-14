@@ -48,7 +48,6 @@ class ResourceController extends Controller
         $isOwner = $resource->clerk_id === $user->clerk_id;
 
         if ($isOwner) {
-            // Owner deletes the resource globally for everyone
             DB::transaction(function () use ($resource) {
                 $sessions = $resource->studySessions()
                     ->with(['sessionOutput', 'sessionFile'])
@@ -68,7 +67,6 @@ class ResourceController extends Controller
                 });
             });
         } else {
-            // Invited collaborator removes the space individually for themselves only
             $resource->collaborators()->detach($user->clerk_id);
         }
 
@@ -88,11 +86,15 @@ class ResourceController extends Controller
             abort(403, 'You do not have access to this workspace.');
         }
 
-        // Include clerk_id explicitly when loading items
-        $resource->load(['resourceItems' => function ($query) {
-            $query->select('id', 'resource_id', 'clerk_id', 'type', 'title', 'url', 'content', 'description', 'metadata', 'study_session_id', 'created_at')
-                ->latest();
-        }]);
+        $resource->load([
+            'resourceItems' => function ($query) {
+                $query->select('id', 'resource_id', 'clerk_id', 'type', 'title', 'url', 'content', 'description', 'metadata', 'study_session_id', 'created_at')
+                    ->latest();
+            },
+            'collaborators' => function ($query) {
+                $query->select('users.id', 'users.clerk_id', 'users.name', 'users.email');
+            }
+        ]);
 
         return Inertia::render('Resources/PublicResource', [
             'resource'   => $resource,
@@ -133,10 +135,15 @@ class ResourceController extends Controller
             abort(403, 'You do not have access to this workspace.');
         }
 
-        $resource->load(['resourceItems' => function ($query) {
-            $query->select('id', 'resource_id', 'clerk_id', 'type', 'title', 'url', 'content', 'description', 'metadata', 'study_session_id', 'created_at')
-                ->latest();
-        }]);
+        $resource->load([
+            'resourceItems' => function ($query) {
+                $query->select('id', 'resource_id', 'clerk_id', 'type', 'title', 'url', 'content', 'description', 'metadata', 'study_session_id', 'created_at')
+                    ->latest();
+            },
+            'collaborators' => function ($query) {
+                $query->select('users.id', 'users.clerk_id', 'users.name', 'users.email');
+            }
+        ]);
 
         return Inertia::render('Resources/PublicResource', [
             'resource'   => $resource,
