@@ -23,6 +23,7 @@ export default function Resource({
     }
 
     const isCollaborative = data.resource_type === 'public';
+    const hasInput = data.course_name.trim().length > 0;
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -121,8 +122,12 @@ export default function Resource({
 
                     <button
                         type="submit"
-                        disabled={processing || !data.course_name.trim()}
-                        className="mt-5 h-[43px] w-full rounded-[9px] bg-[#C6A4B3] text-[14px] font-bold text-white transition hover:bg-[#AD5266] disabled:cursor-not-allowed disabled:opacity-70"
+                        disabled={processing || !hasInput}
+                        className={`mt-5 h-[43px] w-full rounded-[9px] text-[14px] font-bold text-white transition ${
+                            hasInput
+                                ? 'cursor-pointer bg-[#762F50] shadow-sm hover:bg-[#5E243F]'
+                                : 'cursor-not-allowed bg-[#C6A4B3] opacity-60'
+                        }`}
                     >
                         {processing ? 'Creating space...' : 'Create space'}
                     </button>
