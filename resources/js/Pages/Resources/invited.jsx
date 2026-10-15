@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Trash2, UserPlus } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import InviteModal from '@/Components/Invite';
@@ -45,6 +45,15 @@ export default function Invited({
 
     return (
         <AuthenticatedLayout>
+            <Head>
+                <title>Cadence -Members</title>
+                <link
+                    rel="icon"
+                    type="image/svg+xml"
+                    href="/images/cadence_logo.svg"
+                />
+                {/* Or use href="/logo.png" if your file is a PNG */}
+            </Head>
             <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
                 {/* BACK LINK */}
                 <div>

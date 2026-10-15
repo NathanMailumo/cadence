@@ -111,7 +111,15 @@ export default function Dashboard() {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Cadence - Dashboard" />
+            <Head>
+                <title>Cadence — Dashboard</title>
+                <link
+                    rel="icon"
+                    type="image/svg+xml"
+                    href="/images/cadence_logo.svg"
+                />
+                {/* Or use href="/logo.png" if your file is a PNG */}
+            </Head>
 
             <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-10 sm:py-10 lg:px-12">
                 <header className="flex flex-col justify-between gap-6 border-b border-[#D8DDD5] pb-8 sm:flex-row sm:items-end">

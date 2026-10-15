@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { FolderOpen, Plus, Trash2 } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ResourceCanvas from '@/Components/ResourceCanvas';
@@ -349,6 +349,15 @@ export default function PrivateResource({ resource, items = [] }) {
 
     return (
         <AuthenticatedLayout>
+            <Head>
+                <title>Cadence - Private Resource</title>
+                <link
+                    rel="icon"
+                    type="image/svg+xml"
+                    href="/images/cadence_logo.svg"
+                />
+                {/* Or use href="/logo.png" if your file is a PNG */}
+            </Head>
             <div className="flex min-h-full min-w-0 flex-1 flex-col bg-[#F0F0E9]">
                 <header className="flex w-full flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-3 sm:px-8 sm:py-4">
                     <div className="flex min-w-0 items-center gap-3">

@@ -59,7 +59,15 @@ export default function ForgotPassword() {
 
     return (
         <div className="flex min-h-screen flex-col justify-center bg-[#F0F0E9] p-4 font-sans text-[#30302D] sm:p-6 lg:p-8">
-            <Head title="Cadence - Reset Password" />
+            <Head>
+                <title>Cadence - Reset Password</title>
+                <link
+                    rel="icon"
+                    type="image/svg+xml"
+                    href="/images/cadence_logo.svg"
+                />
+                {/* Or use href="/logo.png" if your file is a PNG */}
+            </Head>
 
             <div className="mx-auto w-full max-w-md">
                 <div className="mb-8 flex flex-col items-center justify-center text-center">

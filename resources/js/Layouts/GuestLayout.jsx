@@ -1,6 +1,7 @@
 import React from 'react';
 import CadenceLogo from '@/Components/CadenceLogo';
 import { Link, usePage } from '@inertiajs/react';
+import { Mail } from 'lucide-react';
 
 export default function GuestLayout({ children }) {
     const { props } = usePage();
@@ -8,8 +9,8 @@ export default function GuestLayout({ children }) {
 
     return (
         <div className="relative flex min-h-screen flex-col bg-[#F0F0E9] font-sans text-[#30302D] antialiased selection:bg-[#AD5266]/20 selection:text-[#762F50]">
-            {/* Top Navigation Bar */}
-            <header className="sticky top-0 z-40 border-b border-[#D8DDD5] bg-[#FFFFFF]/85 px-5 py-4 backdrop-blur-md transition-all sm:px-8 md:px-12">
+            {/* Top Navigation Bar (Matches image_d5a4fe.png) */}
+            <header className="sticky top-0 z-40 border-b border-[#D8DDD5]/60 bg-[#F0F0E9]/90 px-6 py-4 backdrop-blur-md transition-all sm:px-10 md:px-16">
                 <div className="mx-auto flex max-w-7xl items-center justify-between">
                     <Link href="/" className="group flex items-center gap-2">
                         <CadenceLogo
@@ -18,32 +19,41 @@ export default function GuestLayout({ children }) {
                         />
                     </Link>
 
-                    <div className="flex items-center gap-3 sm:gap-6">
+                    {/* Nav Links */}
+                    <nav className="hidden items-center gap-8 text-xs font-semibold text-[#30302D] sm:flex">
+                        <a
+                            href="#how-it-works"
+                            className="transition hover:text-[#762F50]"
+                        >
+                            How it works
+                        </a>
+                        <a
+                            href="#use-cases"
+                            className="transition hover:text-[#762F50]"
+                        >
+                            Use cases
+                        </a>
+                        <a
+                            href="#pricing"
+                            className="transition hover:text-[#762F50]"
+                        >
+                            Pricing
+                        </a>
+                    </nav>
+
+                    {/* Auth Actions */}
+                    <div className="flex items-center gap-3">
                         {user ? (
-                            <>
-                                <Link
-                                    href={
-                                        typeof route === 'function'
-                                            ? route('dashboard')
-                                            : '/dashboard'
-                                    }
-                                    className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-4 py-2 text-xs font-semibold text-[#30302D] shadow-sm transition-all hover:bg-[#F7F7F2]"
-                                >
-                                    Go to Dashboard
-                                </Link>
-                                <Link
-                                    method="post"
-                                    href={
-                                        typeof route === 'function'
-                                            ? route('logout')
-                                            : '/logout'
-                                    }
-                                    as="button"
-                                    className="rounded-full bg-[#762F50] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#5E243F]"
-                                >
-                                    Log out
-                                </Link>
-                            </>
+                            <Link
+                                href={
+                                    typeof route === 'function'
+                                        ? route('dashboard')
+                                        : '/dashboard'
+                                }
+                                className="rounded-xl bg-[#762F50] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#5E243F]"
+                            >
+                                Go to Dashboard
+                            </Link>
                         ) : (
                             <>
                                 <Link
@@ -52,7 +62,7 @@ export default function GuestLayout({ children }) {
                                             ? route('login')
                                             : '/login'
                                     }
-                                    className="text-xs font-medium text-[#30302D] transition-colors hover:text-[#762F50] sm:text-sm"
+                                    className="rounded-xl border border-[#D8DDD5] bg-[#F7F7F2]/60 px-5 py-2.5 text-xs font-bold text-[#30302D] shadow-sm transition hover:bg-white hover:text-[#762F50]"
                                 >
                                     Log in
                                 </Link>
@@ -62,7 +72,7 @@ export default function GuestLayout({ children }) {
                                             ? route('register')
                                             : '/register'
                                     }
-                                    className="rounded-full bg-[#AD5266] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#974356] active:scale-95 sm:px-5 sm:py-2.5 sm:text-sm"
+                                    className="rounded-xl bg-[#762F50] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#5E243F] active:scale-95"
                                 >
                                     Get started
                                 </Link>
@@ -77,21 +87,99 @@ export default function GuestLayout({ children }) {
                 {children}
             </main>
 
-            {/* Footer */}
-            <footer className="border-t border-[#D8DDD5] bg-[#FFFFFF] py-8 text-center text-xs text-[#73736C]">
-                <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
-                    <div className="flex items-center gap-2">
-                        <CadenceLogo
-                            className="h-5 w-auto"
-                            textClassName="text-sm font-bold text-[#762F50]"
-                        />
-                        <span className="text-gray-400">·</span>
-                        <span>Learning, in your own rhythm.</span>
+            {/* Footer (Matches image_d5a463.png) */}
+            <footer className="border-t border-[#D8DDD5]/60 bg-[#F0F0E9] py-16">
+                <div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 px-6 sm:px-10 md:flex-row lg:px-16">
+                    {/* Left Column: Brand, Socials & Slogan */}
+                    <div className="flex flex-col gap-6">
+                        <Link href="/">
+                            <CadenceLogo
+                                className="h-7 w-auto"
+                                textClassName="text-xl"
+                            />
+                        </Link>
+
+                        {/* Social Handles: Instagram, Gmail, X */}
+                        <div className="flex items-center gap-3">
+                            <a
+                                href="https://instagram.com"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D8DDD5] bg-[#F0F0E9] text-xs font-bold text-[#762F50] transition hover:border-[#762F50] hover:bg-white"
+                                title="Instagram"
+                            >
+                                IG
+                            </a>
+                            <a
+                                href="mailto:support@cadence.study"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D8DDD5] bg-[#F0F0E9] text-xs font-bold text-[#762F50] transition hover:border-[#762F50] hover:bg-white"
+                                title="Gmail"
+                            >
+                                <Mail size={16} strokeWidth={1.8} />
+                            </a>
+                            <a
+                                href="https://x.com"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D8DDD5] bg-[#F0F0E9] text-xs font-bold text-[#762F50] transition hover:border-[#762F50] hover:bg-white"
+                                title="X"
+                            >
+                                X
+                            </a>
+                        </div>
+
+                        <p className="mt-2 text-xs font-medium text-[#73736C]">
+                            Learn clearly. Grow confidently.
+                        </p>
                     </div>
-                    <p className="text-[11px] text-gray-500">
-                        &copy; {new Date().getFullYear()} Cadence. All rights
-                        reserved.
-                    </p>
+
+                    {/* Right Column: Footer Links */}
+                    <div className="flex flex-col items-start gap-3.5 text-xs font-bold text-[#30302D] md:items-end">
+                        <a
+                            href="#how-it-works"
+                            className="transition hover:text-[#762F50]"
+                        >
+                            How it works
+                        </a>
+                        <a
+                            href="#use-cases"
+                            className="transition hover:text-[#762F50]"
+                        >
+                            Use cases
+                        </a>
+                        <a
+                            href="#pricing"
+                            className="transition hover:text-[#762F50]"
+                        >
+                            Pricing
+                        </a>
+                        <Link
+                            href={
+                                typeof route === 'function'
+                                    ? route('login')
+                                    : '/login'
+                            }
+                            className="transition hover:text-[#762F50]"
+                        >
+                            Log in
+                        </Link>
+                        <Link
+                            href={
+                                typeof route === 'function'
+                                    ? route('register')
+                                    : '/register'
+                            }
+                            className="transition hover:text-[#762F50]"
+                        >
+                            Get started
+                        </Link>
+                        <Link
+                            href={route('terms')}
+                            className="mt-2 transition hover:text-[#762F50]"
+                        >
+                            Terms and conditions
+                        </Link>
+                    </div>
                 </div>
             </footer>
         </div>

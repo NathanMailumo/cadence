@@ -43,7 +43,15 @@ export default function EditProfile() {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Cadence - Profile" />
+            <Head>
+                <title>Cadence - Profile</title>
+                <link
+                    rel="icon"
+                    type="image/svg+xml"
+                    href="/images/cadence_logo.svg"
+                />
+                {/* Or use href="/logo.png" if your file is a PNG */}
+            </Head>
 
             <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-10 sm:py-10 lg:px-12">
                 <Link

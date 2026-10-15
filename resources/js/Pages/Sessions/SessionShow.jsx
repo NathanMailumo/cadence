@@ -127,9 +127,18 @@ export default function SessionShow({ session }) {
 
     return (
         <AuthenticatedLayout>
-            <Head
+            {/* <Head
                 title={`Cadence - ${session?.course_title || 'Revision Pack'}`}
-            />
+            /> */}
+            <Head>
+                <title>{`Cadence - ${session?.course_title || 'Revision Pack'}`}</title>
+                <link
+                    rel="icon"
+                    type="image/svg+xml"
+                    href="/images/cadence_logo.svg"
+                />
+                {/* Or use href="/logo.png" if your file is a PNG */}
+            </Head>
 
             <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
                 {/* BREADCRUMB & BACK NAVIGATION */}

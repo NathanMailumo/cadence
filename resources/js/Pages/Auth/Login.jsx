@@ -186,7 +186,15 @@ export default function Login() {
                     label="Signing you in"
                 />
             )}
-            <Head title="Cadence - Log In" />
+            <Head>
+                <title>Cadence - Log In</title>
+                <link
+                    rel="icon"
+                    type="image/svg+xml"
+                    href="/images/cadence_logo.svg"
+                />
+                {/* Or use href="/logo.png" if your file is a PNG */}
+            </Head>
             <Navbar />
 
             <div className="flex flex-1 flex-col justify-center p-4 sm:p-6 lg:p-8">

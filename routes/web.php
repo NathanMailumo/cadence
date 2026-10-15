@@ -24,6 +24,9 @@ Route::middleware(['web', 'guest'])->group(function () {
         return Inertia::render('Welcome');
     })->name('welcome');
 
+    Route::get('/terms', fn () => Inertia::render('Legal/TermsAndConditions'))->name('terms');
+
+
     Route::get('/register', function () {
         return Inertia::render('Auth/Register');
     })->name('register');
@@ -73,7 +76,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/resources/{resource}/decline', [ResourceUserController::class, 'declineInvite'])->name('resources.invitations.decline');
 
     Route::get('/resources/{resource}/invited', [ResourceUserController::class, 'members'])->name('resources.members');
-    
+
     // YouTube Controller
     Route::get('/youtube/search', [YouTubeController::class, 'search'])->name('youtube.search');
+
+    // T&C
 });
