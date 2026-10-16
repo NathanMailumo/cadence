@@ -43,6 +43,6 @@ EXPOSE 10000
 
 # Clear config/cache so environment variables are loaded, run migrations, and start server
 CMD php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan migrate --force && \
+    php artisan config:cache && \
+    php artisan migrate:fresh --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
