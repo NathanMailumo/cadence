@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies & modern Node.js (needed for Vite / Inertia build)
+# Install system dependencies & modern Node.js
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -14,34 +14,29 @@ RUN apt-get update && apt-get install -y \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# Clear cache to keep image size small
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
 RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
 
-# Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy project files into the container
 COPY . /var/www/html
 
-# Install PHP production dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node dependencies and build Vite assets during build stage with a secure memory limit
+# Declare the build argument for Vite
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+
+# Install Node dependencies and build Vite assets securely
 RUN npm install && NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
-# Set proper permissions for Laravel storage, cache, and public build assets
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
 
-# Expose port (Render overrides this with $PORT)
 EXPOSE 10000
 
-# Clear caches, run migrations, and start server cleanly at runtime without heavy compilation
 CMD php artisan config:clear && \
     php artisan cache:clear && \
     php artisan migrate --force && \
