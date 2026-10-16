@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libpq-dev \
+    libzip-dev \
     zip \
     unzip \
     nodejs \
@@ -16,8 +17,8 @@ RUN apt-get update && apt-get install -y \
 # Clear cache to keep image size small
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions (including pdo_pgsql for PostgreSQL)
-RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
+# Install PHP extensions (including pdo_pgsql and zip)
+RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
