@@ -32,8 +32,8 @@ COPY . /var/www/html
 # Install PHP production dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node dependencies
-RUN npm install
+# Install Node dependencies and build Vite assets during build stage with a secure memory limit
+RUN npm install && NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
 # Set proper permissions for Laravel storage, cache, and public build assets
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
@@ -41,9 +41,8 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Expose port (Render overrides this with $PORT)
 EXPOSE 10000
 
-# Increase Node memory limit, build assets at runtime, clear caches, migrate, and start server
-CMD NODE_OPTIONS="--max-old-space-size=2048" npm run build && \
-    php artisan config:clear && \
+# Clear caches, run migrations, and start server cleanly at runtime without heavy compilation
+CMD php artisan config:clear && \
     php artisan cache:clear && \
     php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
