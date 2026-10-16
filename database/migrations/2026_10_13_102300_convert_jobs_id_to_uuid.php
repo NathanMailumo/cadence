@@ -7,11 +7,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE jobs MODIFY id CHAR(36) NOT NULL DEFAULT (UUID())");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE jobs MODIFY id CHAR(36) NOT NULL DEFAULT (UUID())");
+        }
     }
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE jobs MODIFY id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE jobs MODIFY id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT');
+        }
     }
 };
