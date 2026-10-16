@@ -41,5 +41,8 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Expose port (Render overrides this with $PORT)
 EXPOSE 10000
 
-# Run migrations and start the server using Render's dynamic port
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+# Clear config/cache so environment variables are loaded, run migrations, and start server
+CMD php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan migrate --force && \
+    php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
