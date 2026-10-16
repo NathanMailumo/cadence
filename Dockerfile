@@ -32,7 +32,7 @@ COPY . /var/www/html
 # Install PHP production dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node dependencies (we build during startup now so env vars are present)
+# Install Node dependencies
 RUN npm install
 
 # Set proper permissions for Laravel storage, cache, and public build assets
@@ -41,8 +41,8 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Expose port (Render overrides this with $PORT)
 EXPOSE 10000
 
-# Build frontend assets at runtime (accessing Render env vars), clear caches, migrate, and start server
-CMD npm run build && \
+# Increase Node memory limit, build assets at runtime, clear caches, migrate, and start server
+CMD NODE_OPTIONS="--max-old-space-size=2048" npm run build && \
     php artisan config:clear && \
     php artisan cache:clear && \
     php artisan migrate --force && \
