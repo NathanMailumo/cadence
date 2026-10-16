@@ -35,14 +35,14 @@ RUN composer install --no-dev --optimize-autoloader
 # Install Node dependencies and build your Inertia/React frontend assets
 RUN npm install && npm run build
 
-# Set proper permissions for Laravel storage and cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Set proper permissions for Laravel storage, cache, and public build assets
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
 
 # Expose port (Render overrides this with $PORT)
 EXPOSE 10000
 
-# Clear config/cache, safely run pending database migrations, and start server
+# Clear caches freshly, safely run pending database migrations, and start server
 CMD php artisan config:clear && \
-    php artisan config:cache && \
+    php artisan cache:clear && \
     php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
