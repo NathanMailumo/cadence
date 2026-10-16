@@ -31,7 +31,9 @@ return new class extends Migration
             $table->enum('status', ['active', 'deleted'])->default('active')->index();
         });
 
-        DB::statement("ALTER TABLE resource_items MODIFY status ENUM('active', 'notActive', 'deleted') NOT NULL DEFAULT 'active'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE resource_items MODIFY status ENUM('active', 'notActive', 'deleted') NOT NULL DEFAULT 'active'");
+        }
     }
 
     public function down(): void
@@ -39,7 +41,9 @@ return new class extends Migration
         DB::table('resource_items')
             ->where('status', 'deleted')
             ->update(['status' => 'notActive']);
-        DB::statement("ALTER TABLE resource_items MODIFY status ENUM('active', 'notActive') NOT NULL DEFAULT 'active'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE resource_items MODIFY status ENUM('active', 'notActive') NOT NULL DEFAULT 'active'");
+        }
 
         Schema::table('session_files', function (Blueprint $table) {
             $table->dropColumn('status');
