@@ -99,7 +99,7 @@ export default function PrivateResource({ resource, items = [] }) {
                                     <img
                                         src={metadata.thumbnail_url}
                                         alt=""
-                                        className="h-28 w-full object-cover"
+                                        className="h-24 w-full object-cover"
                                     />
                                 </div>
                             )}
@@ -224,7 +224,7 @@ export default function PrivateResource({ resource, items = [] }) {
                                     <img
                                         src={fileUrl}
                                         alt={item.title}
-                                        className="h-32 w-full object-contain"
+                                        className="h-24 w-full object-contain"
                                     />
                                 </a>
                             )}
@@ -335,7 +335,7 @@ export default function PrivateResource({ resource, items = [] }) {
                                 {item.title}
                             </h3>
                             {item.content && (
-                                <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-[#4A3E2C]">
+                                <p className="mt-2 line-clamp-3 whitespace-pre-line text-xs leading-relaxed text-[#4A3E2C]">
                                     {item.content}
                                 </p>
                             )}
