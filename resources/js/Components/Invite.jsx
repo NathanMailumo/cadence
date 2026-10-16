@@ -209,7 +209,8 @@ export default function InviteModal({
                         )}
                     </div>
 
-                    {/* SHARE LINK SECTION (FIGMA FRAME 14:2134) */}
+                    {/* SHARE LINK SECTION - COMMENTED OUT TEMPORARILY */}
+                    {/* 
                     <div className="rounded-2xl border border-[#D8DDD5] bg-[#F7F7F2] p-4">
                         <div className="flex items-center justify-between">
                             <div>
@@ -229,6 +230,7 @@ export default function InviteModal({
                             </button>
                         </div>
                     </div>
+                    */}
 
                     {/* FOOTER ACTIONS */}
                     <div className="flex items-center justify-end gap-3 border-t border-[#F0F0E9] pt-4">
