@@ -97,50 +97,41 @@ export default function PublicResource({
                 return (
                     <div
                         key={item.id}
-                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-5 pr-16 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-[#FFFFFF] p-4 pr-14 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266]/30 hover:shadow-md"
                     >
-                        {canDeleteItem(item) && (
-                            <button
-                                type="button"
-                                onClick={() => handleDelete(item)}
-                                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
-                                title="Delete resource"
-                                aria-label={`Delete ${item.title}`}
-                            >
-                                <Trash2 size={15} strokeWidth={1.8} />
-                            </button>
-                        )}
+                        {/* Note: Include canDeleteItem(item) check if in PublicResource */}
+                        <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            className="absolute right-2.5 top-2.5 z-10 flex h-7 w-7 items-center justify-center rounded-lg border border-[#F0D9DF] bg-[#FFF7F8] text-[#AD5266] transition-colors hover:bg-[#FCE8ED] hover:text-[#762F50]"
+                            title="Delete resource"
+                            aria-label={`Delete ${item.title}`}
+                        >
+                            <Trash2 size={14} strokeWidth={1.8} />
+                        </button>
                         <div>
-                            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
+                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#AD5266]">
                                 <span className="flex items-center gap-1.5">
-                                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#AD5266]/10 text-[9px] text-[#AD5266]">
-                                        Video
-                                    </span>
-                                    VIDEO
+                                    <span>Video</span>
                                 </span>
                                 {metadata.author_name && (
-                                    <span className="max-w-[130px] truncate font-normal text-[#73736C]">
+                                    <span className="max-w-[100px] truncate font-normal text-[#73736C]">
                                         {metadata.author_name}
                                     </span>
                                 )}
                             </div>
                             <h3
-                                className="mt-3 text-sm font-bold leading-snug text-[#30302D]"
+                                className="mt-1.5 truncate text-xs font-bold text-[#30302D]"
                                 style={{ fontFamily: '"Manrope", sans-serif' }}
                             >
                                 {item.title}
                             </h3>
-                            {item.description && (
-                                <p className="mt-1 line-clamp-2 text-xs text-[#73736C]">
-                                    {item.description}
-                                </p>
-                            )}
                             {metadata.thumbnail_url && (
-                                <div className="mt-3 overflow-hidden rounded-xl border border-[#F0F0E9]">
+                                <div className="mt-2 overflow-hidden rounded-lg border border-[#F0F0E9]">
                                     <img
                                         src={metadata.thumbnail_url}
                                         alt=""
-                                        className="h-24 w-full object-cover"
+                                        className="h-16 w-full object-cover"
                                     />
                                 </div>
                             )}
@@ -150,12 +141,11 @@ export default function PublicResource({
                                 href={item.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="mt-4 flex items-center justify-between truncate rounded-xl bg-[#F7F7F2] px-3 py-1.5 text-[11px] font-semibold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
+                                className="mt-3 flex items-center justify-between truncate rounded-lg bg-[#F7F7F2] px-2.5 py-1 text-[10px] font-semibold text-[#762F50] transition-colors hover:bg-[#F0F0E9]"
                             >
                                 <span className="truncate">
                                     Watch on YouTube
                                 </span>
-                                <span>↗</span>
                             </a>
                         )}
                     </div>
