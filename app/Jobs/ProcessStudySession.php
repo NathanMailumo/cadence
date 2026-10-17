@@ -19,6 +19,9 @@ class ProcessStudySession implements ShouldQueue
 {
     use Queueable, InteractsWithQueue, SerializesModels, Dispatchable;
 
+    public int $timeout = 180;
+    public int $tries = 1;
+
     public function __construct(
         public Study_Session $session,
         public string $contentToProcess

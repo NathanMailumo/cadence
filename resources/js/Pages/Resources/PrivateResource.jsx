@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import ResourceShow from '@/Components/ResourceShow';
 import {
     FolderOpen,
     Plus,
@@ -736,6 +737,10 @@ export default function PrivateResource({ resource, items = [] }) {
                         );
                     }
                 }}
+            />
+            <ResourceShow
+                item={viewingItem}
+                onClose={() => setViewingItem(null)}
             />
         </AuthenticatedLayout>
     );

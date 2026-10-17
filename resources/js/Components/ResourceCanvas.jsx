@@ -35,7 +35,6 @@ export default function ResourceCanvas({ items, renderCard, emptyState }) {
             return;
         }
 
-        event.currentTarget.setPointerCapture(event.pointerId);
         pointers.current.set(event.pointerId, event);
 
         if (pointers.current.size === 2) {
@@ -51,6 +50,7 @@ export default function ResourceCanvas({ items, renderCard, emptyState }) {
             startY: event.clientY,
             panX: pan.x,
             panY: pan.y,
+            hasMoved: false,
         };
     };
 
@@ -68,16 +68,45 @@ export default function ResourceCanvas({ items, renderCard, emptyState }) {
         }
 
         if (!drag.current || drag.current.pointerId !== event.pointerId) return;
+
+        const dx = event.clientX - drag.current.startX;
+        const dy = event.clientY - drag.current.startY;
+
+        if (!drag.current.hasMoved) {
+            if (Math.hypot(dx, dy) > 5) {
+                drag.current.hasMoved = true;
+                try {
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                } catch {
+                    // Ignore pointer capture error
+                }
+            } else {
+                return;
+            }
+        }
+
         setPan({
-            x: drag.current.panX + event.clientX - drag.current.startX,
-            y: drag.current.panY + event.clientY - drag.current.startY,
+            x: drag.current.panX + dx,
+            y: drag.current.panY + dy,
         });
     };
 
     const handlePointerUp = (event) => {
         pointers.current.delete(event.pointerId);
         if (pointers.current.size < 2) pinch.current = null;
-        if (drag.current?.pointerId === event.pointerId) drag.current = null;
+        if (drag.current?.pointerId === event.pointerId) {
+            if (
+                drag.current.hasMoved &&
+                event.currentTarget.hasPointerCapture?.(event.pointerId)
+            ) {
+                try {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                } catch {
+                    // Ignore release error
+                }
+            }
+            drag.current = null;
+        }
     };
 
     const handleWheel = (event) => {

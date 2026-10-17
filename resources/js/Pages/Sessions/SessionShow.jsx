@@ -5,6 +5,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CadenceLoader from '@/Components/CadenceLoader';
+import { Sparkles, CheckCircle2, Clock, Loader2 } from 'lucide-react';
 import 'katex/dist/katex.css';
 
 export default function SessionShow({ session }) {
@@ -17,9 +18,6 @@ export default function SessionShow({ session }) {
         outputContent === FAILED_OUTPUT,
     );
     const [copied, setCopied] = useState(false);
-    const [activeTab, setActiveTab] = useState('notes');
-    const [activeCardIndex, setActiveCardIndex] = useState(0);
-    const [isFlipped, setIsFlipped] = useState(false);
 
     // Polling while AI is generating
     useEffect(() => {
@@ -46,6 +44,56 @@ export default function SessionShow({ session }) {
         };
     }, [generationFailed, hasOutput, session?.created_at]);
 
+    // Live elapsed time tracking for the generation progress
+    const [elapsedSeconds, setElapsedSeconds] = useState(() => {
+        const createdAt = Date.parse(session?.created_at || '');
+        if (Number.isNaN(createdAt)) return 0;
+        return Math.max(0, Math.floor((Date.now() - createdAt) / 1000));
+    });
+
+    useEffect(() => {
+        if (hasOutput || generationFailed) return;
+
+        const timer = setInterval(() => {
+            const createdAt = Date.parse(session?.created_at || '');
+            if (!Number.isNaN(createdAt)) {
+                setElapsedSeconds(
+                    Math.max(0, Math.floor((Date.now() - createdAt) / 1000)),
+                );
+            } else {
+                setElapsedSeconds((prev) => prev + 1);
+            }
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [hasOutput, generationFailed, session?.created_at]);
+
+    // Realistic progress percentage based on typical generation time (~25-30s)
+    const progressPercent = useMemo(() => {
+        if (hasOutput) return 100;
+        if (generationFailed) return 0;
+        const s = elapsedSeconds;
+        if (s <= 4) return Math.min(22, Math.round(8 + (s / 4) * 14));
+        if (s <= 12) return Math.min(52, Math.round(22 + ((s - 4) / 8) * 30));
+        if (s <= 22) return Math.min(78, Math.round(52 + ((s - 12) / 10) * 26));
+        if (s <= 35) return Math.min(92, Math.round(78 + ((s - 22) / 13) * 14));
+        return Math.min(96, Math.round(92 + (1 - Math.exp(-(s - 35) / 25)) * 4));
+    }, [elapsedSeconds, hasOutput, generationFailed]);
+
+    const generationSteps = [
+        { label: 'Analyze material', desc: 'Parsing course notes & topics' },
+        { label: 'Synthesize notes', desc: 'Extracting key concepts & definitions' },
+        { label: 'Format math & logic', desc: 'Structuring formulas & derivations' },
+        { label: 'Review & polish', desc: 'Assembling comprehensive revision pack' },
+    ];
+
+    const currentStepIndex = useMemo(() => {
+        if (progressPercent < 25) return 0;
+        if (progressPercent < 55) return 1;
+        if (progressPercent < 80) return 2;
+        return 3;
+    }, [progressPercent]);
+
     // Extract headings for Table of Contents
     const headings = useMemo(() => {
         if (!outputContent) return [];
@@ -67,34 +115,6 @@ export default function SessionShow({ session }) {
             }
         }
         return extracted;
-    }, [outputContent]);
-
-    const flashcards = useMemo(() => {
-        if (!outputContent) return [];
-
-        const cards = [];
-        for (const line of outputContent.split('\n')) {
-            const colonMatch = line.match(/^[-*]\s+\*\*([^*]+)\*\*:\s*(.+)$/);
-            if (colonMatch) {
-                cards.push({
-                    question: colonMatch[1].trim(),
-                    answer: colonMatch[2].trim(),
-                });
-                continue;
-            }
-
-            const qaMatch = line.match(
-                /^(?:Q|Question):\s*(.+?)(?:\s*(?:A|Answer):\s*(.+))?$/i,
-            );
-            if (qaMatch?.[2]) {
-                cards.push({
-                    question: qaMatch[1].trim(),
-                    answer: qaMatch[2].trim(),
-                });
-            }
-        }
-
-        return cards.slice(0, 20);
     }, [outputContent]);
 
     const handleCopy = () => {
@@ -213,35 +233,6 @@ export default function SessionShow({ session }) {
                             </span>
                         </div>
                     </div>
-
-                    {hasOutput && flashcards.length > 0 && (
-                        <div className="mt-6 flex w-full justify-end">
-                            <div className="flex w-fit rounded-full bg-[#F0F0E9] p-1 text-xs font-semibold">
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveTab('notes')}
-                                    className={`rounded-full px-4 py-1.5 transition-all ${
-                                        activeTab === 'notes'
-                                            ? 'bg-[#FFFFFF] text-[#30302D] shadow-sm'
-                                            : 'text-[#73736C] hover:text-[#30302D]'
-                                    }`}
-                                >
-                                    Study Guide
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveTab('flashcards')}
-                                    className={`rounded-full px-4 py-1.5 transition-all ${
-                                        activeTab === 'flashcards'
-                                            ? 'bg-[#FFFFFF] text-[#30302D] shadow-sm'
-                                            : 'text-[#73736C] hover:text-[#30302D]'
-                                    }`}
-                                >
-                                    Interactive Flashcards ({flashcards.length})
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* MAIN CONTENT AREA */}
@@ -271,143 +262,116 @@ export default function SessionShow({ session }) {
                             </div>
                         </div>
                     ) : !hasOutput ? (
-                        /* 2. LOADING STATE WITH CADENCE PULSE */
-                        <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-12 text-center shadow-sm">
-                            <CadenceLoader
-                                size="lg"
-                                label="Generating your revision pack"
-                            />
+                        /* 2. LOADING STATE WITH DYNAMIC PROGRESS BAR */
+                        <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-8 text-center shadow-sm sm:p-12">
+                            <div className="flex justify-center">
+                                <CadenceLoader
+                                    size="lg"
+                                    label="Generating your revision pack"
+                                />
+                            </div>
+
+                            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-[#AD5266]/20 bg-[#FDF8FA] px-3.5 py-1 text-xs font-semibold text-[#762F50]">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#AD5266] opacity-75" />
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[#AD5266]" />
+                                </span>
+                                AI Generation in Progress
+                            </div>
 
                             <h2
-                                className="mt-6 text-xl font-bold text-[#30302D]"
+                                className="mt-4 text-xl font-bold text-[#30302D] sm:text-2xl"
                                 style={{ fontFamily: '"Manrope", sans-serif' }}
                             >
                                 Compiling your revision pack...
                             </h2>
                             <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#73736C]">
-                                Cadence is synthesizing key course concepts,
-                                explanations, definitions, and practice
-                                questions. This usually takes around 20–30
-                                seconds.
+                                Cadence is synthesizing key course concepts, explanations,
+                                definitions, and formulas. This usually takes around 10–25 seconds.
                             </p>
 
-                            <div className="mx-auto mt-8 max-w-sm space-y-2">
-                                <div className="flex items-center justify-between text-[11px] font-semibold text-[#73736C]">
-                                    <span>Synthesizing notes</span>
-                                    <span className="animate-pulse text-[#AD5266]">
-                                        In progress...
-                                    </span>
-                                </div>
-                                <div className="h-2 w-full overflow-hidden rounded-full bg-[#F0F0E9]">
-                                    <div className="h-full w-2/3 animate-pulse rounded-full bg-[#AD5266]" />
-                                </div>
-                            </div>
-                        </div>
-                    ) : activeTab === 'flashcards' && flashcards.length > 0 ? (
-                        <div className="mx-auto w-full max-w-3xl py-4">
-                            <div className="flex items-center justify-between px-1 pb-3 text-xs font-semibold text-[#73736C]">
-                                <span>
-                                    Card {activeCardIndex + 1} of{' '}
-                                    {flashcards.length}
-                                </span>
-                                <span>Click card to reveal answer</span>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() => setIsFlipped((value) => !value)}
-                                className={`flex min-h-[280px] w-full cursor-pointer flex-col justify-between rounded-3xl border-2 p-8 text-left shadow-md transition-all duration-300 sm:p-10 ${
-                                    isFlipped
-                                        ? 'border-[#AD5266] bg-[#FBF5F7]'
-                                        : 'border-[#D8DDD5] bg-[#FFFFFF] hover:border-[#AD5266]/50'
-                                }`}
-                            >
-                                <div className="flex w-full items-center justify-between">
-                                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
-                                        {isFlipped
-                                            ? 'Answer / Explanation'
-                                            : 'Question / Concept'}
-                                    </span>
-                                    <span className="text-xs text-[#73736C]">
-                                        {isFlipped
-                                            ? 'Flip back'
-                                            : 'Click to reveal'}
+                            {/* PROGRESS CARD */}
+                            <div className="mx-auto mt-8 max-w-lg rounded-2xl border border-[#D8DDD5] bg-[#FAF8F2] p-5 text-left shadow-sm sm:p-6">
+                                {/* Header with active stage & percentage */}
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                        <Sparkles className="h-4 w-4 shrink-0 text-[#AD5266]" />
+                                        <span className="truncate text-xs font-bold text-[#30302D]">
+                                            {generationSteps[currentStepIndex].desc}
+                                        </span>
+                                    </div>
+                                    <span className="rounded-full bg-white px-2.5 py-0.5 font-mono text-xs font-bold text-[#762F50] shadow-xs border border-[#D8DDD5]">
+                                        {progressPercent}%
                                     </span>
                                 </div>
 
-                                <div className="my-6 min-w-0 text-lg font-bold leading-relaxed text-[#30302D] [&_.katex-display]:my-4 [&_.katex-display]:overflow-x-auto [&_.katex-display]:py-1 [&_.katex]:text-[1em]">
-                                    <ReactMarkdown
-                                        remarkPlugins={[remarkMath]}
-                                        rehypePlugins={[rehypeKatex]}
-                                        components={{
-                                            p: ({ children, ...props }) => (
-                                                <p
-                                                    className="mb-3 last:mb-0"
-                                                    style={{
-                                                        fontFamily:
-                                                            '"Manrope", sans-serif',
-                                                    }}
-                                                    {...props}
-                                                >
-                                                    {children}
-                                                </p>
-                                            ),
-                                        }}
+                                {/* Active Progress Bar */}
+                                <div className="mt-3 relative h-3.5 w-full overflow-hidden rounded-full bg-[#E8E6DF] p-0.5 border border-[#D8DDD5]/60">
+                                    <div
+                                        className="h-full rounded-full bg-gradient-to-r from-[#AD5266] via-[#974356] to-[#762F50] transition-all duration-700 ease-out relative overflow-hidden"
+                                        style={{ width: `${progressPercent}%` }}
                                     >
-                                        {isFlipped
-                                            ? flashcards[activeCardIndex].answer
-                                            : flashcards[activeCardIndex]
-                                                  .question}
-                                    </ReactMarkdown>
+                                        <div className="absolute inset-0 bg-white/20 [background-image:linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] [background-size:1rem_1rem] animate-pulse" />
+                                    </div>
                                 </div>
 
-                                <span className="text-[11px] text-[#73736C]">
-                                    Cadence Flashcard Trainer
-                                </span>
-                            </button>
+                                {/* Live Timer & Info */}
+                                <div className="mt-3 flex items-center justify-between text-[11px] text-[#73736C]">
+                                    <span className="flex items-center gap-1.5 font-medium">
+                                        <Clock size={13} className="text-[#8A7146]" />
+                                        Elapsed: {elapsedSeconds}s{' '}
+                                        <span className="text-gray-400">· Typical: ~25s</span>
+                                    </span>
+                                    <span className="flex items-center gap-1.5 font-semibold text-[#AD5266]">
+                                        <Loader2 size={12} className="animate-spin" />
+                                        Generating live...
+                                    </span>
+                                </div>
 
-                            <div className="mt-6 flex items-center justify-between px-1">
-                                <button
-                                    type="button"
-                                    disabled={activeCardIndex === 0}
-                                    onClick={() => {
-                                        setIsFlipped(false);
-                                        setActiveCardIndex((index) =>
-                                            Math.max(0, index - 1),
+                                {/* Step checklist */}
+                                <div className="mt-5 grid grid-cols-2 gap-2 border-t border-[#D8DDD5]/70 pt-4 sm:grid-cols-4">
+                                    {generationSteps.map((step, idx) => {
+                                        const isDone = currentStepIndex > idx;
+                                        const isCurrent = currentStepIndex === idx;
+                                        return (
+                                            <div
+                                                key={step.label}
+                                                className={`flex flex-col rounded-xl p-2 transition-all ${
+                                                    isCurrent
+                                                        ? 'bg-white border border-[#AD5266]/30 shadow-xs'
+                                                        : isDone
+                                                          ? 'bg-white/60 text-[#30302D]'
+                                                          : 'opacity-50'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-1.5">
+                                                    {isDone ? (
+                                                        <CheckCircle2
+                                                            size={13}
+                                                            className="text-emerald-600 shrink-0"
+                                                        />
+                                                    ) : isCurrent ? (
+                                                        <Loader2
+                                                            size={13}
+                                                            className="text-[#AD5266] animate-spin shrink-0"
+                                                        />
+                                                    ) : (
+                                                        <span className="h-3 w-3 rounded-full border border-gray-400 shrink-0 inline-block" />
+                                                    )}
+                                                    <span
+                                                        className={`truncate text-[11px] font-semibold ${
+                                                            isCurrent
+                                                                ? 'text-[#AD5266]'
+                                                                : 'text-[#30302D]'
+                                                        }`}
+                                                    >
+                                                        {step.label}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         );
-                                    }}
-                                    className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-5 py-2 text-xs font-semibold text-[#30302D] hover:bg-[#F7F7F2] disabled:opacity-40"
-                                >
-                                    ← Previous
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setIsFlipped((value) => !value)
-                                    }
-                                    className="rounded-full bg-[#F0F0E9] px-4 py-2 text-xs font-semibold text-[#762F50] hover:bg-[#EAEAE4]"
-                                >
-                                    Flip Card
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={
-                                        activeCardIndex ===
-                                        flashcards.length - 1
-                                    }
-                                    onClick={() => {
-                                        setIsFlipped(false);
-                                        setActiveCardIndex((index) =>
-                                            Math.min(
-                                                flashcards.length - 1,
-                                                index + 1,
-                                            ),
-                                        );
-                                    }}
-                                    className="rounded-full bg-[#AD5266] px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] disabled:opacity-40"
-                                >
-                                    Next →
-                                </button>
+                                    })}
+                                </div>
                             </div>
                         </div>
                     ) : (

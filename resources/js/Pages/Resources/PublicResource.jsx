@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ResourceShow from '@/Components/ResourceShow';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     FolderOpen,
@@ -832,6 +833,10 @@ export default function PublicResource({
                 spaceName={spaceName}
                 inviteLink={inviteLink}
                 onSuccess={() => showToast('Invitation sent successfully!')}
+            />
+            <ResourceShow
+                item={viewingItem}
+                onClose={() => setViewingItem(null)}
             />
         </AuthenticatedLayout>
     );
