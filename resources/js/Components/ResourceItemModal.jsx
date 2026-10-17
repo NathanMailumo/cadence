@@ -510,7 +510,7 @@ export default function ResourceItemModal({
                                     ? 'Upload'
                                     : isRevision
                                       ? 'Generate and add to space'
-                                      : '+ Add resource'}
+                                      : 'Add resource'}
                         </button>
                     ) : null}
                 </div>

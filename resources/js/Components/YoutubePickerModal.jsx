@@ -1,26 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X } from 'lucide-react';
 
-export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
-    const [mode, setMode] = useState('search'); // 'search' or 'direct'
+export default function YouTubePickerModal({
+    isOpen,
+    onClose,
+    onSelectVideo,
+    editItem = null,
+}) {
+    const [mode, setMode] = useState('search'); // Default to search
     const [query, setQuery] = useState('');
     const [directUrl, setDirectUrl] = useState('');
     const [results, setResults] = useState([]);
+    const [selectedVideo, setSelectedVideo] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    if (!isOpen) return null;
-
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        if (!query.trim()) return;
+    const executeSearch = async (searchQuery) => {
+        if (!searchQuery.trim()) return;
 
         setLoading(true);
         setError('');
         try {
             const response = await axios.get('/youtube/search', {
-                params: { q: query },
+                params: { q: searchQuery.trim() },
             });
             setResults(response.data);
             if (response.data.length === 0) {
@@ -33,6 +36,40 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            setSelectedVideo(null);
+            setError('');
+
+            if (editItem) {
+                // Pre-fill search query with the video title and set mode to search
+                const initialTitle = editItem.title || '';
+                setQuery(initialTitle);
+                setDirectUrl(editItem.url || '');
+                setMode('search');
+
+                // Auto-execute search if a title exists
+                if (initialTitle) {
+                    executeSearch(initialTitle);
+                } else {
+                    setResults([]);
+                }
+            } else {
+                setDirectUrl('');
+                setQuery('');
+                setResults([]);
+                setMode('search');
+            }
+        }
+    }, [isOpen, editItem]);
+
+    if (!isOpen) return null;
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        executeSearch(query);
     };
 
     const getYouTubeId = (url) => {
@@ -73,19 +110,24 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                 url: directUrl,
             };
 
-            onSelectVideo(customVideo);
+            onSelectVideo(customVideo, editItem);
         } catch {
-            // Fallback object with direct thumbnail
             const fallbackVideo = {
                 id: videoId,
-                title: 'YouTube Video',
+                title: editItem ? editItem.title : 'YouTube Video',
                 uploader: 'YouTube',
                 thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
                 url: directUrl,
             };
-            onSelectVideo(fallbackVideo);
+            onSelectVideo(fallbackVideo, editItem);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSaveSelectedSearchVideo = () => {
+        if (selectedVideo) {
+            onSelectVideo(selectedVideo, editItem);
         }
     };
 
@@ -103,13 +145,15 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                 <div className="flex items-start justify-between border-b border-[#F0F0E9] pb-4">
                     <div>
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
-                            Add a resource
+                            {editItem ? 'Edit Resource' : 'Add a resource'}
                         </span>
                         <h2
                             className="mt-1 text-xl font-bold text-[#30302D]"
                             style={{ fontFamily: '"Manrope", sans-serif' }}
                         >
-                            Add a YouTube video
+                            {editItem
+                                ? 'Edit YouTube video'
+                                : 'Add a YouTube video'}
                         </h2>
                     </div>
                     <button
@@ -156,7 +200,10 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                 {/* MODE 1: SEARCH */}
                 {mode === 'search' ? (
                     <div className="mt-4 space-y-4">
-                        <form onSubmit={handleSearch} className="flex gap-2">
+                        <form
+                            onSubmit={handleSearchSubmit}
+                            className="flex gap-2"
+                        >
                             <input
                                 type="text"
                                 placeholder="Search for educational videos..."
@@ -180,37 +227,68 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                         {/* Search Results */}
                         <div className="custom-scrollbar max-h-60 space-y-2 overflow-y-auto pr-1">
                             {results.length > 0 ? (
-                                results.map((v) => (
-                                    <div
-                                        key={v.id}
-                                        onClick={() => onSelectVideo(v)}
-                                        className="group flex cursor-pointer items-center gap-3 rounded-2xl border border-[#D8DDD5] p-2.5 transition-all hover:border-[#AD5266] hover:bg-[#FDF9FA]"
-                                    >
-                                        <img
-                                            src={v.thumbnail}
-                                            alt=""
-                                            className="h-14 w-20 rounded-xl object-cover"
-                                        />
-                                        <div className="min-w-0 flex-1">
-                                            <p className="truncate text-xs font-bold text-[#30302D] group-hover:text-[#AD5266]">
-                                                {v.title}
-                                            </p>
-                                            <p className="truncate text-[11px] text-[#73736C]">
-                                                {v.uploader}
-                                            </p>
+                                results.map((v) => {
+                                    const isSelected =
+                                        selectedVideo?.id === v.id ||
+                                        (!selectedVideo &&
+                                            editItem?.url === v.url);
+
+                                    return (
+                                        <div
+                                            key={v.id}
+                                            onClick={() => setSelectedVideo(v)}
+                                            className={`group flex cursor-pointer items-center gap-3 rounded-2xl border p-2.5 transition-all ${
+                                                isSelected
+                                                    ? 'border-[#AD5266] bg-[#FDF9FA]'
+                                                    : 'border-[#D8DDD5] hover:border-[#AD5266] hover:bg-[#FDF9FA]'
+                                            }`}
+                                        >
+                                            <img
+                                                src={v.thumbnail}
+                                                alt=""
+                                                className="h-14 w-20 rounded-xl object-cover"
+                                            />
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-xs font-bold text-[#30302D] group-hover:text-[#AD5266]">
+                                                    {v.title}
+                                                </p>
+                                                <p className="truncate text-[11px] text-[#73736C]">
+                                                    {v.uploader}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <div className="py-8 text-center text-xs text-[#73736C]">
-                                    Search results will appear here. Results use
-                                    Cadence's YouTube provider when connected.
+                                    {loading
+                                        ? 'Loading search results...'
+                                        : 'Search results will appear here.'}
                                 </div>
                             )}
                         </div>
+
+                        {/* EDIT ACTION BUTTONS FOR SEARCH MODE */}
+                        <div className="flex items-center justify-end gap-3 border-t border-[#F0F0E9] pt-3">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="rounded-full px-4 py-2 text-xs font-semibold text-[#73736C] hover:text-[#30302D]"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSaveSelectedSearchVideo}
+                                disabled={!selectedVideo}
+                                className="rounded-full bg-[#AD5266] px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] disabled:opacity-50"
+                            >
+                                {editItem ? 'Save changes' : 'Add video'}
+                            </button>
+                        </div>
                     </div>
                 ) : (
-                    /* MODE 2: DIRECT URL (MATCHES FIGMA FRAME 14:3080) */
+                    /* MODE 2: DIRECT URL */
                     <form
                         onSubmit={handleDirectUrlSubmit}
                         className="mt-4 space-y-4"
@@ -251,7 +329,11 @@ export default function YouTubePickerModal({ isOpen, onClose, onSelectVideo }) {
                                 disabled={loading || !directUrl}
                                 className="rounded-full bg-[#AD5266] px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#974356] disabled:opacity-50"
                             >
-                                {loading ? 'Fetching...' : 'Add video'}
+                                {loading
+                                    ? 'Fetching...'
+                                    : editItem
+                                      ? 'Save changes'
+                                      : 'Add video'}
                             </button>
                         </div>
                     </form>

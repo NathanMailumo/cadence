@@ -63,6 +63,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     // Resource Items
     Route::post('/resource-items', [ResourceItemController::class, 'store'])->name('resource-items.store');
     Route::delete('/resource-items/{resourceItem}', [ResourceItemController::class, 'destroy'])->name('resource-items.destroy');
+    Route::put('/resource-items/{resourceItem}', [ResourceItemController::class , 'update'])->name('resource-items.update');
 
     // Collaborators & Members
     Route::get('/resources/{resource}/collaborators', [ResourceUserController::class, 'members'])->name('resources.collaborators.index');
