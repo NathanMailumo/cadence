@@ -38,6 +38,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
             ],
+            'flash' => [
+                'success' => fn() => $request->session()->get('success'),
+                'error'   => fn() => $request->session()->get('error'),
+            ],
             'privateResources' => fn() => $user
                 ? Resource::where('status', 'active')
                 ->where('clerk_id', $user->clerk_id)

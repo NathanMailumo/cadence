@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 use Inertia\Inertia;
 use App\Services\CloudinaryService;
+use App\Http\Controllers\SubscriptionController;
 
 class ResourceItemController extends Controller
 {
@@ -26,12 +27,34 @@ class ResourceItemController extends Controller
             'file'        => 'required_if:type,pq|nullable|file|mimes:pdf,png,jpg,jpeg,webp,txt|max:2048',
         ]);
 
+        $user = $request->user();
         $metadata = $request->input('metadata', []);
 
         if ($validated['type'] === 'pq') {
-            $upload = $cloudinary->uploadResourceFile($request->file('file'));
+            try {
+                $upload = $cloudinary->uploadResourceFile($request->file('file'));
+            } catch (\Throwable $e) {
+                $upload = null;
+            }
 
-            abort_unless($upload, 503, 'Practice question upload failed. Please try again.');
+            if (!$upload) {
+                return back()->withErrors([
+                    'file' => 'Upload failed. Your internet connection appears to be poor. Please check your connection and try again.',
+                ]);
+            }
+
+            // Enforce Free plan limit: Max 3 past-question uploads using independent counter allowance
+            $allowed = SubscriptionController::checkAndConsumeFreeUsage($user, 'pq_upload');
+
+            if (!$allowed) {
+                if (!empty($upload['public_id'])) {
+                    $cloudinary->deleteImage($upload['public_id']);
+                }
+                return back()->withErrors([
+                    'file' => 'You have exhausted your available allowance of 3 past-question uploads on the Free plan. Upgrade to Cadence Plus for unlimited uploads!',
+                    'limit' => 'You have exhausted your available allowance of 3 past-question uploads on the Free plan. Upgrade to Cadence Plus for unlimited uploads!'
+                ]);
+            }
 
             $metadata = [
                 'file_url' => $upload['url'],
@@ -52,7 +75,6 @@ class ResourceItemController extends Controller
 
             if ($validated['type'] === 'video' && $isYouTube) {
                 try {
-                    // Query YouTube oEmbed endpoint (free, no API key needed)
                     $response = Http::withoutVerifying()->get('https://www.youtube.com/oembed', [
                         'url'    => $validated['url'],
                         'format' => 'json',
@@ -61,7 +83,6 @@ class ResourceItemController extends Controller
                     if ($response->successful()) {
                         $oembed = $response->json();
 
-                        // OVERWRITE DUMMY TITLE & DESCRIPTION WITH REAL OEMBED METADATA
                         if (!empty($oembed['title'])) {
                             $validated['title'] = html_entity_decode($oembed['title']);
                         }
@@ -75,13 +96,13 @@ class ResourceItemController extends Controller
                         $metadata['provider_name']  = $oembed['provider_name'] ?? 'YouTube';
                     }
                 } catch (\Exception $e) {
-                    // Gracefully fallback to submitted title/description if oEmbed fails
+                    // Fallback
                 }
             }
         }
 
         $validated['metadata'] = $metadata;
-        $validated['clerk_id'] = $request->user()->clerk_id;
+        $validated['clerk_id'] = $user->clerk_id;
         $validated['status'] = 'active';
 
         ResourceItem::create($validated);
@@ -93,7 +114,6 @@ class ResourceItemController extends Controller
     {
         $user = $request->user();
 
-        // Allow update if the user is the space owner OR the item creator
         $isOwner = $resourceItem->resource->clerk_id === $user->clerk_id;
         $isCreator = $resourceItem->clerk_id === $user->clerk_id;
 
@@ -108,15 +128,22 @@ class ResourceItemController extends Controller
 
         $metadata = $resourceItem->metadata ?? [];
 
-        // Handle file replacement for Past Questions (pq)
         if ($resourceItem->type === 'pq' && $request->hasFile('file')) {
-            // Delete old file from Cloudinary if public_id exists
             if (!empty($metadata['public_id'])) {
                 $cloudinary->deleteImage($metadata['public_id']);
             }
 
-            $upload = $cloudinary->uploadResourceFile($request->file('file'));
-            abort_unless($upload, 503, 'Practice question file replacement failed. Please try again.');
+            try {
+                $upload = $cloudinary->uploadResourceFile($request->file('file'));
+            } catch (\Throwable $e) {
+                $upload = null;
+            }
+
+            if (!$upload) {
+                return back()->withErrors([
+                    'file' => 'Upload failed. Your internet connection appears to be poor. Please check your connection and try again.',
+                ]);
+            }
 
             $metadata = array_merge($metadata, [
                 'file_url'  => $upload['url'],
@@ -127,7 +154,6 @@ class ResourceItemController extends Controller
             ]);
         }
 
-        // Handle URL changes & YouTube oEmbed re-fetching if URL changed
         if (!empty($validated['url']) && $validated['url'] !== $resourceItem->url) {
             $host = parse_url($validated['url'], PHP_URL_HOST) ?? '';
             $metadata['domain'] = $host;
@@ -153,7 +179,7 @@ class ResourceItemController extends Controller
                         $metadata['provider_name'] = $oembed['provider_name'] ?? 'YouTube';
                     }
                 } catch (\Exception $e) {
-                    // Fallback gracefully
+                    // Fallback
                 }
             }
         }
@@ -172,7 +198,6 @@ class ResourceItemController extends Controller
     {
         $user = $request->user();
 
-        // Allow deletion if the user is the space owner OR the item creator
         $isOwner = $resourceItem->resource->clerk_id === $user->clerk_id;
         $isCreator = $resourceItem->clerk_id === $user->clerk_id;
 
@@ -185,7 +210,6 @@ class ResourceItemController extends Controller
 
     public function show(Resource $resource): Response
     {
-        // Load items related to this specific resource
         $resource->load(['items' => function ($query) {
             $query->latest();
         }]);

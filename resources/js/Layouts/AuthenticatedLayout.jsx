@@ -10,6 +10,8 @@ import {
     Plus,
     Trash2,
     Users,
+    User,
+    Zap,
 } from 'lucide-react';
 import Resource from '@/Components/Resource';
 import CadenceLogo from '@/Components/CadenceLogo';
@@ -31,6 +33,7 @@ export default function AuthenticatedLayout({ children }) {
     const [isMobileSpaceMenuOpen, setIsMobileSpaceMenuOpen] = useState(false);
     const [isMobileAccountMenuOpen, setIsMobileAccountMenuOpen] =
         useState(false);
+    const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
     const { signOut } = useClerk();
 
     const openResourceModal = (type) => {
@@ -317,42 +320,84 @@ export default function AuthenticatedLayout({ children }) {
                     </nav>
                 </div>
 
-                <div className="mt-auto border-t border-[#E5E7E1] px-5 py-5">
+                <div className="relative mt-auto border-t border-[#E5E7E1] px-3 py-4">
+                    {/* DESKTOP PROFILE DROPDOWN MENU */}
+                    {isProfileDropdownOpen && (
+                        <div className="absolute bottom-[calc(100%+0.5rem)] left-3 right-3 z-50 overflow-hidden rounded-2xl border border-[#D8DDD5] bg-white p-1.5 shadow-[0_12px_30px_rgba(48,48,45,0.16)]">
+                            <Link
+                                href="/profile"
+                                onClick={() => {
+                                    setIsProfileDropdownOpen(false);
+                                    closeMobileMenu();
+                                }}
+                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-[#30302D] transition hover:bg-[#F1E5EA] hover:text-[#762F50]"
+                            >
+                                <User size={15} className="text-[#AD5266]" />
+                                Profile
+                            </Link>
+                            <Link
+                                href="/billing"
+                                onClick={() => {
+                                    setIsProfileDropdownOpen(false);
+                                    closeMobileMenu();
+                                }}
+                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-[#30302D] transition hover:bg-[#F1E5EA] hover:text-[#762F50]"
+                            >
+                                <Zap size={15} className="text-[#AD5266]" />
+                                Upgrade
+                            </Link>
+                            <div className="my-1 border-t border-[#F0F0E9]" />
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-[#AD5266] transition hover:bg-[#FCE8ED]"
+                            >
+                                <LogOut size={15} strokeWidth={1.8} />
+                                Log out
+                            </button>
+                        </div>
+                    )}
+
+                    {/* PROFILE CARD TRIGGER */}
                     <button
                         type="button"
-                        onClick={handleLogout}
-                        className="mb-5 flex items-center gap-3 px-3 py-2 text-sm text-[#73736C] transition hover:text-[#762F50]"
+                        onClick={() =>
+                            setIsProfileDropdownOpen(!isProfileDropdownOpen)
+                        }
+                        className="flex w-full items-center justify-between rounded-xl p-2 text-left transition hover:bg-[#F7F7F2]"
+                        aria-haspopup="menu"
+                        aria-expanded={isProfileDropdownOpen}
                     >
-                        <LogOut size={16} strokeWidth={1.8} />
-                        Log out
+                        <div className="flex min-w-0 items-center gap-2.5">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F1E5EA] text-sm font-bold text-[#762F50]">
+                                {user?.profile_image_url ? (
+                                    <img
+                                        src={user.profile_image_url}
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    (user?.name || user?.email || 'A')
+                                        .charAt(0)
+                                        .toUpperCase()
+                                )}
+                            </div>
+                            <div className="min-w-0">
+                                <p className="truncate text-xs font-semibold text-[#30302D]">
+                                    {user?.name || 'Cadence user'}
+                                </p>
+                                <p className="truncate text-[10px] text-[#A5A59D]">
+                                    {user?.email || 'Study workspace'}
+                                </p>
+                            </div>
+                        </div>
+                        <ChevronDown
+                            size={15}
+                            className={`shrink-0 text-[#73736C] transition-transform duration-200 ${
+                                isProfileDropdownOpen ? 'rotate-180' : ''
+                            }`}
+                        />
                     </button>
-                    <Link
-                        href="/profile"
-                        onClick={closeMobileMenu}
-                        className="flex items-center gap-3 px-3"
-                    >
-                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#F1E5EA] text-sm font-bold text-[#762F50]">
-                            {user?.profile_image_url ? (
-                                <img
-                                    src={user.profile_image_url}
-                                    alt=""
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                (user?.name || user?.email || 'A')
-                                    .charAt(0)
-                                    .toUpperCase()
-                            )}
-                        </div>
-                        <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-[#30302D] hover:text-[#762F50]">
-                                {user?.name || 'Cadence user'}
-                            </p>
-                            <p className="truncate text-[11px] text-[#A5A59D]">
-                                {user?.email || 'Study workspace'}
-                            </p>
-                        </div>
-                    </Link>
                 </div>
             </aside>
 
@@ -461,10 +506,18 @@ export default function AuthenticatedLayout({ children }) {
                     >
                         Account settings
                     </Link>
+                    <Link
+                        href={route('billing')}
+                        onClick={() => setIsMobileAccountMenuOpen(false)}
+                        className="mt-1 flex w-full items-center rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-[#762F50] transition hover:bg-[#F1E5EA]"
+                        role="menuitem"
+                    >
+                        Upgrade
+                    </Link>
                     <button
                         type="button"
                         onClick={handleLogout}
-                        className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-[#762F50] transition hover:bg-[#F1E5EA]"
+                        className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-[#762F50] transition hover:bg-[#F1E5EA]"
                         role="menuitem"
                     >
                         <LogOut size={15} strokeWidth={1.8} />

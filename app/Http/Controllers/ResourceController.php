@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Http\Controllers\SubscriptionController;
 
 class ResourceController extends Controller
 {
@@ -31,7 +32,19 @@ class ResourceController extends Controller
             'resource_type' => 'required|in:private,public',
         ]);
 
-        $validated['clerk_id'] = $request->user()->clerk_id;
+        $user = $request->user();
+        $validated['clerk_id'] = $user->clerk_id;
+
+        // Enforce Free plan limit: Max 2 collaborative spaces using independent counter allowance
+        if ($validated['resource_type'] === 'public') {
+            $allowed = SubscriptionController::checkAndConsumeFreeUsage($user, 'collaborative_space');
+
+            if (!$allowed) {
+                return back()->withErrors([
+                    'limit' => 'You have exhausted your available allowance of 2 collaborative spaces on the Free plan. Upgrade to Cadence Plus for unlimited collaborative spaces!'
+                ]);
+            }
+        }
 
         $resource = Resource::create([...$validated, 'status' => 'active']);
 

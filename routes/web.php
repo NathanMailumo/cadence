@@ -9,6 +9,7 @@ use App\Http\Controllers\YouTubeController;
 use App\Http\Controllers\ClerkSyncController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -81,5 +82,10 @@ Route::middleware(['web', 'auth'])->group(function () {
     // YouTube Controller
     Route::get('/youtube/search', [YouTubeController::class, 'search'])->name('youtube.search');
 
-    // T&C
+    // payment
+    Route::get('/billing', [SubscriptionController::class, 'index'])->name('billing');
+    Route::get('/billing/info', [SubscriptionController::class, 'info'])->name('billing.info');
+    Route::post('/subscription/initialize', [SubscriptionController::class, 'initialize'])->name('subscription.initialize');
+    Route::get('/subscription/callback', [SubscriptionController::class, 'callback'])->name('subscription.callback');
+    Route::post('/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
 });

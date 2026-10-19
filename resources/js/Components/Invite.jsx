@@ -8,6 +8,7 @@ export default function InviteModal({
     resourceId,
     spaceName = 'space',
     inviteLink,
+    onSuccess,
 }) {
     const [emailInput, setEmailInput] = useState('');
     const [emailTags, setEmailTags] = useState([]);
@@ -103,24 +104,10 @@ export default function InviteModal({
                 },
                 onSuccess: () => {
                     handleClose();
+                    if (onSuccess) onSuccess();
                 },
             },
         );
-    };
-
-    const handleCopyLink = async () => {
-        const linkToCopy = inviteLink;
-        if (!linkToCopy) {
-            console.error('No invitation link was provided.');
-            return;
-        }
-        try {
-            await navigator.clipboard.writeText(linkToCopy);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-            console.error('Failed to copy link:', err);
-        }
     };
 
     if (!isOpen) return null;
@@ -135,7 +122,6 @@ export default function InviteModal({
             }}
         >
             <div className="w-full max-w-lg rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-6 shadow-2xl transition-all sm:p-7">
-                {/* HEADER (MATCHES FIGMA FRAME 14:2134) */}
                 <div className="flex items-start justify-between border-b border-[#F0F0E9] pb-4">
                     <div>
                         <span className="text-[11px] font-bold uppercase tracking-wider text-[#AD5266]">
@@ -161,7 +147,6 @@ export default function InviteModal({
                     </button>
                 </div>
 
-                {/* FORM */}
                 <form onSubmit={handleEmailSubmit} className="mt-5 space-y-4">
                     <div>
                         <label className="block text-xs font-semibold uppercase text-[#30302D]">
@@ -209,30 +194,6 @@ export default function InviteModal({
                         )}
                     </div>
 
-                    {/* SHARE LINK SECTION - COMMENTED OUT TEMPORARILY */}
-                    {/* 
-                    <div className="rounded-2xl border border-[#D8DDD5] bg-[#F7F7F2] p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-bold text-[#30302D]">
-                                    Share invitation link
-                                </p>
-                                <p className="text-[11px] text-[#73736C]">
-                                    Direct invite link for this workspace
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={handleCopyLink}
-                                className="rounded-full border border-[#D8DDD5] bg-[#FFFFFF] px-3.5 py-1 text-xs font-semibold text-[#30302D] transition-colors hover:bg-[#F0F0E9]"
-                            >
-                                {copied ? '✓ Copied' : 'Copy link'}
-                            </button>
-                        </div>
-                    </div>
-                    */}
-
-                    {/* FOOTER ACTIONS */}
                     <div className="flex items-center justify-end gap-3 border-t border-[#F0F0E9] pt-4">
                         <button
                             type="button"

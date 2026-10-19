@@ -99,45 +99,50 @@ class CloudinaryService
             return null;
         }
 
-        $timestamp = time();
-        $params = [
-            'folder' => $folder,
-            'timestamp' => $timestamp,
-        ];
-        ksort($params);
+        try {
+            $timestamp = time();
+            $params = [
+                'folder' => $folder,
+                'timestamp' => $timestamp,
+            ];
+            ksort($params);
 
-        $toSign = '';
-        foreach ($params as $key => $value) {
-            $toSign .= ($toSign ? '&' : '') . "{$key}={$value}";
-        }
-        $signature = sha1($toSign . $this->apiSecret);
+            $toSign = '';
+            foreach ($params as $key => $value) {
+                $toSign .= ($toSign ? '&' : '') . "{$key}={$value}";
+            }
+            $signature = sha1($toSign . $this->apiSecret);
 
-        $response = Http::asMultipart()->timeout(30)->post(
-            "https://api.cloudinary.com/v1_1/{$this->cloudName}/auto/upload",
-            [
-                ['name' => 'api_key', 'contents' => (string) $this->apiKey],
-                ['name' => 'timestamp', 'contents' => (string) $timestamp],
-                ['name' => 'folder', 'contents' => $folder],
-                ['name' => 'signature', 'contents' => $signature],
+            $response = Http::asMultipart()->timeout(30)->post(
+                "https://api.cloudinary.com/v1_1/{$this->cloudName}/auto/upload",
                 [
-                    'name' => 'file',
-                    'contents' => fopen($file->getRealPath(), 'r'),
-                    'filename' => $file->getClientOriginalName(),
-                ],
-            ]
-        );
+                    ['name' => 'api_key', 'contents' => (string) $this->apiKey],
+                    ['name' => 'timestamp', 'contents' => (string) $timestamp],
+                    ['name' => 'folder', 'contents' => $folder],
+                    ['name' => 'signature', 'contents' => $signature],
+                    [
+                        'name' => 'file',
+                        'contents' => fopen($file->getRealPath(), 'r'),
+                        'filename' => $file->getClientOriginalName(),
+                    ],
+                ]
+            );
 
-        if (!$response->successful()) {
-            Log::error('Cloudinary resource upload failed: ' . $response->body());
+            if (!$response->successful()) {
+                Log::error('Cloudinary resource upload failed: ' . $response->body());
+                return null;
+            }
+
+            $data = $response->json();
+
+            return [
+                'url' => $data['secure_url'] ?? $data['url'] ?? '',
+                'public_id' => $data['public_id'] ?? '',
+            ];
+        } catch (\Throwable $e) {
+            Log::error('Cloudinary resource upload exception: ' . $e->getMessage());
             return null;
         }
-
-        $data = $response->json();
-
-        return [
-            'url' => $data['secure_url'] ?? $data['url'] ?? '',
-            'public_id' => $data['public_id'] ?? '',
-        ];
     }
 
     /**

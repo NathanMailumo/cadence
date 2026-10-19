@@ -48,6 +48,14 @@ return [
 
     'youtube' => [
         'api_key' => env('YOUTUBE_API_KEY'),
+    ],
+
+    'paystack' => [
+        'secret' => env('PAYSTACK_SECRET_KEY'),
+        'public' => env('PAYSTACK_PUBLIC_KEY'),
+        // 'secret' => env('PAYSTACK_SECRET_KEY'),
     ]
+
+
 
 ];

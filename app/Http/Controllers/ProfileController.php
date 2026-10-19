@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Subscriptions;
 
 class ProfileController extends Controller
 {
@@ -19,9 +20,17 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+
+        $activeSub = Subscriptions::where('clerk_id', $user->clerk_id)
+            ->where('status', 'active')
+            ->latest()
+            ->first();
+
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'currentPlan' => $activeSub ? $activeSub->plan_type : 'free',
         ]);
     }
 

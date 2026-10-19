@@ -1,18 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, Camera, Check, CreditCard, Mail } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import {
+    ArrowLeft,
+    Camera,
+    Check,
+    CreditCard,
+    Mail,
+    CheckCircle2,
+} from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function EditProfile() {
+export default function EditProfile({ currentPlan = 'free' }) {
     const { props } = usePage();
     const user = props.auth?.user;
+    const flash = props.flash;
+
     const [previewUrl, setPreviewUrl] = useState(user?.profile_image_url || '');
+    const [successBanner, setSuccessBanner] = useState(flash?.success || null);
+
     const { data, setData, patch, processing, errors, recentlySuccessful } =
         useForm({
             name: user?.name || '',
             email: user?.email || '',
             profile_image: null,
         });
+
+    // Handle auto-dismissing success banner after 4 seconds
+    useEffect(() => {
+        if (flash?.success) {
+            setSuccessBanner(flash.success);
+            const timer = setTimeout(() => {
+                setSuccessBanner(null);
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
 
     useEffect(() => {
         return () => {
@@ -41,6 +63,16 @@ export default function EditProfile() {
         patch('/profile', { forceFormData: true });
     };
 
+    const handleCancelSubscription = () => {
+        if (
+            window.confirm(
+                'Are you sure you want to cancel your subscription? You will be moved to the Free plan.',
+            )
+        ) {
+            router.post(route('subscription.cancel'));
+        }
+    };
+
     return (
         <AuthenticatedLayout>
             <Head>
@@ -50,7 +82,6 @@ export default function EditProfile() {
                     type="image/svg+xml"
                     href="/images/cadence_logo.svg"
                 />
-                {/* Or use href="/logo.png" if your file is a PNG */}
             </Head>
 
             <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-10 sm:py-10 lg:px-12">
@@ -61,6 +92,17 @@ export default function EditProfile() {
                     <ArrowLeft size={15} />
                     Back to home
                 </Link>
+
+                {/* AUTO-DISMISSING SUCCESS BANNER */}
+                {successBanner && (
+                    <div className="animate-in fade-in slide-in-from-top-2 mt-4 flex items-center gap-2.5 rounded-2xl border border-[#762F50]/20 bg-[#F1E5EA] p-4 text-xs font-bold text-[#762F50] transition-all duration-300">
+                        <CheckCircle2
+                            size={16}
+                            className="shrink-0 text-[#AD5266]"
+                        />
+                        <span>{successBanner}</span>
+                    </div>
+                )}
 
                 <header className="mt-8 border-b border-[#D8DDD5] pb-8">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#AD5266]">
@@ -165,28 +207,63 @@ export default function EditProfile() {
                         </form>
                     </section>
 
-                    <section className="relative rounded-2xl border border-[#D8DDD5] bg-white p-6 sm:p-8">
-                        <span className="absolute right-6 top-6 rounded-full bg-[#F1E5EA] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#762F50]">
-                            Coming soon
-                        </span>
-                        <div className="flex items-center gap-3">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F7F7F2] text-[#762F50]">
-                                <CreditCard size={18} />
-                            </span>
-                            <div>
-                                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#AD5266]">
-                                    Billing
-                                </p>
-                                <h2 className="mt-1 text-xl font-medium text-[#30302D]">
-                                    Plan and billing
-                                </h2>
+                    {/* BILLING & PLAN MANAGEMENT CARD LINK */}
+                    <Link
+                        href={route('billing.info')}
+                        className="group relative flex flex-col justify-between rounded-2xl border border-[#D8DDD5] bg-white p-6 transition hover:border-[#AD5266] hover:shadow-md sm:p-8"
+                    >
+                        <div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F7F7F2] text-[#762F50] transition group-hover:bg-[#F1E5EA]">
+                                        <CreditCard size={18} />
+                                    </span>
+                                    <div>
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#AD5266]">
+                                            Billing
+                                        </p>
+                                        <h2 className="mt-1 text-xl font-medium text-[#30302D]">
+                                            Plan and billing
+                                        </h2>
+                                    </div>
+                                </div>
+                                <span className="text-xs font-semibold text-[#762F50] underline opacity-0 transition group-hover:opacity-100">
+                                    Manage &rarr;
+                                </span>
+                            </div>
+
+                            <div className="mt-6 flex items-center justify-between rounded-xl bg-[#F7F7F2] p-4">
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#73736C]">
+                                        Current Plan
+                                    </p>
+                                    <p className="mt-0.5 text-sm font-bold uppercase text-[#30302D]">
+                                        {currentPlan === 'free'
+                                            ? 'Free Plan'
+                                            : currentPlan === 'semester'
+                                              ? 'Semester Pass'
+                                              : 'Plus Plan'}
+                                    </p>
+                                </div>
+                                <span
+                                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                                        currentPlan === 'free'
+                                            ? 'bg-[#D8DDD5]/40 text-[#73736C]'
+                                            : 'bg-[#F1E5EA] text-[#762F50]'
+                                    }`}
+                                >
+                                    {currentPlan === 'free'
+                                        ? 'Inactive'
+                                        : 'Active'}
+                                </span>
                             </div>
                         </div>
-                        <p className="mt-8 max-w-sm text-sm leading-6 text-[#73736C]">
-                            Billing details, invoices, and plan management will
-                            be available here soon.
-                        </p>
-                    </section>
+
+                        <div className="mt-8 border-t border-[#F0F0E9] pt-4 text-xs font-semibold text-[#762F50]">
+                            Click to view billing info & manage subscription
+                            &rarr;
+                        </div>
+                    </Link>
                 </div>
             </div>
         </AuthenticatedLayout>

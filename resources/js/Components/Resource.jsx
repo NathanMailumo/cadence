@@ -1,20 +1,22 @@
 import React, { useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Globe2, LockKeyhole, X } from 'lucide-react';
+import { AlertCircle, Globe2, LockKeyhole, X } from 'lucide-react';
 
 export default function Resource({
     isOpen,
     onClose,
     defaultResourceType = 'private',
 }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        course_name: '',
-        resource_type: defaultResourceType || 'private',
-    });
+    const { data, setData, post, processing, errors, reset, clearErrors } =
+        useForm({
+            course_name: '',
+            resource_type: defaultResourceType || 'private',
+        });
 
     useEffect(() => {
         if (isOpen) {
             setData('resource_type', defaultResourceType);
+            clearErrors();
         }
     }, [defaultResourceType, isOpen, setData]);
 
@@ -70,6 +72,17 @@ export default function Resource({
                         <X size={22} strokeWidth={1.8} />
                     </button>
                 </div>
+
+                {/* GENERAL / LIMIT ERROR BANNER */}
+                {errors.limit && (
+                    <div className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                        <AlertCircle
+                            size={16}
+                            className="mt-0.5 shrink-0 text-rose-600"
+                        />
+                        <span>{errors.limit}</span>
+                    </div>
+                )}
 
                 <form className="mt-7" onSubmit={handleSubmit}>
                     <label

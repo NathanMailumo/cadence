@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import axios from 'axios';
 import {
+    AlertCircle,
     BrainCircuit,
     FileText,
     Link2,
@@ -126,8 +127,8 @@ export default function ResourceItemModal({
         setYoutubeUrl('');
         setSelectedVideoUrl('');
         setSelectedFile(null);
-        // useForm objects are intentionally excluded to avoid resetting a view
-        // whenever a controlled input updates.
+        itemForm.clearErrors();
+        revisionForm.clearErrors();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [defaultType, isOpen, resource]);
 
@@ -137,7 +138,9 @@ export default function ResourceItemModal({
 
     const handleClose = () => {
         itemForm.reset();
+        itemForm.clearErrors();
         revisionForm.reset();
+        revisionForm.clearErrors();
         setActiveModal(null);
         setSelectedType(null);
         setYoutubeMode('search');
@@ -260,11 +263,6 @@ export default function ResourceItemModal({
             <form
                 method="POST"
                 encType="multipart/form-data"
-                action={
-                    typeof route === 'function'
-                        ? route('resource-items.store')
-                        : '/resource-items'
-                }
                 onSubmit={handleSubmit}
                 className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white px-6 py-5 shadow-2xl sm:px-7"
             >
@@ -283,16 +281,6 @@ export default function ResourceItemModal({
                     name="type"
                     value={getBackendType(selectedType) || ''}
                 />
-                {isYoutube && (
-                    <input
-                        type="hidden"
-                        name="title"
-                        value={itemForm.data.title || 'YouTube Video'}
-                    />
-                )}
-                {isYoutube && youtubeMode === 'search' && (
-                    <input type="hidden" name="url" value={selectedVideoUrl} />
-                )}
 
                 <ModalHeader
                     activeModal={currentModal}
@@ -301,131 +289,41 @@ export default function ResourceItemModal({
                 />
 
                 {isSelectionGrid && (
-                    <>
-                        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                            {choices.map(
-                                ({ type, label, description, icon: Icon }) => {
-                                    const isSelected = selectedType === type;
-                                    return (
-                                        <button
-                                            key={type}
-                                            type="button"
-                                            onClick={() => selectType(type)}
-                                            className={`min-h-[116px] rounded-xl border p-3 text-left transition-colors ${
+                    <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                        {choices.map(
+                            ({ type, label, description, icon: Icon }) => {
+                                const isSelected = selectedType === type;
+                                return (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        onClick={() => selectType(type)}
+                                        className={`min-h-[116px] rounded-xl border p-3 text-left transition-colors ${
+                                            isSelected
+                                                ? 'border-[#702B4B] bg-[#FDF4F6]'
+                                                : 'border-[#E2E2DA] bg-[#F7F6F1] hover:border-[#C98A9A]'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`flex h-7 w-7 items-center justify-center rounded-md ${
                                                 isSelected
-                                                    ? 'border-[#702B4B] bg-[#FDF4F6]'
-                                                    : 'border-[#E2E2DA] bg-[#F7F6F1] hover:border-[#C98A9A]'
+                                                    ? 'bg-[#702B4B] text-white'
+                                                    : 'bg-[#E9E9E1] text-[#AD5266]'
                                             }`}
                                         >
-                                            <span
-                                                className={`flex h-7 w-7 items-center justify-center rounded-md ${
-                                                    isSelected
-                                                        ? 'bg-[#702B4B] text-white'
-                                                        : 'bg-[#E9E9E1] text-[#AD5266]'
-                                                }`}
-                                            >
-                                                <Icon
-                                                    size={15}
-                                                    strokeWidth={1.8}
-                                                />
-                                            </span>
-                                            <span className="mt-4 block text-[11px] font-bold text-[#30302D]">
-                                                {label}
-                                            </span>
-                                            <span className="mt-1 block text-[9px] leading-[1.35] text-[#73736C]">
-                                                {description}
-                                            </span>
-                                        </button>
-                                    );
-                                },
-                            )}
-                        </div>
-
-                        {isInlineItem && (
-                            <div className="mt-4 border-t border-[#E8E7E0] pt-4">
-                                {selectedType === 'link' && (
-                                    <>
-                                        <BottomHeading title="ADD WEBSITE LINK" />
-                                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                                            <Field label="Resource title">
-                                                <input
-                                                    name="title"
-                                                    type="text"
-                                                    required
-                                                    placeholder="Give this resource a clear title"
-                                                    value={itemForm.data.title}
-                                                    onChange={(event) =>
-                                                        itemForm.setData(
-                                                            'title',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    className={inputClass}
-                                                />
-                                            </Field>
-                                            <Field label="Link or details">
-                                                <input
-                                                    name="url"
-                                                    type="url"
-                                                    required
-                                                    placeholder="Paste a URL or add a short description"
-                                                    value={itemForm.data.url}
-                                                    onChange={(event) =>
-                                                        itemForm.setData(
-                                                            'url',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    className={inputClass}
-                                                />
-                                            </Field>
-                                        </div>
-                                    </>
-                                )}
-                                {selectedType === 'note' && (
-                                    <>
-                                        <BottomHeading title="ADD STICKY NOTE" />
-                                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                                            <Field label="Note title">
-                                                <input
-                                                    name="title"
-                                                    type="text"
-                                                    required
-                                                    placeholder="e.g. Key idea to remember"
-                                                    value={itemForm.data.title}
-                                                    onChange={(event) =>
-                                                        itemForm.setData(
-                                                            'title',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    className={inputClass}
-                                                />
-                                            </Field>
-                                            <Field label="Your note">
-                                                <textarea
-                                                    name="content"
-                                                    required
-                                                    rows="1"
-                                                    placeholder="Write a short note"
-                                                    value={
-                                                        itemForm.data.content
-                                                    }
-                                                    onChange={(event) =>
-                                                        itemForm.setData(
-                                                            'content',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    className={`${inputClass} resize-none`}
-                                                />
-                                            </Field>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                                            <Icon size={15} strokeWidth={1.8} />
+                                        </span>
+                                        <span className="mt-4 block text-[11px] font-bold text-[#30302D]">
+                                            {label}
+                                        </span>
+                                        <span className="mt-1 block text-[9px] leading-[1.35] text-[#73736C]">
+                                            {description}
+                                        </span>
+                                    </button>
+                                );
+                            },
                         )}
-                    </>
+                    </div>
                 )}
 
                 {isYoutube && (
@@ -457,15 +355,29 @@ export default function ResourceItemModal({
                     />
                 )}
 
-                {activeModal === 'past_questions' && (
+                {isPastQuestions && (
                     <PastQuestionsView
                         title={itemForm.data.title}
-                        setTitle={(title) => itemForm.setData('title', title)}
+                        setTitle={(title) => {
+                            itemForm.setData('title', title);
+                            if (itemForm.errors.title) {
+                                itemForm.clearErrors('title');
+                            }
+                        }}
                         file={selectedFile}
                         setFile={(file) => {
                             setSelectedFile(file);
                             itemForm.setData('file', file);
+                            if (itemForm.errors.file) {
+                                itemForm.clearErrors('file');
+                            }
                         }}
+                        error={
+                            itemForm.errors.limit ||
+                            itemForm.errors.file ||
+                            itemForm.errors.error ||
+                            itemForm.errors.message
+                        }
                     />
                 )}
 
@@ -479,6 +391,11 @@ export default function ResourceItemModal({
                         topics={revisionForm.data.focus_prompt}
                         setTopics={(value) =>
                             revisionForm.setData('focus_prompt', value)
+                        }
+                        error={
+                            revisionForm.errors.limit ||
+                            revisionForm.errors.message ||
+                            revisionForm.errors.error
                         }
                     />
                 )}
@@ -668,13 +585,31 @@ function YoutubeView({
     );
 }
 
-function PastQuestionsView({ title, setTitle, file, setFile }) {
+function PastQuestionsView({ title, setTitle, file, setFile, error }) {
     return (
         <div className="mt-4 border-t border-[#E8E7E0] pt-4">
             <p className="text-xs text-[#73736C]">
                 Add a past exam paper, practice question set, or another
                 relevant academic document.
             </p>
+
+            {error && (
+                <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                    <AlertCircle
+                        size={16}
+                        className="mt-0.5 shrink-0 text-rose-600"
+                    />
+                    <div className="flex-1">
+                        <span className="block font-semibold">
+                            Limit Reached
+                        </span>
+                        <span className="text-[11px] text-rose-600">
+                            {error}
+                        </span>
+                    </div>
+                </div>
+            )}
+
             <div className="mt-3 space-y-3">
                 <Field label="Title">
                     <input
@@ -717,12 +652,31 @@ function RevisionPackView({
     setCourseName,
     topics,
     setTopics,
+    error,
 }) {
     return (
         <div className="mt-4 border-t border-[#E8E7E0] pt-4">
             <p className="inline-flex rounded-full bg-[#FDF4F6] px-3 py-1.5 text-[10px] font-semibold text-[#702B4B]">
                 This pack will be saved as a resource inside {spaceName}
             </p>
+
+            {error && (
+                <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                    <AlertCircle
+                        size={16}
+                        className="mt-0.5 shrink-0 text-rose-600"
+                    />
+                    <div className="flex-1">
+                        <span className="block font-semibold">
+                            Limit Reached
+                        </span>
+                        <span className="text-[11px] text-rose-600">
+                            {error}
+                        </span>
+                    </div>
+                </div>
+            )}
+
             <div className="mt-3 space-y-3">
                 <Field label="Course name">
                     <input
@@ -761,18 +715,5 @@ function Field({ label, children }) {
             </span>
             {children}
         </label>
-    );
-}
-
-function BottomHeading({ title }) {
-    return (
-        <div className="flex items-end justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#AD5266]">
-                {title}
-            </span>
-            <span className="text-[10px] text-[#73736C]">
-                Complete the details below to create this resource card.
-            </span>
-        </div>
     );
 }
