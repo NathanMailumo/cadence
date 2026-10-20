@@ -9,8 +9,8 @@ export default function GuestLayout({ children }) {
 
     return (
         <div className="relative flex min-h-screen flex-col bg-[#F0F0E9] font-sans text-[#30302D] antialiased selection:bg-[#AD5266]/20 selection:text-[#762F50]">
-            {/* Top Navigation Bar (Matches image_d5a4fe.png) */}
-            <header className="sticky top-0 z-40 border-b border-[#D8DDD5]/60 bg-[#F0F0E9]/90 px-6 py-4 backdrop-blur-md transition-all sm:px-10 md:px-16">
+            {/* Top Navigation Bar - Permanently Fixed */}
+            <header className="fixed inset-x-0 top-0 z-50 border-b border-[#D8DDD5]/60 bg-[#F0F0E9]/90 px-6 py-4 backdrop-blur-md transition-all sm:px-10 md:px-16">
                 <div className="mx-auto flex max-w-7xl items-center justify-between">
                     <Link href="/" className="group flex items-center gap-2">
                         <CadenceLogo
@@ -38,6 +38,12 @@ export default function GuestLayout({ children }) {
                             className="transition hover:text-[#762F50]"
                         >
                             Pricing
+                        </a>
+                        <a
+                            href="#faq"
+                            className="transition hover:text-[#762F50]"
+                        >
+                            FAQ
                         </a>
                     </nav>
 
@@ -82,12 +88,12 @@ export default function GuestLayout({ children }) {
                 </div>
             </header>
 
-            {/* Main Content Area */}
-            <main className="relative z-10 flex flex-grow flex-col">
+            {/* Main Content Area with top padding offset for the fixed header */}
+            <main className="relative z-10 flex flex-grow flex-col pt-20">
                 {children}
             </main>
 
-            {/* Footer (Matches image_d5a463.png) */}
+            {/* Footer */}
             <footer className="border-t border-[#D8DDD5]/60 bg-[#F0F0E9] py-16">
                 <div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 px-6 sm:px-10 md:flex-row lg:px-16">
                     {/* Left Column: Brand, Socials & Slogan */}
@@ -152,6 +158,12 @@ export default function GuestLayout({ children }) {
                             className="transition hover:text-[#762F50]"
                         >
                             Pricing
+                        </a>
+                        <a
+                            href="#faq"
+                            className="transition hover:text-[#762F50]"
+                        >
+                            FAQ
                         </a>
                         <Link
                             href={

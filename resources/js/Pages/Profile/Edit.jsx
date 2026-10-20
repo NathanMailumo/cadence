@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     Camera,
@@ -61,16 +61,6 @@ export default function EditProfile({ currentPlan = 'free' }) {
     const handleSubmit = (event) => {
         event.preventDefault();
         patch('/profile', { forceFormData: true });
-    };
-
-    const handleCancelSubscription = () => {
-        if (
-            window.confirm(
-                'Are you sure you want to cancel your subscription? You will be moved to the Free plan.',
-            )
-        ) {
-            router.post(route('subscription.cancel'));
-        }
     };
 
     return (

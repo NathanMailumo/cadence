@@ -63,6 +63,33 @@ const Icon = ({ children }) => (
 );
 
 export default function Welcome() {
+    const [openFaq, setOpenFaq] = useState(null);
+
+    const toggleFaq = (index) => {
+        setOpenFaq(openFaq === index ? null : index);
+    };
+
+    const faqs = [
+        {
+            question:
+                'What is the difference between private and collaborative spaces?',
+            answer: 'Private spaces are exclusively for your own personal notes, links, and study files. Collaborative spaces allow you to invite classmates via unique links to contribute resources and study together in real-time.',
+        },
+        {
+            question: 'How do the free tier limits work?',
+            answer: 'On the Free Tier, you can create unlimited private spaces, alongside up to 2 collaborative spaces, 3 AI revision pack generations, and 3 past-question file uploads. Using these allowances does not delete your existing files.',
+        },
+        {
+            question:
+                'What happens when my Plus plan or Semester Pass expires?',
+            answer: 'When your subscription ends, your account smoothly transitions back to the Free plan. You keep all your existing spaces and resources permanently, and you receive a fresh set of free allowances.',
+        },
+        {
+            question: 'How does Paystack process payments?',
+            answer: 'We use Paystack to handle secure payments in Nigerian Naira (NGN). You can easily pay using bank cards, transfers, or supported mobile channels on a monthly subscription or a 4-month semester pass.',
+        },
+    ];
+
     return (
         <GuestLayout>
             <Head>
@@ -589,11 +616,6 @@ export default function Welcome() {
 
                         {/* CADENCE PLUS PLAN CARD */}
                         <div className="relative flex flex-col justify-between rounded-3xl bg-[#762F50] p-8 text-white shadow-xl sm:p-10">
-                            {/* Popular Badge */}
-                            <span className="absolute -top-3 right-8 rounded-full bg-[#AD5266] px-3.5 py-1 text-[10px] font-extrabold tracking-wider text-white shadow-md">
-                                POPULAR
-                            </span>
-
                             <div>
                                 <div className="flex items-baseline justify-between border-b border-white/10 pb-6">
                                     <div>
@@ -747,6 +769,64 @@ export default function Welcome() {
                                 </Link>
                             </div>
                         </div>
+                    </div>
+                </FadeInSection>
+            </section>
+
+            {/* FAQ SECTION WITH SMOOTH GRID ANIMATION */}
+            <section
+                id="faq"
+                className="mx-auto max-w-4xl px-6 py-20 sm:px-10 lg:px-12"
+            >
+                <FadeInSection>
+                    <div className="text-center">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#AD5266]">
+                            FREQUENTLY ASKED QUESTIONS
+                        </p>
+                        <h2
+                            className="mt-3 text-3xl font-medium tracking-[-0.03em] text-[#30302D] sm:text-4xl"
+                            style={{ fontFamily: '"Manrope", sans-serif' }}
+                        >
+                            Everything you need to know about Cadence.
+                        </h2>
+                    </div>
+
+                    <div className="mt-12 space-y-4">
+                        {faqs.map((faq, index) => {
+                            const isOpen = openFaq === index;
+                            return (
+                                <div
+                                    key={index}
+                                    className="overflow-hidden rounded-2xl border border-[#D8DDD5] bg-white transition-all"
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleFaq(index)}
+                                        className="flex w-full items-center justify-between p-6 text-left transition hover:bg-[#FDF9FA]"
+                                    >
+                                        <span className="text-sm font-bold text-[#30302D] sm:text-base">
+                                            {faq.question}
+                                        </span>
+                                        <span className="ml-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F0F0E9] text-xs font-bold text-[#762F50]">
+                                            {isOpen ? '−' : '+'}
+                                        </span>
+                                    </button>
+                                    <div
+                                        className={`grid transition-all duration-300 ease-in-out ${
+                                            isOpen
+                                                ? 'grid-rows-[1fr] opacity-100'
+                                                : 'grid-rows-[0fr] opacity-0'
+                                        }`}
+                                    >
+                                        <div className="overflow-hidden">
+                                            <div className="border-t border-[#F0F0E9] px-6 pb-6 pt-4 text-xs leading-relaxed text-[#73736C] sm:text-sm">
+                                                {faq.answer}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </FadeInSection>
             </section>
