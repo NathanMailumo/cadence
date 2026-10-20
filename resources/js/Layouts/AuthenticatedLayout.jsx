@@ -5,7 +5,8 @@ import {
     Check,
     ChevronDown,
     Home,
-    LockKeyhole,
+    // LockKeyhole,
+    LockOpen,
     LogOut,
     Plus,
     Trash2,
@@ -106,7 +107,7 @@ export default function AuthenticatedLayout({ children }) {
                                     className="shrink-0 text-[#AD5266]"
                                 />
                             ) : (
-                                <LockKeyhole
+                                <LockOpen
                                     size={14}
                                     className="shrink-0 text-[#AD5266]"
                                 />
@@ -139,7 +140,7 @@ export default function AuthenticatedLayout({ children }) {
                                                 }
                                                 className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-semibold text-[#30302D] transition hover:bg-[#F1E5EA] hover:text-[#762F50]"
                                             >
-                                                <LockKeyhole
+                                                <LockOpen
                                                     size={14}
                                                     className="shrink-0 text-[#AD5266]"
                                                 />
@@ -252,7 +253,7 @@ export default function AuthenticatedLayout({ children }) {
                             onClick={() => openResourceModal('private')}
                             className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-semibold text-[#73736C] transition hover:bg-[#F7F7F2] hover:text-[#762F50]"
                         >
-                            <LockKeyhole size={16} strokeWidth={1.8} />
+                            <LockOpen size={16} strokeWidth={1.8} />
                             <span className="flex-1">Private space</span>
                             <Plus size={15} />
                         </button>
@@ -321,6 +322,21 @@ export default function AuthenticatedLayout({ children }) {
                 </div>
 
                 <div className="relative mt-auto border-t border-[#E5E7E1] px-3 py-4">
+                    {/* SUBTLE UPGRADE LINK ABOVE PROFILE */}
+                    <Link
+                        href="/billing"
+                        onClick={closeMobileMenu}
+                        className="mb-3 flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-[#73736C] transition hover:bg-[#F7F7F2] hover:text-[#762F50]"
+                    >
+                        <span className="flex items-center gap-2">
+                            <Zap size={14} className="text-[#AD5266]" />
+                            Upgrade to Plus
+                        </span>
+                        <span className="text-[10px] text-[#A5A59D]">
+                            Explore
+                        </span>
+                    </Link>
+
                     {/* DESKTOP PROFILE DROPDOWN MENU */}
                     {isProfileDropdownOpen && (
                         <div className="absolute bottom-[calc(100%+0.5rem)] left-3 right-3 z-50 overflow-hidden rounded-2xl border border-[#D8DDD5] bg-white p-1.5 shadow-[0_12px_30px_rgba(48,48,45,0.16)]">
@@ -334,17 +350,6 @@ export default function AuthenticatedLayout({ children }) {
                             >
                                 <User size={15} className="text-[#AD5266]" />
                                 Profile
-                            </Link>
-                            <Link
-                                href="/billing"
-                                onClick={() => {
-                                    setIsProfileDropdownOpen(false);
-                                    closeMobileMenu();
-                                }}
-                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-[#30302D] transition hover:bg-[#F1E5EA] hover:text-[#762F50]"
-                            >
-                                <Zap size={15} className="text-[#AD5266]" />
-                                Upgrade
                             </Link>
                             <div className="my-1 border-t border-[#F0F0E9]" />
                             <button
@@ -428,7 +433,7 @@ export default function AuthenticatedLayout({ children }) {
                     onClick={() => openResourceModal('private')}
                     className="flex flex-col items-center justify-center gap-1 text-[10px] font-semibold text-[#73736C]"
                 >
-                    <LockKeyhole size={18} strokeWidth={1.8} />
+                    <LockOpen size={18} strokeWidth={1.8} />
                     Private
                 </button>
                 <button

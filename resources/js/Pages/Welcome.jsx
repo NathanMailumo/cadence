@@ -72,7 +72,6 @@ export default function Welcome() {
                     type="image/svg+xml"
                     href="/images/cadence_logo.svg"
                 />
-                {/* Or use href="/logo.png" if your file is a PNG */}
             </Head>
 
             {/* HERO SECTION */}
@@ -491,56 +490,60 @@ export default function Welcome() {
                 className="mx-auto max-w-7xl px-6 py-20 sm:px-10 lg:px-12"
             >
                 <FadeInSection>
-                    <div className="overflow-hidden rounded-3xl bg-[#762F50] p-8 text-white shadow-xl sm:p-12 md:p-16">
-                        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
+                    <div className="text-center">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#AD5266]">
+                            PRICING PLANS
+                        </p>
+                        <h2
+                            className="mt-3 text-4xl font-normal leading-[1.05] text-[#30302D] sm:text-5xl lg:text-6xl"
+                            style={{ fontFamily: '"Manrope", sans-serif' }}
+                        >
+                            Choose the right rhythm for your studies.
+                        </h2>
+                        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#73736C]">
+                            Start for free or upgrade to Cadence Plus or the
+                            Semester Pass for unlimited access to everything you
+                            need.
+                        </p>
+                    </div>
+
+                    <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-3 lg:items-stretch">
+                        {/* FREE PLAN CARD */}
+                        <div className="flex flex-col justify-between rounded-3xl border border-[#D8DDD5] bg-white p-8 shadow-sm sm:p-10">
                             <div>
-                                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#E8C7D3]">
-                                    SIMPLE PRICING
-                                </p>
-                                <h2
-                                    className="mt-4 text-4xl font-normal leading-[1.05] text-white sm:text-5xl lg:text-6xl"
-                                    style={{
-                                        fontFamily: '"Manrope", sans-serif',
-                                    }}
-                                >
-                                    Start learning together, completely
-                                    flexible.
-                                </h2>
-                                <p className="mt-6 max-w-md text-xs leading-relaxed text-[#E8C7D3] sm:text-sm">
-                                    Everything you need to collect, organise,
-                                    and turn your resources into useful
-                                    revision.
-                                </p>
-                            </div>
-
-                            <div className="relative rounded-3xl bg-white p-8 text-[#30302D] shadow-2xl sm:p-10">
-                                {/* Coming Soon Badge */}
-                                <span className="absolute -top-3 right-8 rounded-full bg-[#AD5266] px-3.5 py-1 text-[10px] font-extrabold tracking-wider text-white shadow-md">
-                                    COMING SOON
-                                </span>
-
                                 <div className="flex items-baseline justify-between border-b border-[#F0F0E9] pb-6">
-                                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#AD5266]">
-                                        CADENCE PRO
-                                    </p>
+                                    <div>
+                                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#73736C]">
+                                            FREE TIER
+                                        </p>
+                                        <h3 className="mt-1 text-2xl font-bold text-[#30302D]">
+                                            Starter Plan
+                                        </h3>
+                                    </div>
                                     <div className="text-right">
                                         <span
-                                            className="text-3xl font-extrabold text-[#762F50]"
+                                            className="text-3xl font-extrabold text-[#30302D]"
                                             style={{
                                                 fontFamily:
                                                     '"Manrope", sans-serif',
                                             }}
                                         >
-                                            ₦2,000
+                                            ₦0
                                         </span>
                                         <span className="text-xs text-[#73736C]">
                                             {' '}
-                                            / month
+                                            / forever
                                         </span>
                                     </div>
                                 </div>
 
-                                <ul className="my-8 space-y-4 text-xs font-semibold text-[#30302D]">
+                                <p className="mt-6 text-xs leading-relaxed text-[#73736C]">
+                                    Essential features to get started with
+                                    individual study and small group
+                                    collaboration.
+                                </p>
+
+                                <ul className="mt-8 space-y-4 text-xs font-semibold text-[#30302D]">
                                     <li className="flex items-center gap-3">
                                         <span className="text-[#762F50]">
                                             ✓
@@ -551,13 +554,19 @@ export default function Welcome() {
                                         <span className="text-[#762F50]">
                                             ✓
                                         </span>{' '}
-                                        Collaborative learning spaces
+                                        2 collaborative spaces limit
                                     </li>
                                     <li className="flex items-center gap-3">
                                         <span className="text-[#762F50]">
                                             ✓
                                         </span>{' '}
-                                        AI-generated revision packs
+                                        3 AI revision pack generations limit
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#762F50]">
+                                            ✓
+                                        </span>{' '}
+                                        3 past-question uploads limit
                                     </li>
                                     <li className="flex items-center gap-3">
                                         <span className="text-[#762F50]">
@@ -566,14 +575,176 @@ export default function Welcome() {
                                         Links, videos, notes, and files
                                     </li>
                                 </ul>
+                            </div>
 
-                                <button
-                                    type="button"
-                                    disabled
-                                    className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-gray-200 py-4 text-xs font-bold text-gray-500 shadow-none"
+                            <div className="mt-10">
+                                <Link
+                                    href="/register"
+                                    className="flex w-full items-center justify-center rounded-xl border border-[#762F50] bg-white py-4 text-xs font-bold text-[#762F50] transition hover:bg-[#FDF4F6]"
                                 >
-                                    Coming Soon
-                                </button>
+                                    Get Started Free
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* CADENCE PLUS PLAN CARD */}
+                        <div className="relative flex flex-col justify-between rounded-3xl bg-[#762F50] p-8 text-white shadow-xl sm:p-10">
+                            {/* Popular Badge */}
+                            <span className="absolute -top-3 right-8 rounded-full bg-[#AD5266] px-3.5 py-1 text-[10px] font-extrabold tracking-wider text-white shadow-md">
+                                POPULAR
+                            </span>
+
+                            <div>
+                                <div className="flex items-baseline justify-between border-b border-white/10 pb-6">
+                                    <div>
+                                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#E8C7D3]">
+                                            MONTHLY PRO
+                                        </p>
+                                        <h3 className="mt-1 text-2xl font-bold text-white">
+                                            Cadence Plus
+                                        </h3>
+                                    </div>
+                                    <div className="text-right">
+                                        <span
+                                            className="text-3xl font-extrabold text-white"
+                                            style={{
+                                                fontFamily:
+                                                    '"Manrope", sans-serif',
+                                            }}
+                                        >
+                                            ₦500
+                                        </span>
+                                        <span className="text-xs text-[#E8C7D3]">
+                                            {' '}
+                                            / month
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p className="mt-6 text-xs leading-relaxed text-[#E8C7D3]">
+                                    Complete, unrestricted access for serious
+                                    students and power learners.
+                                </p>
+
+                                <ul className="mt-8 space-y-4 text-xs font-semibold text-white">
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#E8C7D3]">
+                                            ✓
+                                        </span>{' '}
+                                        Unlimited private spaces
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#E8C7D3]">
+                                            ✓
+                                        </span>{' '}
+                                        Unlimited collaborative spaces
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#E8C7D3]">
+                                            ✓
+                                        </span>{' '}
+                                        Unlimited AI-generated revision packs
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#E8C7D3]">
+                                            ✓
+                                        </span>{' '}
+                                        Unlimited past-question uploads
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#E8C7D3]">
+                                            ✓
+                                        </span>{' '}
+                                        Priority processing & updates
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div className="mt-10">
+                                <Link
+                                    href="/register"
+                                    className="flex w-full items-center justify-center rounded-xl bg-white py-4 text-xs font-bold text-[#762F50] shadow-md transition hover:bg-[#FDF4F6]"
+                                >
+                                    Upgrade to Plus
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* SEMESTER PASS PLAN CARD */}
+                        <div className="flex flex-col justify-between rounded-3xl border border-[#D8DDD5] bg-[#F7F8F5] p-8 shadow-sm sm:p-10">
+                            <div>
+                                <div className="flex items-baseline justify-between border-b border-[#E2E6DF] pb-6">
+                                    <div>
+                                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#AD5266]">
+                                            BEST VALUE
+                                        </p>
+                                        <h3 className="mt-1 text-2xl font-bold text-[#30302D]">
+                                            Semester Pass
+                                        </h3>
+                                    </div>
+                                    <div className="text-right">
+                                        <span
+                                            className="text-3xl font-extrabold text-[#30302D]"
+                                            style={{
+                                                fontFamily:
+                                                    '"Manrope", sans-serif',
+                                            }}
+                                        >
+                                            ₦1,500
+                                        </span>
+                                        <span className="text-xs text-[#73736C]">
+                                            {' '}
+                                            / 4 months
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p className="mt-6 text-xs leading-relaxed text-[#73736C]">
+                                    One-off payment covering your entire
+                                    academic semester with discount pricing.
+                                </p>
+
+                                <ul className="mt-8 space-y-4 text-xs font-semibold text-[#30302D]">
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#762F50]">
+                                            ✓
+                                        </span>{' '}
+                                        4 full months of Plus access
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#762F50]">
+                                            ✓
+                                        </span>{' '}
+                                        Unlimited collaborative spaces
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#762F50]">
+                                            ✓
+                                        </span>{' '}
+                                        Unlimited AI revision packs
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#762F50]">
+                                            ✓
+                                        </span>{' '}
+                                        Unlimited past-question uploads
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <span className="text-[#762F50]">
+                                            ✓
+                                        </span>{' '}
+                                        Save 25% over monthly plan
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div className="mt-10">
+                                <Link
+                                    href="/register"
+                                    className="flex w-full items-center justify-center rounded-xl bg-[#762F50] py-4 text-xs font-bold text-white shadow-md transition hover:bg-[#5E243F]"
+                                >
+                                    Get Semester Pass
+                                </Link>
                             </div>
                         </div>
                     </div>
