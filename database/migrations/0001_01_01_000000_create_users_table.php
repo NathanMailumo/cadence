@@ -16,9 +16,8 @@ return new class extends Migration
             $table->string('clerk_id')->nullable()->unique();
             $table->string('name');
             $table->string('email')->unique();
-            // $table->rememberToken()->nullable();
+            $table->boolean('is_registration')->default(false)->nullable();
             $table->string('profile_image_url')->nullable();
-            // $table->string('profile_image_public_id')->nullable();
 
             $table->timestamps();
         });

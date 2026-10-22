@@ -1,30 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AuthenticateWithRedirectCallback, useUser } from '@clerk/clerk-react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
+import CadenceLoader from '@/Components/CadenceLoader';
 
 export default function SSOCallback() {
     const { isLoaded, isSignedIn, user } = useUser();
+    const { props } = usePage();
+    const laravelUser = props.auth?.user;
+
     const [error, setError] = useState('');
     const syncStarted = useRef(false);
-    const isComplete = new URLSearchParams(window.location.search).has(
-        'complete',
-    );
 
     useEffect(() => {
-        if (
-            isComplete &&
-            isLoaded &&
-            isSignedIn &&
-            user &&
-            !syncStarted.current
-        ) {
+        if (laravelUser) {
+            router.visit('/dashboard', { replace: true });
+            return;
+        }
+
+        if (isLoaded && isSignedIn && user && !syncStarted.current) {
             syncStarted.current = true;
+
             const email = user.primaryEmailAddress?.emailAddress;
             const fullName =
                 user.fullName || user.firstName || email?.split('@')[0];
 
             if (!email) {
-                setError('Google did not return an email address.');
+                setError('Email address is invalid');
                 return;
             }
 
@@ -38,29 +39,35 @@ export default function SSOCallback() {
                 },
                 {
                     onSuccess: () => {
-                        window.location.assign('/dashboard');
+                        router.visit('/dashboard', { replace: true });
                     },
                     onError: (errors) => {
-                        console.error('Sync failed:', errors);
+                        console.error('Sync error:', errors);
                         setError(
-                            errors.email ||
-                                errors.clerk_id ||
-                                'Unable to finish signing you in. Please try again.',
+                            'Unable to finish signing you in. Please try again.',
                         );
                     },
                 },
             );
         }
-    }, [isComplete, isLoaded, isSignedIn, user]);
+    }, [isLoaded, isSignedIn, user, laravelUser]);
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-white font-black">
-            <Head title="Authenticating..." />
-            {!isComplete && <AuthenticateWithRedirectCallback />}
+        <div className="flex min-h-screen flex-col items-center justify-center bg-[#F0F0E9] font-sans">
+            <Head title="Completing sign in..." />
+            <CadenceLoader fullScreen size="lg" label="Setting up your space" />
+
+            <AuthenticateWithRedirectCallback
+                signInUrl="/login"
+                signUpUrl="/register"
+                signInFallbackRedirectUrl="/dashboard"
+                signUpFallbackRedirectUrl="/dashboard"
+            />
+
             {error && (
-                <p className="absolute text-center text-sm text-red-600">
+                <div className="absolute z-50 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 shadow-md">
                     {error}
-                </p>
+                </div>
             )}
         </div>
     );

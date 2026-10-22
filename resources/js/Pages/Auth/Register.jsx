@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSignUp, useClerk } from '@clerk/clerk-react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import Navbar from '@/Components/Navbar';
 import CadenceLogo from '@/Components/CadenceLogo';
 import CadenceLoader from '@/Components/CadenceLoader';
@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 export default function Register() {
     const { isLoaded: isSignUpLoaded, signUp, setActive } = useSignUp();
     const { signOut } = useClerk();
+    const { props } = usePage();
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -16,11 +17,24 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [pendingVerification, setPendingVerification] = useState(false);
-    const [error, setError] = useState('');
+
+    const initialError =
+        props.error ||
+        props.flash?.error ||
+        new URLSearchParams(window.location.search).get('error') ||
+        '';
+
+    const [error, setError] = useState(initialError);
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
 
-    const syncAndRedirect = (clerkUserId, userEmail) => {
+    useEffect(() => {
+        if (props.error || props.flash?.error) {
+            setError(props.error || props.flash?.error);
+        }
+    }, [props.error, props.flash]);
+
+    const syncAndRedirect = (clerkUserId, userEmail, imageUrl = null) => {
         setLoading(true);
         router.post(
             '/clerk-sync',
@@ -28,19 +42,15 @@ export default function Register() {
                 clerk_id: clerkUserId,
                 email: userEmail,
                 name: `${firstName} ${lastName}`.trim() || 'User',
-                profile_image_url: null,
+                profile_image_url: imageUrl,
             },
             {
-                onError: (errors) => {
+                onError: () => {
                     setLoading(false);
-                    setError(
-                        errors.email ||
-                            errors.clerk_id ||
-                            'Failed to sync account. Please log in.',
-                    );
+                    setError('Failed to sync account. Please log in.');
                 },
                 onSuccess: () => {
-                    window.location.assign('/dashboard');
+                    router.visit('/dashboard', { replace: true });
                 },
             },
         );
@@ -55,13 +65,21 @@ export default function Register() {
             await signUp.authenticateWithRedirect({
                 strategy: 'oauth_google',
                 redirectUrl: `${window.location.origin}/sso-callback`,
-                redirectUrlComplete: `${window.location.origin}/sso-callback?complete=1`,
+                redirectUrlComplete: `${window.location.origin}/sso-callback`,
             });
         } catch (err) {
-            setError(
-                err.errors?.[0]?.message ||
-                    'Unable to continue with Google. Please try again.',
-            );
+            const msg = err.errors?.[0]?.message || '';
+            if (
+                msg.toLowerCase().includes('exists') ||
+                msg.toLowerCase().includes('already') ||
+                msg.toLowerCase().includes('taken')
+            ) {
+                setError('Account already exists. Please log in.');
+            } else {
+                setError(
+                    msg || 'Unable to continue with Google. Please try again.',
+                );
+            }
             setGoogleLoading(false);
         }
     };
@@ -86,6 +104,16 @@ export default function Register() {
             setPendingVerification(true);
         } catch (err) {
             const msg = err.errors?.[0]?.message || '';
+
+            if (
+                msg.toLowerCase().includes('exists') ||
+                msg.toLowerCase().includes('taken') ||
+                msg.toLowerCase().includes('already registered')
+            ) {
+                setError('Account already exists. Please log in.');
+                return;
+            }
+
             if (
                 msg.toLowerCase().includes('already signed in') ||
                 msg.toLowerCase().includes('session')
@@ -105,7 +133,7 @@ export default function Register() {
                     return;
                 } catch (retryErr) {
                     setError(
-                        'Session conflict resolved. Please click Create Account again.',
+                        'Session conflict detected. Please click Create Account again.',
                     );
                 }
             } else {
@@ -129,7 +157,11 @@ export default function Register() {
 
             if (result.status === 'complete') {
                 await setActive({ session: result.createdSessionId });
-                syncAndRedirect(result.createdUserId, email);
+                syncAndRedirect(
+                    result.createdUserId,
+                    email,
+                    signUp.imageUrl || null,
+                );
             } else {
                 setError(`Verification status: ${result.status}`);
             }
@@ -175,8 +207,16 @@ export default function Register() {
 
                     <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-7 shadow-lg shadow-stone-200/50 sm:p-9">
                         {error && (
-                            <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
-                                {error}
+                            <div className="mb-5 flex items-center justify-between rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
+                                <span>{error}</span>
+                                {error.includes('already exists') && (
+                                    <Link
+                                        href="/login"
+                                        className="ml-2 font-bold underline hover:text-rose-900"
+                                    >
+                                        Log in
+                                    </Link>
+                                )}
                             </div>
                         )}
 
@@ -247,7 +287,7 @@ export default function Register() {
                                                 }
                                                 required
                                                 className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
-                                                placeholder="Alex"
+                                                placeholder="Enter first name"
                                             />
                                         </div>
                                         <div>
@@ -262,7 +302,7 @@ export default function Register() {
                                                 }
                                                 required
                                                 className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
-                                                placeholder="Morgan"
+                                                placeholder="Enter last name"
                                             />
                                         </div>
                                     </div>
@@ -279,7 +319,7 @@ export default function Register() {
                                             }
                                             required
                                             className="w-full rounded-xl border border-[#D8DDD5] bg-[#F7F7F2] p-3 text-sm text-[#30302D] outline-none focus:border-[#AD5266] focus:bg-[#FFFFFF] focus:ring-1 focus:ring-[#AD5266]"
-                                            placeholder="alex@cadence.study"
+                                            placeholder="Enter your email"
                                         />
                                     </div>
 

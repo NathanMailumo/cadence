@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSignIn, useClerk, useUser } from '@clerk/clerk-react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import Navbar from '@/Components/Navbar';
 import CadenceLogo from '@/Components/CadenceLogo';
 import CadenceLoader from '@/Components/CadenceLoader';
@@ -9,14 +9,30 @@ export default function Login() {
     const { isLoaded: isSignInLoaded, signIn, setActive } = useSignIn();
     const { signOut } = useClerk();
     const { isLoaded: isUserLoaded, isSignedIn, user } = useUser();
+    const { props } = usePage();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [pendingSecondFactor, setPendingSecondFactor] = useState(false);
-    const [error, setError] = useState('');
+
+    // Check if error was passed in page props or query params
+    const initialError =
+        props.error ||
+        props.flash?.error ||
+        new URLSearchParams(window.location.search).get('error') ||
+        '';
+
+    const [error, setError] = useState(initialError);
     const [loading, setLoading] = useState(false);
     const syncInProgress = useRef(false);
+
+    // Keep error banner updated if props change on redirect
+    useEffect(() => {
+        if (props.error || props.flash?.error) {
+            setError(props.error || props.flash?.error);
+        }
+    }, [props.error, props.flash]);
 
     const syncAndRedirect = (clerkUserId, userEmail) => {
         if (syncInProgress.current) return;
@@ -42,7 +58,7 @@ export default function Login() {
                     );
                 },
                 onSuccess: () => {
-                    window.location.assign('/dashboard');
+                    router.visit('/dashboard', { replace: true });
                 },
             },
         );
@@ -61,10 +77,12 @@ export default function Login() {
 
         setLoading(true);
         try {
+            // Clear any lingering or conflicting session before starting Google login
+            await signOut();
             await signIn.authenticateWithRedirect({
                 strategy: 'oauth_google',
                 redirectUrl: `${window.location.origin}/sso-callback`,
-                redirectUrlComplete: `${window.location.origin}/sso-callback?complete=1`,
+                redirectUrlComplete: `${window.location.origin}/sso-callback`,
             });
         } catch (err) {
             setLoading(false);
@@ -132,7 +150,7 @@ export default function Login() {
                     }
                 } catch (retryErr) {
                     setError(
-                        'Session conflict resolved. Please try logging in again.',
+                        'Session conflict detected. Please try logging in again.',
                     );
                 }
             } else {
@@ -193,7 +211,6 @@ export default function Login() {
                     type="image/svg+xml"
                     href="/images/cadence_logo.svg"
                 />
-                {/* Or use href="/logo.png" if your file is a PNG */}
             </Head>
             <Navbar />
 
@@ -211,6 +228,7 @@ export default function Login() {
                     </div>
 
                     <div className="rounded-3xl border border-[#D8DDD5] bg-[#FFFFFF] p-7 shadow-lg shadow-stone-200/50 sm:p-9">
+                        {/* Error Message Banner */}
                         {error && (
                             <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
                                 {error}
