@@ -65,9 +65,10 @@ class ClerkSyncController extends Controller
             ]);
         }
 
+        // Authenticate user session
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        return response()->json(['success' => true]);
     }
 }
