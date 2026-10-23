@@ -17,55 +17,39 @@ class ClerkSyncController extends Controller
             'email'             => 'required|email',
             'name'              => 'nullable|string',
             'profile_image_url' => 'nullable|string',
+            'is_registration'   => 'nullable|boolean',
         ]);
 
-        $user = User::where('clerk_id', $validated['clerk_id'])->first();
+        $userByClerkId = User::where('clerk_id', $validated['clerk_id'])->first();
+        $userByEmail   = User::where('email', $validated['email'])->first();
+
+        // If this is an explicit registration attempt and the user already exists, reject it
+        if (!empty($validated['is_registration']) && ($userByClerkId || $userByEmail)) {
+            return response()->json([
+                'errors' => [
+                    'email' => 'Account already exists. Please log in.'
+                ]
+            ], 422);
+        }
+
+        $user = $userByClerkId ?? $userByEmail;
 
         if (!$user) {
-            $user = User::where('email', $validated['email'])->first();
-
-            if ($user) {
-                DB::transaction(function () use ($user, $validated) {
-                    $oldClerkId = $user->clerk_id;
-                    $newClerkId = $validated['clerk_id'];
-
-                    if ($oldClerkId && $oldClerkId !== $newClerkId) {
-                        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-                        DB::table('resources')->where('clerk_id', $oldClerkId)->update(['clerk_id' => $newClerkId]);
-                        DB::table('resource_users')->where('clerk_id', $oldClerkId)->update(['clerk_id' => $newClerkId]);
-
-                        $user->update([
-                            'clerk_id'          => $newClerkId,
-                            'name'              => $validated['name'] ?? $user->name,
-                            'profile_image_url' => $validated['profile_image_url'] ?? $user->profile_image_url,
-                        ]);
-
-                        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-                    } else {
-                        $user->update([
-                            'name'              => $validated['name'] ?? $user->name,
-                            'profile_image_url' => $validated['profile_image_url'] ?? $user->profile_image_url,
-                        ]);
-                    }
-                });
-            } else {
-                $user = User::create([
-                    'clerk_id'          => $validated['clerk_id'],
-                    'name'              => $validated['name'] ?? explode('@', $validated['email'])[0],
-                    'email'             => $validated['email'],
-                    'profile_image_url' => $validated['profile_image_url'] ?? null,
-                    'password'          => bcrypt(Str::random(16)),
-                ]);
-            }
+            $user = User::create([
+                'clerk_id'          => $validated['clerk_id'],
+                'name'              => $validated['name'] ?? explode('@', $validated['email'])[0],
+                'email'             => $validated['email'],
+                'profile_image_url' => $validated['profile_image_url'] ?? null,
+                'password'          => bcrypt(Str::random(16)),
+            ]);
         } else {
             $user->update([
+                'clerk_id'          => $validated['clerk_id'],
                 'name'              => $validated['name'] ?? $user->name,
                 'profile_image_url' => $validated['profile_image_url'] ?? $user->profile_image_url,
             ]);
         }
 
-        // Authenticate user session
         Auth::login($user);
         $request->session()->regenerate();
 

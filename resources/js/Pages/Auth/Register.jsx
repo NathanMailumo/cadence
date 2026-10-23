@@ -43,6 +43,7 @@ export default function Register() {
                 email: userEmail,
                 name: `${firstName} ${lastName}`.trim() || 'User',
                 profile_image_url: imageUrl,
+                is_registration: true,
             },
             {
                 onError: () => {
@@ -64,8 +65,8 @@ export default function Register() {
         try {
             await signUp.authenticateWithRedirect({
                 strategy: 'oauth_google',
-                redirectUrl: `${window.location.origin}/sso-callback`,
-                redirectUrlComplete: `${window.location.origin}/sso-callback`,
+                redirectUrl: `${window.location.origin}/sso-callback?mode=register`,
+                redirectUrlComplete: `${window.location.origin}/sso-callback?mode=register`,
             });
         } catch (err) {
             const msg = err.errors?.[0]?.message || '';
