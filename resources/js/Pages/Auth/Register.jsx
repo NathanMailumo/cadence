@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSignUp, useClerk } from '@clerk/clerk-react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import axios from 'axios';
 import Navbar from '@/Components/Navbar';
 import CadenceLogo from '@/Components/CadenceLogo';
 import CadenceLoader from '@/Components/CadenceLoader';
@@ -10,6 +11,13 @@ export default function Register() {
     const { isLoaded: isSignUpLoaded, signUp, setActive } = useSignUp();
     const { signOut } = useClerk();
     const { props } = usePage();
+    const laravelUser = props.auth?.user;
+
+    useEffect(() => {
+        if (laravelUser) {
+            window.location.replace('/dashboard');
+        }
+    }, [laravelUser]);
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -36,25 +44,35 @@ export default function Register() {
 
     const syncAndRedirect = (clerkUserId, userEmail, imageUrl = null) => {
         setLoading(true);
-        router.post(
-            '/clerk-sync',
-            {
+        axios
+            .post('/clerk-sync', {
                 clerk_id: clerkUserId,
                 email: userEmail,
                 name: `${firstName} ${lastName}`.trim() || 'User',
                 profile_image_url: imageUrl,
                 is_registration: true,
-            },
-            {
-                onError: () => {
-                    setLoading(false);
-                    setError('Failed to sync account. Please log in.');
-                },
-                onSuccess: () => {
-                    router.visit('/dashboard', { replace: true });
-                },
-            },
-        );
+            })
+            .then(() => {
+                // Hard native browser navigation eliminates production loop bugs
+                window.location.replace('/dashboard');
+            })
+            .catch(async (err) => {
+                const data = err.response?.data;
+                const msg = Array.isArray(data?.errors?.email)
+                    ? data.errors.email[0]
+                    : data?.errors?.email;
+
+                // Drop the Clerk session and return to the register form
+                try {
+                    await signOut();
+                } catch (signOutErr) {
+                    console.error('Clerk sign out error:', signOutErr);
+                }
+                setPendingVerification(false);
+                setCode('');
+                setLoading(false);
+                setError(msg || 'Failed to sync account. Please try again.');
+            });
     };
 
     const handleGoogleSignUp = async () => {
@@ -158,6 +176,7 @@ export default function Register() {
 
             if (result.status === 'complete') {
                 await setActive({ session: result.createdSessionId });
+                // syncAndRedirect keeps the loader on until the page navigates
                 syncAndRedirect(
                     result.createdUserId,
                     email,
@@ -165,10 +184,10 @@ export default function Register() {
                 );
             } else {
                 setError(`Verification status: ${result.status}`);
+                setLoading(false);
             }
         } catch (err) {
             setError(err.errors?.[0]?.message || 'Invalid verification code.');
-        } finally {
             setLoading(false);
         }
     };

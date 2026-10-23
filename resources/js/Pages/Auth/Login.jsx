@@ -9,17 +9,18 @@ import CadenceLoader from '@/Components/CadenceLoader';
 export default function Login() {
     const { isLoaded: isSignInLoaded, signIn, setActive } = useSignIn();
     const { signOut } = useClerk();
-    // Fixed: Removed unused 'user' variable to eliminate syntax/lint warnings
-    const { isLoaded: isUserLoaded, isSignedIn } = useUser();
+    const { isLoaded: isUserLoaded, isSignedIn, user } = useUser();
     const { props } = usePage();
 
     const laravelUser = props.auth?.user;
 
+    // Only a LARAVEL session counts as logged in. Redirecting on a Clerk-only
+    // session caused the /login <-> /dashboard loop (dashboard requires Laravel auth).
     useEffect(() => {
-        if (laravelUser || (isUserLoaded && isSignedIn)) {
+        if (laravelUser) {
             window.location.replace('/dashboard');
         }
-    }, [laravelUser, isUserLoaded, isSignedIn]);
+    }, [laravelUser]);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -52,24 +53,40 @@ export default function Login() {
             .post('/clerk-sync', {
                 clerk_id: clerkUserId,
                 email: userEmail,
-                name: userEmail ? userEmail.split('@')[0] : 'User',
                 profile_image_url: imageUrl,
                 is_registration: false,
             })
             .then(() => {
                 window.location.replace('/dashboard');
             })
-            .catch((err) => {
+            .catch(async (err) => {
+                const errors = err.response?.data?.errors;
+                const msg = errors?.email || errors?.clerk_id;
+                // Clear the Clerk session so Clerk and Laravel can't disagree
+                try {
+                    await signOut();
+                } catch (signOutErr) {
+                    console.error('Clerk sign out error:', signOutErr);
+                }
                 syncInProgress.current = false;
                 setLoading(false);
-                const errors = err.response?.data?.errors;
                 setError(
-                    errors?.email ||
-                        errors?.clerk_id ||
+                    (Array.isArray(msg) ? msg[0] : msg) ||
                         'Unable to finish signing you in. Please try again.',
                 );
             });
     };
+
+    // Clerk is signed in but Laravel isn't (e.g. expired Laravel session):
+    // create the Laravel session instead of bouncing to /dashboard.
+    useEffect(() => {
+        if (laravelUser || !isUserLoaded || !isSignedIn || !user) return;
+        const userEmail = user.primaryEmailAddress?.emailAddress;
+        if (userEmail) {
+            syncAndRedirect(user.id, userEmail, user.imageUrl || null);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [laravelUser, isUserLoaded, isSignedIn, user]);
 
     const handleGoogleLogin = async () => {
         if (!isSignInLoaded) return;
@@ -81,9 +98,6 @@ export default function Login() {
                 strategy: 'oauth_google',
                 redirectUrl: `${window.location.origin}/sso-callback`,
                 redirectUrlComplete: `${window.location.origin}/sso-callback`,
-                // Explicitly force navigation away from any default fallback
-                forceRedirectUrl: `${window.location.origin}/sso-callback`,
-                fallbackRedirectUrl: `${window.location.origin}/sso-callback`,
             });
         } catch (err) {
             setLoading(false);
@@ -196,7 +210,7 @@ export default function Login() {
         }
     };
 
-    if (laravelUser || (isUserLoaded && isSignedIn)) {
+    if (laravelUser) {
         return (
             <div className="flex min-h-screen flex-col bg-[#F0F0E9]">
                 <CadenceLoader
