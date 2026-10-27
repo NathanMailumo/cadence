@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { Head, usePage } from '@inertiajs/react';
-import axios from 'axios';
+import { clerkSync } from '@/lib/clerkSync';
 import CadenceLoader from '@/Components/CadenceLoader';
 
 const firstMessage = (value) => (Array.isArray(value) ? value[0] : value);
 
 export default function SSOCallback() {
     const { isLoaded, isSignedIn, user } = useUser();
-    const { signOut, handleRedirectCallback } = useClerk();
+    const clerk = useClerk();
+    const { signOut, handleRedirectCallback } = clerk;
     const { props } = usePage();
     const laravelUser = props.auth?.user;
 
@@ -67,22 +68,7 @@ export default function SSOCallback() {
         if (!isLoaded || !isSignedIn || !user || syncStarted.current) return;
         syncStarted.current = true;
 
-        const email = user.primaryEmailAddress?.emailAddress;
-        if (!email) {
-            setError('Email address is invalid');
-            return;
-        }
-
-        const fullName = user.fullName || user.firstName || email.split('@')[0];
-
-        axios
-            .post('/clerk-sync', {
-                clerk_id: user.id,
-                email,
-                name: fullName,
-                profile_image_url: user.imageUrl || null,
-                is_registration: isRegistrationMode,
-            })
+        clerkSync(clerk, isRegistrationMode)
             .then(() => {
                 window.location.replace('/dashboard');
             })
@@ -110,7 +96,15 @@ export default function SSOCallback() {
                     setError(message);
                 }
             });
-    }, [isLoaded, isSignedIn, user, laravelUser, isRegistrationMode, signOut]);
+    }, [
+        isLoaded,
+        isSignedIn,
+        user,
+        laravelUser,
+        isRegistrationMode,
+        signOut,
+        clerk,
+    ]);
 
     return (
         <div className="fixed inset-0 z-[999999] flex flex-col items-center justify-center bg-[#F0F0E9] font-sans">

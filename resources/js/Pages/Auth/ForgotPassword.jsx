@@ -48,7 +48,7 @@ export default function ForgotPassword() {
 
             if (result.status === 'complete') {
                 await setActive({ session: result.createdSessionId });
-                window.location.href = '/dashboard';
+                window.location.href = '/login';
             }
         } catch (err) {
             setError(err.errors?.[0]?.message || 'Invalid code or password.');

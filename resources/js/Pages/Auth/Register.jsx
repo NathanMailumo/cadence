@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useSignUp, useClerk } from '@clerk/clerk-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSignUp, useClerk, useUser } from '@clerk/clerk-react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import axios from 'axios';
+import { clerkSync } from '@/lib/clerkSync';
 import Navbar from '@/Components/Navbar';
 import CadenceLogo from '@/Components/CadenceLogo';
 import CadenceLoader from '@/Components/CadenceLoader';
@@ -9,7 +9,9 @@ import { Loader2 } from 'lucide-react';
 
 export default function Register() {
     const { isLoaded: isSignUpLoaded, signUp, setActive } = useSignUp();
-    const { signOut } = useClerk();
+    const clerk = useClerk();
+    const { signOut } = clerk;
+    const { isLoaded: isUserLoaded, isSignedIn } = useUser();
     const { props } = usePage();
     const laravelUser = props.auth?.user;
 
@@ -42,37 +44,42 @@ export default function Register() {
         }
     }, [props.error, props.flash]);
 
-    const syncAndRedirect = (clerkUserId, userEmail, imageUrl = null) => {
-        setLoading(true);
-        axios
-            .post('/clerk-sync', {
-                clerk_id: clerkUserId,
-                email: userEmail,
-                name: `${firstName} ${lastName}`.trim() || 'User',
-                profile_image_url: imageUrl,
-                is_registration: true,
-            })
-            .then(() => {
-                // Hard native browser navigation eliminates production loop bugs
-                window.location.replace('/dashboard');
-            })
-            .catch(async (err) => {
-                const data = err.response?.data;
-                const msg = Array.isArray(data?.errors?.email)
-                    ? data.errors.email[0]
-                    : data?.errors?.email;
+    // On /login and /register, if a Clerk session exists on page load without a Laravel session,
+    // sign out of Clerk once, so logging out of Laravel can't silently log the user back in.
+    const signedOutStaleClerk = useRef(false);
+    useEffect(() => {
+        if (laravelUser) return;
+        if (!isUserLoaded || !isSignedIn || signedOutStaleClerk.current) return;
 
-                // Drop the Clerk session and return to the register form
-                try {
-                    await signOut();
-                } catch (signOutErr) {
-                    console.error('Clerk sign out error:', signOutErr);
-                }
-                setPendingVerification(false);
-                setCode('');
-                setLoading(false);
-                setError(msg || 'Failed to sync account. Please try again.');
-            });
+        signedOutStaleClerk.current = true;
+        signOut().catch((err) => {
+            console.error('Error signing out stale Clerk session:', err);
+        });
+    }, [laravelUser, isUserLoaded, isSignedIn, signOut]);
+
+    const syncAndRedirect = async () => {
+        setLoading(true);
+        try {
+            await clerkSync(clerk, true);
+            // Hard native browser navigation eliminates production loop bugs
+            window.location.replace('/dashboard');
+        } catch (err) {
+            const data = err.response?.data;
+            const msg = Array.isArray(data?.errors?.email)
+                ? data.errors.email[0]
+                : data?.errors?.email;
+
+            // Drop the Clerk session and return to the register form
+            try {
+                await signOut();
+            } catch (signOutErr) {
+                console.error('Clerk sign out error:', signOutErr);
+            }
+            setPendingVerification(false);
+            setCode('');
+            setLoading(false);
+            setError(msg || 'Failed to sync account. Please try again.');
+        }
     };
 
     const handleGoogleSignUp = async () => {
@@ -177,11 +184,7 @@ export default function Register() {
             if (result.status === 'complete') {
                 await setActive({ session: result.createdSessionId });
                 // syncAndRedirect keeps the loader on until the page navigates
-                syncAndRedirect(
-                    result.createdUserId,
-                    email,
-                    signUp.imageUrl || null,
-                );
+                await syncAndRedirect();
             } else {
                 setError(`Verification status: ${result.status}`);
                 setLoading(false);

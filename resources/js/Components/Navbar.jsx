@@ -1,14 +1,31 @@
 import React from 'react';
-import { Link, usePage } from '@inertiajs/react';
-import { useAuth, useClerk } from '@clerk/clerk-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { useClerk } from '@clerk/clerk-react';
 import CadenceLogo from './CadenceLogo';
 
 export default function Navbar() {
-    const { isSignedIn, isLoaded } = useAuth();
     const { signOut } = useClerk();
     const { auth } = usePage().props;
 
-    const isAuthenticated = isLoaded && (isSignedIn || !!auth?.user);
+    const isAuthenticated = !!auth?.user;
+
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+        } catch (err) {
+            console.error('Clerk sign out error:', err);
+        } finally {
+            router.post(
+                '/logout',
+                {},
+                {
+                    onFinish: () => {
+                        window.location.assign('/login');
+                    },
+                },
+            );
+        }
+    };
 
     return (
         <nav className="sticky top-0 z-40 border-b border-[#D8DDD5] bg-[#FFFFFF]/90 px-4 py-3.5 backdrop-blur-md transition-all sm:px-6 lg:px-8">
@@ -36,11 +53,7 @@ export default function Navbar() {
 
                             <button
                                 type="button"
-                                onClick={() =>
-                                    signOut(() =>
-                                        window.location.assign('/login'),
-                                    )
-                                }
+                                onClick={handleSignOut}
                                 className="rounded-full bg-[#762F50] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#5E243F] active:scale-95"
                             >
                                 Sign Out

@@ -93,7 +93,11 @@ export default function Welcome() {
     return (
         <GuestLayout>
             <Head>
-                <title>Cadence — Your Study Workspace</title>
+                <title>Cadence - Educational Resource Canvas</title>
+                <meta
+                    name="description"
+                    content="Cadence is a platform for organizing, gathering, and collaborating on educational study resources."
+                />
                 <link
                     rel="icon"
                     type="image/svg+xml"

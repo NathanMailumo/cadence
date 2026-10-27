@@ -54,8 +54,13 @@ return [
         'secret' => env('PAYSTACK_SECRET_KEY'),
         'public' => env('PAYSTACK_PUBLIC_KEY'),
         // 'secret' => env('PAYSTACK_SECRET_KEY'),
-    ]
+    ],
 
-
+    'clerk' => [
+        'secret_key' => env('CLERK_SECRET_KEY'),
+        'issuer' => env('CLERK_ISSUER'),
+        'allowed_origins' => array_values(array_filter(array_map('trim', explode(',', (string) env('CLERK_ALLOWED_ORIGINS', ''))))),
+    ],
 
 ];
+

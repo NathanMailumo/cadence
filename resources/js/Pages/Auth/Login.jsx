@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSignIn, useClerk, useUser } from '@clerk/clerk-react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import axios from 'axios';
+import { clerkSync } from '@/lib/clerkSync';
 import Navbar from '@/Components/Navbar';
 import CadenceLogo from '@/Components/CadenceLogo';
 import CadenceLoader from '@/Components/CadenceLoader';
 
 export default function Login() {
     const { isLoaded: isSignInLoaded, signIn, setActive } = useSignIn();
-    const { signOut } = useClerk();
+    const clerk = useClerk();
+    const { signOut } = clerk;
     const { isLoaded: isUserLoaded, isSignedIn, user } = useUser();
     const { props } = usePage();
 
@@ -43,50 +44,45 @@ export default function Login() {
         }
     }, [props.error, props.flash]);
 
-    const syncAndRedirect = (clerkUserId, userEmail, imageUrl = null) => {
+    const syncAndRedirect = async () => {
         if (syncInProgress.current) return;
 
         syncInProgress.current = true;
         setLoading(true);
 
-        axios
-            .post('/clerk-sync', {
-                clerk_id: clerkUserId,
-                email: userEmail,
-                profile_image_url: imageUrl,
-                is_registration: false,
-            })
-            .then(() => {
-                window.location.replace('/dashboard');
-            })
-            .catch(async (err) => {
-                const errors = err.response?.data?.errors;
-                const msg = errors?.email || errors?.clerk_id;
-                // Clear the Clerk session so Clerk and Laravel can't disagree
-                try {
-                    await signOut();
-                } catch (signOutErr) {
-                    console.error('Clerk sign out error:', signOutErr);
-                }
-                syncInProgress.current = false;
-                setLoading(false);
-                setError(
-                    (Array.isArray(msg) ? msg[0] : msg) ||
-                        'Unable to finish signing you in. Please try again.',
-                );
-            });
+        try {
+            await clerkSync(clerk, false);
+            window.location.replace('/dashboard');
+        } catch (err) {
+            const errors = err.response?.data?.errors;
+            const msg = errors?.email || errors?.clerk_id;
+            // Clear the Clerk session so Clerk and Laravel can't disagree
+            try {
+                await signOut();
+            } catch (signOutErr) {
+                console.error('Clerk sign out error:', signOutErr);
+            }
+            syncInProgress.current = false;
+            setLoading(false);
+            setError(
+                (Array.isArray(msg) ? msg[0] : msg) ||
+                    'Unable to finish signing you in. Please try again.',
+            );
+        }
     };
 
-    // Clerk is signed in but Laravel isn't (e.g. expired Laravel session):
-    // create the Laravel session instead of bouncing to /dashboard.
+    // On /login and /register, if a Clerk session exists on page load without a Laravel session,
+    // sign out of Clerk once, so logging out of Laravel can't silently log the user back in.
+    const signedOutStaleClerk = useRef(false);
     useEffect(() => {
-        if (laravelUser || !isUserLoaded || !isSignedIn || !user) return;
-        const userEmail = user.primaryEmailAddress?.emailAddress;
-        if (userEmail) {
-            syncAndRedirect(user.id, userEmail, user.imageUrl || null);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [laravelUser, isUserLoaded, isSignedIn, user]);
+        if (laravelUser) return;
+        if (!isUserLoaded || !isSignedIn || signedOutStaleClerk.current) return;
+
+        signedOutStaleClerk.current = true;
+        signOut().catch((err) => {
+            console.error('Error signing out stale Clerk session:', err);
+        });
+    }, [laravelUser, isUserLoaded, isSignedIn, signOut]);
 
     const handleGoogleLogin = async () => {
         if (!isSignInLoaded) return;
@@ -122,7 +118,7 @@ export default function Login() {
 
             if (result.status === 'complete') {
                 await setActive({ session: result.createdSessionId });
-                syncAndRedirect(result.createdUserId || result.id, email);
+                await syncAndRedirect();
             } else if (
                 result.status === 'needs_second_factor' ||
                 result.status === 'needs_first_factor'
@@ -160,10 +156,7 @@ export default function Login() {
                         await setActive({
                             session: retryResult.createdSessionId,
                         });
-                        syncAndRedirect(
-                            retryResult.createdUserId || retryResult.id,
-                            email,
-                        );
+                        await syncAndRedirect();
                         return;
                     }
                 } catch (retryErr) {
@@ -199,7 +192,7 @@ export default function Login() {
 
             if (result.status === 'complete') {
                 await setActive({ session: result.createdSessionId });
-                syncAndRedirect(result.createdUserId || result.id, email);
+                await syncAndRedirect();
             } else {
                 setError(`Verification status: ${result.status}`);
                 setLoading(false);

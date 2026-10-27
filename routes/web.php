@@ -16,7 +16,7 @@ use Inertia\Inertia;
 
 // Web Session Middleware Group for Unauthenticated / Public Sync Routes
 Route::middleware(['web'])->group(function () {
-    Route::post('/clerk-sync', [ClerkSyncController::class, 'store'])->name('clerk.sync');
+    Route::post('/clerk-sync', [ClerkSyncController::class, 'store'])->middleware('throttle:20,1')->name('clerk.sync');
     Route::get('/sso-callback', fn() => Inertia::render('Auth/SSOCallback'))->name('sso.callback');
 });
 
@@ -68,7 +68,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     // Collaborators & Members
     Route::get('/resources/{resource}/collaborators', [ResourceUserController::class, 'members'])->name('resources.collaborators.index');
-    Route::post('/resources/{resource}/invite', [ResourceUserController::class, 'invite'])->name('resources.invite');
+    Route::post('/resources/{resource}/invite', [ResourceUserController::class, 'invite'])->middleware('throttle:10,1')->name('resources.invite');
     Route::get('/resources/{resource}/invite', [ResourceUserController::class, 'acceptInviteLink'])->name('resources.invitations.link');
     Route::delete('/resources/{resource}/collaborators/{user}', [ResourceUserController::class, 'removeCollaborator'])->name('resources.collaborators.destroy');
 
@@ -80,12 +80,12 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/resources/{resource}/invited', [ResourceUserController::class, 'members'])->name('resources.members');
 
     // YouTube Controller
-    Route::get('/youtube/search', [YouTubeController::class, 'search'])->name('youtube.search');
+    Route::get('/youtube/search', [YouTubeController::class, 'search'])->middleware('throttle:30,1')->name('youtube.search');
 
     // payment
     Route::get('/billing', [SubscriptionController::class, 'index'])->name('billing');
     Route::get('/billing/info', [SubscriptionController::class, 'info'])->name('billing.info');
-    Route::post('/subscription/initialize', [SubscriptionController::class, 'initialize'])->name('subscription.initialize');
+    Route::post('/subscription/initialize', [SubscriptionController::class, 'initialize'])->middleware('throttle:10,1')->name('subscription.initialize');
     Route::get('/subscription/callback', [SubscriptionController::class, 'callback'])->name('subscription.callback');
     Route::post('/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
 });
