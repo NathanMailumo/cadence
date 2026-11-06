@@ -4,16 +4,38 @@
 
 @keyframes cadence-loader-assemble {
     0% {
-        opacity: 0;
+        opacity: 0.12;
         transform: translate(var(--loader-x), var(--loader-y)) scale(0.62);
     }
-    70% {
+    30% {
         opacity: 1;
         transform: translate(0, 0) scale(1.04);
     }
-    100% {
+    38% {
         opacity: 1;
         transform: translate(0, 0) scale(1);
+    }
+    68% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    82% {
+        opacity: 0.12;
+        transform: translate(var(--loader-x), var(--loader-y)) scale(0.62);
+    }
+    100% {
+        opacity: 0.12;
+        transform: translate(var(--loader-x), var(--loader-y)) scale(0.62);
+    }
+}
+
+@keyframes cadence-loader-breathe {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.04);
     }
 }
 
@@ -38,12 +60,14 @@
 
 .cadence-loader__mark {
     overflow: visible;
+    animation: cadence-loader-breathe 2200ms ease-in-out infinite;
 }
 
 .cadence-loader__shape {
     transform-box: fill-box;
     transform-origin: center;
-    animation: cadence-loader-assemble 850ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: cadence-loader-assemble 2000ms cubic-bezier(0.22, 1, 0.36, 1)
+        infinite;
 }
 
 .cadence-loader__shape--one {
@@ -89,6 +113,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .cadence-loader__mark,
     .cadence-loader__shape {
         animation: none;
         opacity: 1;

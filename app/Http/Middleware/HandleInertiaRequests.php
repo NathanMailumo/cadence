@@ -30,8 +30,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        // Define $user once from the $request
         $user = $request->user();
+        $resources = $user
+            ? Resource::where('status', 'active')
+                ->where(function ($query) use ($user) {
+                    $query->where('clerk_id', $user->clerk_id)
+                        ->orWhereHas('collaborators', function ($collaborators) use ($user) {
+                            $collaborators
+                                ->where('users.clerk_id', $user->clerk_id)
+                                ->where('status', 'accepted');
+                        });
+                })
+                ->withCount('resourceItems')
+                ->latest()
+                ->get()
+            : collect();
 
         return [
             ...parent::share($request),
@@ -42,41 +55,9 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn() => $request->session()->get('success'),
                 'error'   => fn() => $request->session()->get('error'),
             ],
-            'privateResources' => fn() => $user
-                ? Resource::where('status', 'active')
-                ->where('clerk_id', $user->clerk_id)
-                ->where('resource_type', 'private')
-                ->withCount('resourceItems')
-                ->latest()
-                ->get()
-                : [],
-            'publicResources' => fn() => $user
-                ? Resource::where('status', 'active')
-                ->where('resource_type', 'public')
-                ->where(function ($query) use ($user) {
-                    $query->where('clerk_id', $user->clerk_id)
-                        ->orWhereHas('collaborators', function ($collaborators) use ($user) {
-                            $collaborators->where('users.clerk_id', $user->clerk_id)
-                                ->where('status', 'accepted');
-                        });
-                })
-                ->withCount('resourceItems')
-                ->latest()
-                ->get()
-                : [],
-            'resources' => fn() => $user
-                ? Resource::where('status', 'active')
-                ->where(function ($query) use ($user) {
-                    $query->where('clerk_id', $user->clerk_id)
-                ->orWhereHas('collaborators', function ($q) use ($user) {
-                    $q->where('users.clerk_id', $user->clerk_id)
-                        ->where('status', 'accepted');
-                    });
-                })
-                ->withCount('resourceItems')
-                ->latest()
-                ->get()
-                : [],
+            'privateResources' => $resources->where('resource_type', 'private')->values(),
+            'publicResources' => $resources->where('resource_type', 'public')->values(),
+            'resources' => $resources,
         ];
     }
 }

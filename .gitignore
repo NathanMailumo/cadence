@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+cadence_backup.dump
+*.dump
+*.sql

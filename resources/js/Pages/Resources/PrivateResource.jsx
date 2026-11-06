@@ -456,6 +456,8 @@ export default function PrivateResource({ resource, items = [] }) {
                 <main className="relative min-h-0 flex-1 overflow-y-auto bg-[#F9F8F6] p-3 pb-20 [background-image:radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] sm:p-8 sm:pb-8">
                     <div className="h-full">
                         <ResourceCanvas
+                            workspaceId={resource?.id}
+                            onCardClick={setViewingItem}
                             items={items}
                             renderCard={renderCard}
                             emptyState={

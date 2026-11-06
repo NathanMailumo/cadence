@@ -120,10 +120,11 @@ class SessionController extends Controller
             'course_code' => 'nullable|string',
             'input_option' => 'required|in:text,file',
             'raw_notes' => 'nullable|string',
-            'focus_prompt' => 'required|string',
+            'focus_prompt' => 'nullable|string',
             'resource_id' => 'nullable|uuid|exists:resources,id',
             'file' => 'required_if:input_option,file|nullable|file|mimes:pdf,docx,txt,pptx|max:5120',
         ]);
+        $incomingFields['focus_prompt'] = $incomingFields['focus_prompt'] ?? '';
 
         $incomingFields['clerk_id'] = $user->clerk_id;
         $resource = $this->accessibleResource($incomingFields['resource_id'] ?? null);

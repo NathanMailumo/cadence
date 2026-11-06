@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import axios from 'axios';
+import CadenceLoader from '@/Components/CadenceLoader';
 import {
     AlertCircle,
     BrainCircuit,
@@ -201,7 +202,9 @@ export default function ResourceItemModal({
                 typeof route === 'function'
                     ? route('sessions.store')
                     : '/sessions/create',
-                { onSuccess: handleClose },
+                {
+                    onSuccess: handleClose,
+                },
             );
             return;
         }
@@ -257,15 +260,38 @@ export default function ResourceItemModal({
             role="dialog"
             aria-modal="true"
             onMouseDown={(event) => {
-                if (event.target === event.currentTarget) handleClose();
+                if (event.target === event.currentTarget && !isProcessing)
+                    handleClose();
             }}
         >
             <form
                 method="POST"
                 encType="multipart/form-data"
                 onSubmit={handleSubmit}
-                className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white px-6 py-5 shadow-2xl sm:px-7"
+                className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white px-6 py-5 shadow-2xl sm:px-7"
             >
+                {isProcessing && (
+                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center rounded-2xl bg-white/90 p-6 backdrop-blur-sm">
+                        <CadenceLoader
+                            size="lg"
+                            label={
+                                isRevision
+                                    ? 'Generating revision pack...'
+                                    : 'Adding resource...'
+                            }
+                        />
+                        <p className="mt-4 text-sm font-semibold text-[#702B4B]">
+                            {isRevision
+                                ? 'Generating your revision pack...'
+                                : 'Adding resource to space...'}
+                        </p>
+                        <p className="mt-1 text-xs text-[#73736C]">
+                            {isRevision
+                                ? 'This may take a few moments while AI synthesizes notes.'
+                                : 'Please wait while your resource is being added.'}
+                        </p>
+                    </div>
+                )}
                 <input
                     type="hidden"
                     name="resource_id"
@@ -381,6 +407,20 @@ export default function ResourceItemModal({
                     />
                 )}
 
+                {isInlineItem && (
+                    <InlineItemView
+                        type={selectedType}
+                        title={itemForm.data.title}
+                        url={itemForm.data.url}
+                        content={itemForm.data.content}
+                        setTitle={(value) => itemForm.setData('title', value)}
+                        setUrl={(value) => itemForm.setData('url', value)}
+                        setContent={(value) =>
+                            itemForm.setData('content', value)
+                        }
+                    />
+                )}
+
                 {isRevision && (
                     <RevisionPackView
                         spaceName={spaceName}
@@ -432,6 +472,63 @@ export default function ResourceItemModal({
                     ) : null}
                 </div>
             </form>
+        </div>
+    );
+}
+
+function InlineItemView({
+    type,
+    title,
+    url,
+    content,
+    setTitle,
+    setUrl,
+    setContent,
+}) {
+    const isLink = type === 'link';
+
+    return (
+        <div className="mt-4 space-y-3 border-t border-[#E8E7E0] pt-4">
+            <Field label="Title">
+                <input
+                    name="title"
+                    type="text"
+                    required
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder={
+                        isLink
+                            ? 'e.g. Course reference article'
+                            : 'e.g. Exam reminder'
+                    }
+                    className={inputClass}
+                />
+            </Field>
+            {isLink ? (
+                <Field label="Web link">
+                    <input
+                        name="url"
+                        type="url"
+                        required
+                        value={url}
+                        onChange={(event) => setUrl(event.target.value)}
+                        placeholder="https://example.com/article"
+                        className={inputClass}
+                    />
+                </Field>
+            ) : (
+                <Field label="Note">
+                    <textarea
+                        name="content"
+                        rows="5"
+                        required
+                        value={content}
+                        onChange={(event) => setContent(event.target.value)}
+                        placeholder="Write your note..."
+                        className={`${inputClass} resize-none`}
+                    />
+                </Field>
+            )}
         </div>
     );
 }
