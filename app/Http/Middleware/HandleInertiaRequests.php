@@ -38,7 +38,7 @@ class HandleInertiaRequests extends Middleware
                         ->orWhereHas('collaborators', function ($collaborators) use ($user) {
                             $collaborators
                                 ->where('users.clerk_id', $user->clerk_id)
-                                ->where('status', 'accepted');
+                                ->where('resource_users.status', 'accepted');
                         });
                 })
                 ->withCount('resourceItems')

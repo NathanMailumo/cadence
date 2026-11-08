@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import ResourceShow from '@/Components/ResourceShow';
 import {
     FolderOpen,
@@ -311,26 +311,26 @@ export default function PrivateResource({ resource, items = [] }) {
                 );
             }
 
-            case 'revision':
+            case 'revision': {
+                const sessionUrl = item.study_session_id
+                    ? typeof route === 'function'
+                        ? route('sessions.show', item.study_session_id)
+                        : `/session/${item.study_session_id}`
+                    : null;
+
                 return (
-                    <Link
+                    <div
                         key={item.id}
-                        href={
-                            item.study_session_id
-                                ? typeof route === 'function'
-                                    ? route(
-                                          'sessions.show',
-                                          item.study_session_id,
-                                      )
-                                    : `/session/${item.study_session_id}`
-                                : '#'
-                        }
-                        className="group relative flex flex-col justify-between rounded-2xl border-2 border-[#AD5266]/30 bg-[#FDF8FA] p-4 pr-14 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266] hover:shadow-md"
+                        onClick={() => {
+                            if (sessionUrl) {
+                                router.visit(sessionUrl);
+                            }
+                        }}
+                        className="group relative flex cursor-pointer flex-col justify-between rounded-2xl border-2 border-[#AD5266]/30 bg-[#FDF8FA] p-4 pr-14 shadow-sm transition-all hover:-translate-y-1 hover:border-[#AD5266] hover:shadow-md"
                     >
                         <button
                             type="button"
                             onClick={(e) => {
-                                e.preventDefault();
                                 e.stopPropagation();
                                 handleDelete(item, e);
                             }}
@@ -361,8 +361,9 @@ export default function PrivateResource({ resource, items = [] }) {
                         <div className="mt-3 flex items-center justify-between border-t border-[#AD5266]/15 pt-2 text-[10px] font-bold text-[#AD5266]">
                             <span>Open revision pack</span>
                         </div>
-                    </Link>
+                    </div>
                 );
+            }
 
             case 'note':
             default:

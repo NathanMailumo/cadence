@@ -114,7 +114,7 @@ class ResourceItemController extends Controller
     {
         $user = $request->user();
 
-        $isOwner = $resourceItem->resource->clerk_id === $user->clerk_id;
+        $isOwner = $resourceItem->resource?->clerk_id === $user->clerk_id;
         $isCreator = $resourceItem->clerk_id === $user->clerk_id;
 
         abort_unless($isOwner || $isCreator, 403, 'Unauthorized action.');
@@ -198,7 +198,7 @@ class ResourceItemController extends Controller
     {
         $user = $request->user();
 
-        $isOwner = $resourceItem->resource->clerk_id === $user->clerk_id;
+        $isOwner = $resourceItem->resource?->clerk_id === $user->clerk_id;
         $isCreator = $resourceItem->clerk_id === $user->clerk_id;
 
         abort_unless($isOwner || $isCreator, 403, 'Unauthorized action.');

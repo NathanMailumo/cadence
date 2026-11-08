@@ -74,13 +74,7 @@ export default function AuthenticatedLayout({ children }) {
             return;
         }
 
-        router.delete(`/resources/${resource.id}`, {
-            onSuccess: () => {
-                router.reload({
-                    only: ['privateResources', 'publicResources'],
-                });
-            },
-        });
+        router.delete(`/resources/${resource.id}`);
     };
 
     return (

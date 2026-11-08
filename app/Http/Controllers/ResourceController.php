@@ -67,7 +67,7 @@ class ResourceController extends Controller
                     ->get();
 
                 $resource->update(['status' => 'deleted']);
-                $resource->resourceItems()->update(['status' => 'deleted']);
+                $resource->resourceItems()->update(['status' => 'notActive']);
                 $resource->studySessions()->update(['status' => 'deleted']);
 
                 DB::table('resource_users')

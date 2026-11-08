@@ -24,26 +24,6 @@ function defaultPosition(index) {
     };
 }
 
-/**
- * Ensures the dropped card is accessible and does not totally bury an existing card.
- */
-function ensureAccessiblePosition(candidate, otherPositions) {
-    let x = Math.max(16, candidate.x);
-    let y = Math.max(16, candidate.y);
-
-    const isDirectlyStacked = Object.values(otherPositions).some((pos) => {
-        if (!pos) return false;
-        return Math.abs(pos.x - x) < 50 && Math.abs(pos.y - y) < 50;
-    });
-
-    if (isDirectlyStacked) {
-        x += 60;
-        y += 60;
-    }
-
-    return { x: Math.round(x), y: Math.round(y) };
-}
-
 export default function ResourceCanvas({
     items = [],
     renderCard,
@@ -171,20 +151,8 @@ export default function ResourceCanvas({
 
     // Card drag handlers (works smoothly at any zoom level using clientToContent)
     const handleCardPointerDown = (itemId, index, e) => {
-        if (e.button !== 0) return;
-        if (
-            e.target.closest(
-                'button, a, input, textarea, select, [data-no-card-drag]',
-            )
-        ) {
-            return;
-        }
-
-        // If multi-touch gesture is starting, do not initiate card drag
-        if (
-            e.pointerType === 'touch' &&
-            (e.nativeEvent?.touches?.length || 0) > 1
-        ) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (e.target.closest('button, input, textarea, select')) {
             return;
         }
 
@@ -198,7 +166,7 @@ export default function ResourceCanvas({
         const grabOffsetX = contentPoint.x - itemPos.x;
         const grabOffsetY = contentPoint.y - itemPos.y;
 
-        cardDragRef.current = {
+        const dragInfo = {
             itemId,
             pointerId: e.pointerId,
             startX: e.clientX,
@@ -209,91 +177,70 @@ export default function ResourceCanvas({
             hasMoved: false,
         };
 
-        try {
-            e.currentTarget.setPointerCapture(e.pointerId);
-        } catch {
-            // Ignore capture error
-        }
-    };
+        cardDragRef.current = dragInfo;
 
-    const handleCardPointerMove = (itemId, e) => {
-        const drag = cardDragRef.current;
-        if (!drag || drag.pointerId !== e.pointerId || drag.itemId !== itemId)
-            return;
+        const handlePointerMove = (moveEvent) => {
+            if (moveEvent.pointerId !== dragInfo.pointerId) return;
 
-        // Cancel card drag if multiple touches appear (e.g. user began pinch)
-        if (
-            e.pointerType === 'touch' &&
-            (e.nativeEvent?.touches?.length || 0) > 1
-        ) {
+            const dist = Math.hypot(
+                moveEvent.clientX - dragInfo.startX,
+                moveEvent.clientY - dragInfo.startY,
+            );
+
+            if (!dragInfo.hasMoved) {
+                if (dist > 4) {
+                    dragInfo.hasMoved = true;
+                    setActiveDragId(itemId);
+                } else {
+                    return;
+                }
+            }
+
+            if (!transformRef.current) return;
+            const currentPoint = transformRef.current.clientToContent(
+                moveEvent.clientX,
+                moveEvent.clientY,
+            );
+
+            const newX = Math.round(currentPoint.x - dragInfo.grabOffsetX);
+            const newY = Math.round(currentPoint.y - dragInfo.grabOffsetY);
+
+            setPositions((prev) => ({
+                ...prev,
+                [itemId]: { x: newX, y: newY },
+            }));
+        };
+
+        const handlePointerUp = (upEvent) => {
+            if (upEvent.pointerId !== dragInfo.pointerId) return;
+
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerUp);
+
+            if (dragInfo.hasMoved) {
+                suppressClickRef.current = true;
+                setTimeout(() => {
+                    suppressClickRef.current = false;
+                }, 150);
+
+                setPositions((prev) => {
+                    const finalPos = prev[itemId] || dragInfo.startPos;
+                    const next = { ...prev, [itemId]: finalPos };
+                    persistPositions(next);
+                    return next;
+                });
+            }
+
             cardDragRef.current = null;
             setActiveDragId(null);
-            return;
-        }
+        };
 
-        const dist = Math.hypot(
-            e.clientX - drag.startX,
-            e.clientY - drag.startY,
-        );
-        if (!drag.hasMoved) {
-            if (dist > 4) {
-                drag.hasMoved = true;
-                setActiveDragId(itemId);
-            } else {
-                return;
-            }
-        }
-
-        if (!transformRef.current) return;
-        const contentPoint = transformRef.current.clientToContent(
-            e.clientX,
-            e.clientY,
-        );
-
-        const newX = Math.max(16, contentPoint.x - drag.grabOffsetX);
-        const newY = Math.max(16, contentPoint.y - drag.grabOffsetY);
-
-        setPositions((prev) => ({
-            ...prev,
-            [itemId]: { x: Math.round(newX), y: Math.round(newY) },
-        }));
-    };
-
-    const handleCardPointerUp = (itemId, e) => {
-        const drag = cardDragRef.current;
-        if (!drag || drag.pointerId !== e.pointerId || drag.itemId !== itemId)
-            return;
-
-        try {
-            if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
-                e.currentTarget.releasePointerCapture(e.pointerId);
-            }
-        } catch {
-            // Ignore
-        }
-
-        if (drag.hasMoved) {
-            suppressClickRef.current = true;
-            setTimeout(() => {
-                suppressClickRef.current = false;
-            }, 150);
-
-            setPositions((prev) => {
-                const currentPos = prev[itemId] || drag.startPos;
-                const otherPositions = { ...prev };
-                delete otherPositions[itemId];
-                const accessiblePos = ensureAccessiblePosition(
-                    currentPos,
-                    otherPositions,
-                );
-                const next = { ...prev, [itemId]: accessiblePos };
-                persistPositions(next);
-                return next;
-            });
-        }
-
-        cardDragRef.current = null;
-        setActiveDragId(null);
+        window.addEventListener('pointermove', handlePointerMove, {
+            passive: true,
+        });
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointercancel', handlePointerUp);
     };
 
     const handleCardClick = (item, e) => {
@@ -302,7 +249,7 @@ export default function ResourceCanvas({
             e.stopPropagation();
             return;
         }
-        if (e.target.closest('button, a, input, textarea, select')) {
+        if (e.target.closest('button, input, textarea, select')) {
             return;
         }
         if (onCardClick) {
@@ -310,15 +257,13 @@ export default function ResourceCanvas({
         }
     };
 
-    // Calculate dynamic canvas bounds so dragged cards don't clip
-    const contentWidth = Math.max(
-        2000,
-        ...Object.values(positions).map((p) => (p?.x || 0) + CARD_WIDTH + 200),
-    );
-    const contentHeight = Math.max(
-        1400,
-        ...Object.values(positions).map((p) => (p?.y || 0) + CARD_HEIGHT + 200),
-    );
+    // Dynamic canvas bounds allowing wide movement anywhere across the workspace
+    const allX = Object.values(positions).map((p) => p?.x || 0);
+    const allY = Object.values(positions).map((p) => p?.y || 0);
+    const maxX = allX.length > 0 ? Math.max(...allX) : 0;
+    const maxY = allY.length > 0 ? Math.max(...allY) : 0;
+    const contentWidth = Math.max(5000, maxX + CARD_WIDTH + 1000);
+    const contentHeight = Math.max(4000, maxY + CARD_HEIGHT + 1000);
 
     if (items.length === 0) {
         return <div className="h-full w-full">{emptyState}</div>;
@@ -408,15 +353,6 @@ export default function ResourceCanvas({
                                                 index,
                                                 e,
                                             )
-                                        }
-                                        onPointerMove={(e) =>
-                                            handleCardPointerMove(item.id, e)
-                                        }
-                                        onPointerUp={(e) =>
-                                            handleCardPointerUp(item.id, e)
-                                        }
-                                        onPointerCancel={(e) =>
-                                            handleCardPointerUp(item.id, e)
                                         }
                                         onClick={(e) =>
                                             handleCardClick(item, e)
