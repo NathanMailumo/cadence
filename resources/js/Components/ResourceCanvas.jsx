@@ -149,14 +149,16 @@ export default function ResourceCanvas({
         });
     }, [items, persistPositions]);
 
-    // Card drag handlers (works smoothly at any zoom level using clientToContent)
     const handleCardPointerDown = (itemId, index, e) => {
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         if (e.target.closest('button, input, textarea, select')) {
             return;
         }
 
+        suppressClickRef.current = false;
+
         if (!transformRef.current) return;
+
         const contentPoint = transformRef.current.clientToContent(
             e.clientX,
             e.clientY,
@@ -174,77 +176,84 @@ export default function ResourceCanvas({
             grabOffsetX,
             grabOffsetY,
             startPos: { ...itemPos },
-            hasMoved: false,
+            isDragging: false,
         };
 
         cardDragRef.current = dragInfo;
+        e.currentTarget.setPointerCapture(e.pointerId);
+    };
 
-        const handlePointerMove = (moveEvent) => {
-            if (moveEvent.pointerId !== dragInfo.pointerId) return;
+    const handleCardPointerMove = (e) => {
+        const dragInfo = cardDragRef.current;
+        if (!dragInfo || e.pointerId !== dragInfo.pointerId) return;
 
-            const dist = Math.hypot(
-                moveEvent.clientX - dragInfo.startX,
-                moveEvent.clientY - dragInfo.startY,
-            );
+        const distance = Math.hypot(
+            e.clientX - dragInfo.startX,
+            e.clientY - dragInfo.startY,
+        );
 
-            if (!dragInfo.hasMoved) {
-                if (dist > 4) {
-                    dragInfo.hasMoved = true;
-                    setActiveDragId(itemId);
-                } else {
-                    return;
-                }
-            }
+        if (!dragInfo.isDragging) {
+            if (distance < 6) return;
 
-            if (!transformRef.current) return;
-            const currentPoint = transformRef.current.clientToContent(
-                moveEvent.clientX,
-                moveEvent.clientY,
-            );
+            dragInfo.isDragging = true;
+            setActiveDragId(dragInfo.itemId);
+            e.preventDefault();
+        }
 
-            const newX = Math.round(currentPoint.x - dragInfo.grabOffsetX);
-            const newY = Math.round(currentPoint.y - dragInfo.grabOffsetY);
+        if (!transformRef.current) return;
 
-            setPositions((prev) => ({
-                ...prev,
-                [itemId]: { x: newX, y: newY },
-            }));
+        const currentPoint = transformRef.current.clientToContent(
+            e.clientX,
+            e.clientY,
+        );
+
+        const newPosition = {
+            x: Math.round(currentPoint.x - dragInfo.grabOffsetX),
+            y: Math.round(currentPoint.y - dragInfo.grabOffsetY),
         };
 
-        const handlePointerUp = (upEvent) => {
-            if (upEvent.pointerId !== dragInfo.pointerId) return;
+        setPositions((prev) => ({
+            ...prev,
+            [dragInfo.itemId]: newPosition,
+        }));
+    };
 
-            window.removeEventListener('pointermove', handlePointerMove);
-            window.removeEventListener('pointerup', handlePointerUp);
-            window.removeEventListener('pointercancel', handlePointerUp);
+    const finishCardPointer = (e, cancelled = false) => {
+        const dragInfo = cardDragRef.current;
+        if (!dragInfo || e.pointerId !== dragInfo.pointerId) return;
 
-            if (dragInfo.hasMoved) {
-                suppressClickRef.current = true;
-                setTimeout(() => {
-                    suppressClickRef.current = false;
-                }, 150);
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+        }
 
+        if (dragInfo.isDragging) {
+            suppressClickRef.current = !cancelled;
+
+            if (cancelled) {
+                setPositions((prev) => ({
+                    ...prev,
+                    [dragInfo.itemId]: dragInfo.startPos,
+                }));
+            } else {
                 setPositions((prev) => {
-                    const finalPos = prev[itemId] || dragInfo.startPos;
-                    const next = { ...prev, [itemId]: finalPos };
+                    const next = {
+                        ...prev,
+                        [dragInfo.itemId]:
+                            prev[dragInfo.itemId] || dragInfo.startPos,
+                    };
                     persistPositions(next);
                     return next;
                 });
             }
+        }
 
-            cardDragRef.current = null;
-            setActiveDragId(null);
-        };
-
-        window.addEventListener('pointermove', handlePointerMove, {
-            passive: true,
-        });
-        window.addEventListener('pointerup', handlePointerUp);
-        window.addEventListener('pointercancel', handlePointerUp);
+        cardDragRef.current = null;
+        setActiveDragId(null);
     };
 
     const handleCardClick = (item, e) => {
         if (suppressClickRef.current) {
+            suppressClickRef.current = false;
             e.preventDefault();
             e.stopPropagation();
             return;
@@ -353,6 +362,11 @@ export default function ResourceCanvas({
                                                 index,
                                                 e,
                                             )
+                                        }
+                                        onPointerMove={handleCardPointerMove}
+                                        onPointerUp={finishCardPointer}
+                                        onPointerCancel={(e) =>
+                                            finishCardPointer(e, true)
                                         }
                                         onClick={(e) =>
                                             handleCardClick(item, e)
