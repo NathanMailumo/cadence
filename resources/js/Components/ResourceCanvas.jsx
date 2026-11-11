@@ -31,50 +31,49 @@ export default function ResourceCanvas({
     workspaceId,
     onCardClick,
 }) {
+    // ── Mobile detection ──────────────────────────────────────────
+    const [isMobile, setIsMobile] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.innerWidth < 768;
+    });
+
+    useEffect(() => {
+        const onResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    // ── Refs & state ──────────────────────────────────────────────
     const transformRef = useRef(null);
     const [activeDragId, setActiveDragId] = useState(null);
+    const cardDragRef = useRef(null);
+    const suppressClickRef = useRef(false);
 
     const [positions, setPositions] = useState(() => {
         if (!workspaceId || typeof window === 'undefined') return {};
         try {
-            return (
-                JSON.parse(
-                    window.localStorage.getItem(
-                        `cadence:positions:v2:${workspaceId}`,
-                    ),
-                ) || {}
-            );
+            return JSON.parse(
+                window.localStorage.getItem(`cadence:positions:v2:${workspaceId}`),
+            ) || {};
         } catch {
             return {};
         }
     });
 
-    const cardDragRef = useRef(null);
-    const suppressClickRef = useRef(false);
-
-    // Prevent iOS Safari page-level zoom gestures
+    // ── Prevent iOS Safari page-level zoom gestures ───────────────
     useEffect(() => {
-        const preventSafariGesture = (e) => {
-            e.preventDefault();
-        };
-
-        window.addEventListener('gesturestart', preventSafariGesture, {
-            passive: false,
-        });
-        window.addEventListener('gesturechange', preventSafariGesture, {
-            passive: false,
-        });
-        window.addEventListener('gestureend', preventSafariGesture, {
-            passive: false,
-        });
-
+        const prevent = (e) => e.preventDefault();
+        window.addEventListener('gesturestart', prevent, { passive: false });
+        window.addEventListener('gesturechange', prevent, { passive: false });
+        window.addEventListener('gestureend', prevent, { passive: false });
         return () => {
-            window.removeEventListener('gesturestart', preventSafariGesture);
-            window.removeEventListener('gesturechange', preventSafariGesture);
-            window.removeEventListener('gestureend', preventSafariGesture);
+            window.removeEventListener('gesturestart', prevent);
+            window.removeEventListener('gesturechange', prevent);
+            window.removeEventListener('gestureend', prevent);
         };
     }, []);
 
+    // ── Persist positions ─────────────────────────────────────────
     const persistPositions = useCallback(
         (newPositions) => {
             if (!workspaceId || typeof window === 'undefined') return;
@@ -84,44 +83,36 @@ export default function ResourceCanvas({
                     JSON.stringify(newPositions),
                 );
             } catch {
-                // Ignore quota errors
+                // ignore quota errors
             }
         },
         [workspaceId],
     );
 
-    // Reset when switching workspace
     useEffect(() => {
         if (transformRef.current) {
             transformRef.current.resetTransform(0);
         }
-
         if (!workspaceId || typeof window === 'undefined') {
             setPositions({});
             return;
         }
-
         try {
-            const saved =
-                JSON.parse(
-                    window.localStorage.getItem(
-                        `cadence:positions:v2:${workspaceId}`,
-                    ),
-                ) || {};
-            setPositions(saved);
+            const saved = JSON.parse(
+                window.localStorage.getItem(`cadence:positions:v2:${workspaceId}`),
+            );
+            setPositions(saved || {});
         } catch {
             setPositions({});
         }
     }, [workspaceId]);
 
-    // Ensure all items have a valid initial position
+    // ── Ensure every item has an initial position ─────────────────
     useEffect(() => {
         if (!items || items.length === 0) return;
-
         setPositions((prev) => {
             let changed = false;
             const next = { ...prev };
-
             items.forEach((item, index) => {
                 if (!next[item.id]) {
                     let slot = index;
@@ -141,45 +132,33 @@ export default function ResourceCanvas({
                     changed = true;
                 }
             });
-
-            if (changed) {
-                persistPositions(next);
-            }
+            if (changed) persistPositions(next);
             return changed ? next : prev;
         });
     }, [items, persistPositions]);
 
+    // ── Drag handlers ─────────────────────────────────────────────
     const handleCardPointerDown = (itemId, index, e) => {
         if (e.pointerType === 'mouse' && e.button !== 0) return;
-        if (e.target.closest('button, input, textarea, select')) {
-            return;
-        }
+        if (e.target.closest('button, input, textarea, select')) return;
+        if (!transformRef.current) return;
 
         suppressClickRef.current = false;
 
-        if (!transformRef.current) return;
-
-        const contentPoint = transformRef.current.clientToContent(
-            e.clientX,
-            e.clientY,
-        );
+        const contentPoint = transformRef.current.clientToContent(e.clientX, e.clientY);
         const itemPos = positions[itemId] || defaultPosition(index);
 
-        const grabOffsetX = contentPoint.x - itemPos.x;
-        const grabOffsetY = contentPoint.y - itemPos.y;
-
-        const dragInfo = {
+        cardDragRef.current = {
             itemId,
             pointerId: e.pointerId,
             startX: e.clientX,
             startY: e.clientY,
-            grabOffsetX,
-            grabOffsetY,
+            grabOffsetX: contentPoint.x - itemPos.x,
+            grabOffsetY: contentPoint.y - itemPos.y,
             startPos: { ...itemPos },
             isDragging: false,
         };
 
-        cardDragRef.current = dragInfo;
         e.currentTarget.setPointerCapture(e.pointerId);
     };
 
@@ -187,70 +166,55 @@ export default function ResourceCanvas({
         const dragInfo = cardDragRef.current;
         if (!dragInfo || e.pointerId !== dragInfo.pointerId) return;
 
-        const distance = Math.hypot(
-            e.clientX - dragInfo.startX,
-            e.clientY - dragInfo.startY,
-        );
+        const dist = Math.hypot(e.clientX - dragInfo.startX, e.clientY - dragInfo.startY);
 
         if (!dragInfo.isDragging) {
-            if (distance < 6) return;
-
-            dragInfo.isDragging = true;
-            setActiveDragId(dragInfo.itemId);
-            e.preventDefault();
+            if (dist > 4) {
+                dragInfo.isDragging = true;
+                setActiveDragId(dragInfo.itemId);
+                // suppress any click that fires after the drag ends
+                suppressClickRef.current = true;
+            } else {
+                return;
+            }
         }
 
         if (!transformRef.current) return;
-
-        const currentPoint = transformRef.current.clientToContent(
-            e.clientX,
-            e.clientY,
-        );
-
-        const newPosition = {
-            x: Math.round(currentPoint.x - dragInfo.grabOffsetX),
-            y: Math.round(currentPoint.y - dragInfo.grabOffsetY),
-        };
-
+        const pt = transformRef.current.clientToContent(e.clientX, e.clientY);
         setPositions((prev) => ({
             ...prev,
-            [dragInfo.itemId]: newPosition,
+            [dragInfo.itemId]: {
+                x: Math.round(pt.x - dragInfo.grabOffsetX),
+                y: Math.round(pt.y - dragInfo.grabOffsetY),
+            },
         }));
     };
 
-    const finishCardPointer = (e, cancelled = false) => {
+    const handleCardPointerUp = (e) => {
         const dragInfo = cardDragRef.current;
         if (!dragInfo || e.pointerId !== dragInfo.pointerId) return;
 
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        if (e.currentTarget && e.currentTarget.hasPointerCapture(e.pointerId)) {
             e.currentTarget.releasePointerCapture(e.pointerId);
         }
 
         if (dragInfo.isDragging) {
-            suppressClickRef.current = !cancelled;
-
-            if (cancelled) {
-                setPositions((prev) => ({
-                    ...prev,
-                    [dragInfo.itemId]: dragInfo.startPos,
-                }));
-            } else {
-                setPositions((prev) => {
-                    const next = {
-                        ...prev,
-                        [dragInfo.itemId]:
-                            prev[dragInfo.itemId] || dragInfo.startPos,
-                    };
-                    persistPositions(next);
-                    return next;
-                });
-            }
+            setTimeout(() => {
+                suppressClickRef.current = false;
+            }, 150);
+            setPositions((prev) => {
+                const finalPos = prev[dragInfo.itemId] || dragInfo.startPos;
+                const next = { ...prev, [dragInfo.itemId]: finalPos };
+                persistPositions(next);
+                return next;
+            });
         }
 
         cardDragRef.current = null;
         setActiveDragId(null);
     };
 
+    // ── Click handler (opens modal) ───────────────────────────────
     const handleCardClick = (item, e) => {
         if (suppressClickRef.current) {
             suppressClickRef.current = false;
@@ -258,15 +222,11 @@ export default function ResourceCanvas({
             e.stopPropagation();
             return;
         }
-        if (e.target.closest('button, input, textarea, select')) {
-            return;
-        }
-        if (onCardClick) {
-            onCardClick(item);
-        }
+        if (e.target.closest('button, input, textarea, select')) return;
+        if (onCardClick) onCardClick(item);
     };
 
-    // Dynamic canvas bounds allowing wide movement anywhere across the workspace
+    // ── Canvas bounds ─────────────────────────────────────────────
     const allX = Object.values(positions).map((p) => p?.x || 0);
     const allY = Object.values(positions).map((p) => p?.y || 0);
     const maxX = allX.length > 0 ? Math.max(...allX) : 0;
@@ -274,6 +234,27 @@ export default function ResourceCanvas({
     const contentWidth = Math.max(5000, maxX + CARD_WIDTH + 1000);
     const contentHeight = Math.max(4000, maxY + CARD_HEIGHT + 1000);
 
+    // ── Mobile: simple vertical list ─────────────────────────────
+    if (isMobile) {
+        return (
+            <div className="relative h-full w-full overflow-auto">
+                <div className="p-4">
+                    {items.length === 0 && emptyState}
+                    {items.map((item) => (
+                        <div
+                            key={item.id}
+                            className="mb-4"
+                            onClick={(e) => handleCardClick(item, e)}
+                        >
+                            {renderCard(item)}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // ── Desktop: canvas with zoom & drag ─────────────────────────
     if (items.length === 0) {
         return <div className="h-full w-full">{emptyState}</div>;
     }
@@ -294,25 +275,11 @@ export default function ResourceCanvas({
                 panning={{
                     disabled: false,
                     velocityDisabled: true,
-                    excluded: [
-                        'card-draggable',
-                        'button',
-                        'a',
-                        'input',
-                        'textarea',
-                        'select',
-                    ],
+                    excluded: ['card-draggable', 'button', 'a', 'input', 'textarea', 'select'],
                 }}
-                pinch={{
-                    disabled: false,
-                    step: 5,
-                }}
-                wheel={{
-                    step: 0.1,
-                }}
-                doubleClick={{
-                    disabled: true,
-                }}
+                pinch={{ disabled: false, step: 5 }}
+                wheel={{ step: 0.1 }}
+                doubleClick={{ disabled: true }}
             >
                 {({ zoomIn, zoomOut }) => (
                     <>
@@ -333,11 +300,8 @@ export default function ResourceCanvas({
                             }}
                         >
                             {items.map((item, index) => {
-                                const pos =
-                                    positions[item.id] ||
-                                    defaultPosition(index);
+                                const pos = positions[item.id] || defaultPosition(index);
                                 const isDragging = activeDragId === item.id;
-
                                 return (
                                     <div
                                         key={item.id}
@@ -357,20 +321,12 @@ export default function ResourceCanvas({
                                             WebkitUserSelect: 'none',
                                         }}
                                         onPointerDown={(e) =>
-                                            handleCardPointerDown(
-                                                item.id,
-                                                index,
-                                                e,
-                                            )
+                                            handleCardPointerDown(item.id, index, e)
                                         }
                                         onPointerMove={handleCardPointerMove}
-                                        onPointerUp={finishCardPointer}
-                                        onPointerCancel={(e) =>
-                                            finishCardPointer(e, true)
-                                        }
-                                        onClick={(e) =>
-                                            handleCardClick(item, e)
-                                        }
+                                        onPointerUp={handleCardPointerUp}
+                                        onPointerCancel={handleCardPointerUp}
+                                        onClick={(e) => handleCardClick(item, e)}
                                     >
                                         {renderCard(item)}
                                     </div>
