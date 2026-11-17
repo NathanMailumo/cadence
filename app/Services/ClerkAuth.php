@@ -117,7 +117,12 @@ class ClerkAuth
             throw new UnexpectedValueException('Clerk secret key is not configured.');
         }
 
-        $response = Http::withToken($secretKey)->get("https://api.clerk.com/v1/users/{$sub}");
+        $request = Http::withToken($secretKey);
+        if (app()->isLocal()) {
+            $request = $request->withoutVerifying();
+        }
+
+        $response = $request->get("https://api.clerk.com/v1/users/{$sub}");
 
         if (! $response->successful()) {
             throw new RuntimeException('Failed to fetch user from Clerk API: '.$response->body());
@@ -167,6 +172,9 @@ class ClerkAuth
     {
         $secretKey = config('services.clerk.secret_key');
         $request = $secretKey ? Http::withToken($secretKey) : Http::newPendingRequest();
+        if (app()->isLocal()) {
+            $request = $request->withoutVerifying();
+        }
         $response = $request->get('https://api.clerk.com/v1/jwks');
 
         if (! $response->successful()) {

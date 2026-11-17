@@ -1,8 +1,28 @@
 import React from 'react';
-import { X, ExternalLink } from 'lucide-react';
+import { X, ExternalLink, Play } from 'lucide-react';
+
+function getYouTubeId(url) {
+    if (!url) return null;
+    try {
+        const u = new URL(url);
+        // https://www.youtube.com/watch?v=VIDEO_ID
+        if (u.hostname.includes('youtube.com')) {
+            return u.searchParams.get('v') || null;
+        }
+        // https://youtu.be/VIDEO_ID
+        if (u.hostname === 'youtu.be') {
+            return u.pathname.slice(1) || null;
+        }
+    } catch {
+    }
+    return null;
+}
 
 export default function ResourceShow({ item, onClose }) {
     if (!item) return null;
+
+    const isVideo = item.type === 'video';
+    const youtubeId = isVideo ? getYouTubeId(item.url) : null;
 
     return (
         <div
@@ -17,7 +37,7 @@ export default function ResourceShow({ item, onClose }) {
                 <div className="flex items-start justify-between border-b border-[#F0F0E9] pb-4">
                     <div className="min-w-0 pr-4">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#AD5266]">
-                            {item.type === 'video'
+                            {isVideo
                                 ? 'YouTube Video'
                                 : item.type === 'pq'
                                   ? 'Practice Question / Document'
@@ -29,16 +49,6 @@ export default function ResourceShow({ item, onClose }) {
                         >
                             {item.title}
                         </h2>
-                        {item.metadata?.author_name && (
-                            <p className="mt-0.5 truncate text-xs text-[#73736C]">
-                                Channel: {item.metadata.author_name}
-                            </p>
-                        )}
-                        {item.metadata?.domain && (
-                            <p className="mt-0.5 truncate text-xs text-[#73736C]">
-                                Domain: {item.metadata.domain}
-                            </p>
-                        )}
                     </div>
                     <button
                         type="button"
@@ -49,7 +59,7 @@ export default function ResourceShow({ item, onClose }) {
                     </button>
                 </div>
 
-                {/* Modal Body / Extended Info */}
+                {/* Modal Body */}
                 <div className="mt-5 space-y-4">
                     {item.description && (
                         <p className="text-xs leading-relaxed text-[#73736C]">
@@ -63,7 +73,23 @@ export default function ResourceShow({ item, onClose }) {
                         </div>
                     )}
 
-                    {item.metadata?.thumbnail_url && item.type === 'video' && (
+                    {/* YouTube embed – shown when it's a YouTube video */}
+                    {isVideo && youtubeId && (
+                        <div className="overflow-hidden rounded-2xl border border-[#D8DDD5]">
+                            <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${youtubeId}`}
+                                    title={item.title}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className="absolute inset-0 h-full w-full border-0"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Thumbnail fallback – shown for video cards without a recognised YouTube ID */}
+                    {isVideo && !youtubeId && item.metadata?.thumbnail_url && (
                         <div className="overflow-hidden rounded-2xl border border-[#D8DDD5]">
                             <img
                                 src={item.metadata.thumbnail_url}
@@ -73,6 +99,7 @@ export default function ResourceShow({ item, onClose }) {
                         </div>
                     )}
 
+                    {/* File viewer (PDF / image) */}
                     {item.metadata?.file_url && (
                         <div className="overflow-hidden rounded-2xl border border-[#D8DDD5]">
                             {item.metadata.mime_type === 'application/pdf' ? (
@@ -91,17 +118,34 @@ export default function ResourceShow({ item, onClose }) {
                         </div>
                     )}
 
+                    {/* Action buttons */}
                     {item.url && (
-                        <div className="pt-2">
-                            <a
-                                href={item.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-2 rounded-xl bg-[#762F50] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#5E243F]"
-                            >
-                                Open External Link / Video{' '}
-                                <ExternalLink size={14} />
-                            </a>
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            {/* For YouTube videos: watch on YouTube button */}
+                            {isVideo && youtubeId && (
+                                <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-2 rounded-xl bg-[#FF0000] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#CC0000]"
+                                >
+                                    <Play size={15} />
+                                    Watch on YouTube
+                                </a>
+                            )}
+
+                            {/* For non-YouTube or non-video: regular external link */}
+                            {(!isVideo || !youtubeId) && (
+                                <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-2 rounded-xl bg-[#762F50] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#5E243F]"
+                                >
+                                    Open External Link
+                                    <ExternalLink size={14} />
+                                </a>
+                            )}
                         </div>
                     )}
                 </div>
